@@ -1,0 +1,93 @@
+# AI Context Rules - Next.js Frontend Project
+
+## Tech Stack
+- **Framework:** Next.js 16.2.2 (App Router)
+- **Language:** Strict TypeScript
+- **UI:** React 19.2.4, Tailwind CSS 4
+- **Components:** shadcn/ui v4
+- **Icons:** Lucide React
+
+## Architecture & Design Patterns
+
+### Clean Architecture (Frontend)
+```
+src/
+├── app/                    # Next.js pages & layouts (route-based)
+├── components/            # Reusable UI components
+│   ├── ui/               # shadcn primitives
+│   └── features/         # Feature-specific components
+├── lib/                   # Utilities, configs, helpers
+├── services/              # API calls, external integrations
+├── hooks/                 # Custom React hooks (business logic)
+├── types/                 # TypeScript interfaces & DTOs
+└── store/                 # State management (if needed)
+```
+
+### Separation of Concerns
+- **Components:** Pure UI rendering, receive data via props
+- **Hooks:** Encapsulate business logic, state management
+- **Services:** Handle API communication, data fetching
+- **Types:** Define data shapes (DTOs), no implementation
+
+## Data Handling & TypeScript
+
+### DTOs & Types
+- Define interfaces for all API responses and request payloads
+- Use `readonly` for immutable data structures
+- Never expose raw API responses directly to components; map to component-specific types
+- Use discriminated unions for variant types
+
+### Validation
+- Zod for runtime validation (Next.js preferred over class-validator)
+- Validate at service/hook boundary, not in components
+
+## Naming Conventions
+- **Files:** `kebab-case` (e.g., `user-profile.tsx`, `use-user-profile.ts`)
+- **Components:** `PascalCase` (e.g., `UserProfile.tsx`)
+- **Hooks:** `camelCase` with `use` prefix (e.g., `useUserProfile`)
+- **Types/Interfaces:** `PascalCase` (e.g., `UserProfileDto`)
+- **Constants:** `UPPER_SNAKE_CASE`
+
+## Component Patterns
+
+### File Organization
+- One component per file
+- Colocate tests, stories, and types with component
+- Use index exports for cleaner imports
+
+### Component Structure
+```typescript
+// types/component-name.ts
+interface ComponentNameProps { ... }
+
+// components/component-name.tsx
+export function ComponentName(props: ComponentNameProps) { ... }
+```
+
+## Token Optimization Rules
+
+### Output Guidelines
+- Output only the requested code or modified files
+- Skip setup explanations unless explicitly asked
+- Use absolute imports from `@/` alias (configured in tsconfig.json)
+- No conversational filler or redundant explanations
+- Assume developer expertise
+
+### Import Conventions
+```typescript
+// Preferred
+import { Button } from '@/components/ui/button';
+import { useUserProfile } from '@/hooks/use-user-profile';
+
+// Avoid relative paths for project imports
+```
+
+## Code Quality
+- Enable strict TypeScript (`strict: true` in tsconfig)
+- No `any` types - use `unknown` with proper type guards
+- ESLint + Prettier for formatting
+- Run `npm run lint` before commits
+
+## Environment
+- Use `.env.local` for local secrets
+- Never commit secrets to version control
