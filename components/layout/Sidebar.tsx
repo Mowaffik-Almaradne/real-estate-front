@@ -23,7 +23,7 @@ interface SidebarProps {
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: Home },
-  { href: "/cities", label: "Cities", icon: MapPin },
+  { href: "/dashboard/cities", label: "Cities", icon: MapPin },
   { href: "/properties", label: "Properties", icon: Building2 },
   { href: "/leads", label: "Leads", icon: Users },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
