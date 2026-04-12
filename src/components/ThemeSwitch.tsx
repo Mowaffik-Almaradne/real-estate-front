@@ -1,0 +1,27 @@
+"use client"
+
+import { useTheme } from "next-themes"
+import { Moon, Sun } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
+import { cn } from "@/lib/utils"
+
+interface ThemeSwitchProps {
+  className?: string
+}
+
+export function ThemeSwitch({ className }: ThemeSwitchProps) {
+  const { theme, setTheme } = useTheme()
+
+  return (
+    <div className={cn("flex items-center gap-2", className)}>
+      <Sun className="size-4 text-muted-foreground" />
+      <Switch
+        checked={theme === "dark"}
+        onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+        size="sm"
+        aria-label="Toggle theme"
+      />
+      <Moon className="size-4 text-muted-foreground" />
+    </div>
+  )
+}
