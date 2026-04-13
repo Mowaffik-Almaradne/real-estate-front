@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { 
   MapPin, 
   Plus, 
@@ -33,64 +33,116 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { getCountries, getCities, Country, City } from "@/lib/api"
+import { Switch } from "@/components/ui/switch"
+import { getCountries as apiGetCountries, getCitiesByCountry, saveCountry, saveCity, Country, City } from "@/lib/api"
 
 export default function CitiesPage() {
   const [countries, setCountries] = useState<Country[]>([])
   const [cities, setCities] = useState<City[]>([])
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [citiesLoading, setCitiesLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  const [countryPage, setCountryPage] = useState(1)
+  const [countryHasMore, setCountryHasMore] = useState(true)
+  const countryListRef = useRef<HTMLDivElement>(null)
   
   const [countryDialogOpen, setCountryDialogOpen] = useState(false)
   const [cityDialogOpen, setCityDialogOpen] = useState(false)
   const [editingCountry, setEditingCountry] = useState<Country | null>(null)
   const [editingCity, setEditingCity] = useState<City | null>(null)
   const [countryName, setCountryName] = useState("")
+  const [countryCode, setCountryCode] = useState("")
+  const [countryPhoneCode, setCountryPhoneCode] = useState("")
+  const [countryIsActive, setCountryIsActive] = useState(true)
   const [cityName, setCityName] = useState("")
   const [cityCountryId, setCityCountryId] = useState("")
+  const [cityStateProvince, setCityStateProvince] = useState("")
+  const [cityPostalCode, setCityPostalCode] = useState("")
+  const [cityIsActive, setCityIsActive] = useState(true)
 
   useEffect(() => {
-    loadData()
+    loadCountries(1)
   }, [])
 
-  const loadData = async () => {
+  const loadCountries = async (page: number = 1) => {
+    if (page > 1 && (!countryHasMore || loadingMore)) return
+    
     try {
-      setLoading(true)
-      setError(null)
-      const [countriesData, citiesData] = await Promise.all([
-        getCountries(),
-        getCities()
-      ])
-      setCountries(countriesData)
-      setCities(citiesData)
-      if (countriesData.length > 0 && !selectedCountry) {
-        setSelectedCountry(countriesData[0])
+      if (page === 1) {
+        setLoading(true)
+      } else {
+        setLoadingMore(true)
       }
+      setError(null)
+      const response = await apiGetCountries(page)
+      
+      if (page === 1) {
+        setCountries(response.data)
+        if (response.data.length > 0) {
+          setSelectedCountry(response.data[0])
+        }
+      } else {
+        setCountries((prev) => [...prev, ...response.data])
+      }
+      
+      setCountryPage(page)
+      setCountryHasMore(response.pagination ? page < response.pagination.last_page : response.data.length > 0)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load data")
+      setError(err instanceof Error ? err.message : "Failed to load countries")
     } finally {
       setLoading(false)
+      setLoadingMore(false)
     }
+  }
+
+  const handleCountryScroll = useCallback(() => {
+    if (countryListRef.current && !loading && !loadingMore && countryHasMore) {
+      const { scrollTop, scrollHeight, clientHeight } = countryListRef.current
+      if (scrollTop + clientHeight >= scrollHeight - 50) {
+        loadCountries(countryPage + 1)
+      }
+    }
+  }, [loading, loadingMore, countryPage, countryHasMore])
+
+  const loadCities = async (countryId: number) => {
+    try {
+      setCitiesLoading(true)
+      const citiesData = await getCitiesByCountry(countryId)
+      setCities(citiesData)
+    } catch (err) {
+      console.error("Failed to load cities:", err)
+    } finally {
+      setCitiesLoading(false)
+    }
+  }
+
+  const handleCountryClick = (country: Country) => {
+    setSelectedCountry(country)
+    loadCities(country.id)
   }
 
   const getCityCount = (countryId: number) => {
     return cities.filter((c) => c.country_id === countryId).length
   }
 
-  const filteredCities = selectedCountry
-    ? cities.filter((c) => c.country_id === selectedCountry.id)
-    : []
-
   const handleAddCountry = () => {
     setEditingCountry(null)
     setCountryName("")
+    setCountryCode("")
+    setCountryPhoneCode("")
+    setCountryIsActive(true)
     setCountryDialogOpen(true)
   }
 
   const handleEditCountry = (country: Country) => {
     setEditingCountry(country)
     setCountryName(country.name)
+    setCountryCode(country.code || "")
+    setCountryPhoneCode(country.phone_code || "")
+    setCountryIsActive(country.is_active)
     setCountryDialogOpen(true)
   }
 
@@ -102,32 +154,45 @@ export default function CitiesPage() {
     }
   }
 
-  const handleSaveCountry = () => {
+  const handleSaveCountry = async () => {
     if (!countryName.trim()) return
 
-    if (editingCountry) {
-      setCountries(
-        countries.map((c) =>
-          c.id === editingCountry.id ? { ...c, name: countryName } : c
-        )
+    try {
+      const response = await saveCountry(
+        countryName,
+        countryCode || null,
+        countryPhoneCode || null,
+        countryIsActive,
+        editingCountry?.id
       )
-    } else {
-      const newCountry: Country = {
-        id: Date.now(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: countryName,
+      if (response.success) {
+        if (editingCountry) {
+          setCountries(
+            countries.map((c) =>
+              c.id === editingCountry.id ? response.data : c
+            )
+          )
+        } else {
+          setCountries([...countries, response.data])
+        }
+        setCountryDialogOpen(false)
+        setCountryName("")
+        setCountryCode("")
+        setCountryPhoneCode("")
+        setCountryIsActive(true)
       }
-      setCountries([...countries, newCountry])
+    } catch (err) {
+      console.error("Failed to save country:", err)
     }
-    setCountryDialogOpen(false)
-    setCountryName("")
   }
 
   const handleAddCity = () => {
     setEditingCity(null)
     setCityName("")
     setCityCountryId(selectedCountry?.id?.toString() || "")
+    setCityStateProvince("")
+    setCityPostalCode("")
+    setCityIsActive(true)
     setCityDialogOpen(true)
   }
 
@@ -135,6 +200,9 @@ export default function CitiesPage() {
     setEditingCity(city)
     setCityName(city.name)
     setCityCountryId(city.country_id?.toString() || "")
+    setCityStateProvince(city.state_provianc || "")
+    setCityPostalCode(city.postal_code || "")
+    setCityIsActive(city.is_active)
     setCityDialogOpen(true)
   }
 
@@ -142,35 +210,39 @@ export default function CitiesPage() {
     setCities(cities.filter((c) => c.id !== cityId))
   }
 
-  const handleSaveCity = () => {
+  const handleSaveCity = async () => {
     if (!cityName.trim() || !cityCountryId) return
 
     const countryIdNum = parseInt(cityCountryId)
 
-    if (editingCity) {
-      setCities(
-        cities.map((c) =>
-          c.id === editingCity.id ? { ...c, name: cityName, country_id: countryIdNum } : c
-        )
+    try {
+      const response = await saveCity(
+        cityName,
+        countryIdNum,
+        cityStateProvince || null,
+        cityPostalCode || null,
+        cityIsActive,
+        editingCity?.id
       )
-      if (editingCity.country_id !== countryIdNum && selectedCountry?.id === editingCity.country_id) {
-        setSelectedCountry(countries.find((c) => c.id === countryIdNum) || null)
+      if (response.success) {
+        if (editingCity) {
+          setCities(
+            cities.map((c) =>
+              c.id === editingCity.id ? response.data : c
+            )
+          )
+        } else {
+          setCities([...cities, response.data])
+        }
+        setCityDialogOpen(false)
+        setCityName("")
+        setCityStateProvince("")
+        setCityPostalCode("")
+        setCityIsActive(true)
       }
-    } else {
-      const newCity: City = {
-        id: Date.now(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: cityName,
-        country_id: countryIdNum,
-        state_provianc: null,
-        postal_code: null,
-        is_active: true,
-      }
-      setCities([...cities, newCity])
+    } catch (err) {
+      console.error("Failed to save city:", err)
     }
-    setCityDialogOpen(false)
-    setCityName("")
   }
 
   if (loading) {
@@ -192,7 +264,7 @@ export default function CitiesPage() {
         <div className="flex h-[calc(100vh-8rem)] items-center justify-center">
           <div className="flex flex-col items-center gap-3 text-destructive">
             <p>Error: {error}</p>
-            <Button onClick={loadData}>Retry</Button>
+            <Button onClick={loadCountries}>Retry</Button>
           </div>
         </div>
       </DashboardLayout>
@@ -222,17 +294,45 @@ export default function CitiesPage() {
                   </DialogTitle>
                   <DialogDescription>
                     {editingCountry
-                      ? "Update the country name below."
-                      : "Enter the country name below."}
+                      ? "Update the country details below."
+                      : "Enter the country details below."}
                   </DialogDescription>
                 </DialogHeader>
-                <div className="py-4">
-                  <Input
-                    placeholder="Country name"
-                    value={countryName}
-                    onChange={(e) => setCountryName(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleSaveCountry()}
-                  />
+                <div className="space-y-4 py-4">
+                  <div>
+                    <label className="text-sm font-medium">Name *</label>
+                    <Input
+                      placeholder="Country name"
+                      value={countryName}
+                      onChange={(e) => setCountryName(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSaveCountry()}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Code</label>
+                    <Input
+                      placeholder="e.g. US"
+                      value={countryCode}
+                      onChange={(e) => setCountryCode(e.target.value)}
+                      maxLength={3}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Phone Code</label>
+                    <Input
+                      placeholder="e.g. +1"
+                      value={countryPhoneCode}
+                      onChange={(e) => setCountryPhoneCode(e.target.value)}
+                      maxLength={4}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={countryIsActive}
+                      onCheckedChange={setCountryIsActive}
+                    />
+                    <label className="text-sm font-medium">Active</label>
+                  </div>
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setCountryDialogOpen(false)}>
@@ -246,7 +346,11 @@ export default function CitiesPage() {
             </Dialog>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-3 space-y-2 max-h-[50vh] lg:max-h-[calc(100vh-16rem)]">
+          <div 
+            ref={countryListRef}
+            onScroll={handleCountryScroll}
+            className="flex-1 overflow-y-auto p-3 space-y-2 max-h-[50vh] lg:max-h-[calc(100vh-16rem)]"
+          >
             {countries.map((country) => (
               <Card
                 key={country.id}
@@ -255,7 +359,7 @@ export default function CitiesPage() {
                     ? "border-primary bg-primary/5 ring-1 ring-primary"
                     : "border-border hover:border-primary/50"
                 }`}
-                onClick={() => setSelectedCountry(country)}
+                onClick={() => handleCountryClick(country)}
               >
                 <CardContent className="flex items-center justify-between p-3">
                   <div className="flex items-center gap-3">
@@ -308,6 +412,21 @@ export default function CitiesPage() {
                 </CardContent>
               </Card>
             ))}
+            {loadingMore && (
+              <div className="flex justify-center py-2">
+                <Loader2 className="size-5 animate-spin text-muted-foreground" />
+              </div>
+            )}
+            {!loading && !loadingMore && countryHasMore && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full mt-2 text-muted-foreground"
+                onClick={() => loadCountries(countryPage + 1)}
+              >
+                Load more
+              </Button>
+            )}
           </div>
         </div>
 
@@ -341,28 +460,57 @@ export default function CitiesPage() {
                   <DialogDescription>
                     {editingCity
                       ? "Update the city details below."
-                      : "Enter the city name below."}
+                      : "Enter the city details below."}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
-                  <Input
-                    placeholder="City name"
-                    value={cityName}
-                    onChange={(e) => setCityName(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleSaveCity()}
-                  />
-                  <Select value={cityCountryId} onValueChange={setCityCountryId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countries.map((country) => (
-                        <SelectItem key={country.id} value={country.id.toString()}>
-                          {country.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div>
+                    <label className="text-sm font-medium">Name *</label>
+                    <Input
+                      placeholder="City name"
+                      value={cityName}
+                      onChange={(e) => setCityName(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSaveCity()}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Country *</label>
+                    <Select value={cityCountryId} onValueChange={setCityCountryId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {countries.map((country) => (
+                          <SelectItem key={country.id} value={country.id.toString()}>
+                            {country.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">State/Province</label>
+                    <Input
+                      placeholder="State or province"
+                      value={cityStateProvince}
+                      onChange={(e) => setCityStateProvince(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Postal Code</label>
+                    <Input
+                      placeholder="Postal code"
+                      value={cityPostalCode}
+                      onChange={(e) => setCityPostalCode(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={cityIsActive}
+                      onCheckedChange={setCityIsActive}
+                    />
+                    <label className="text-sm font-medium">Active</label>
+                  </div>
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setCityDialogOpen(false)}>
@@ -381,8 +529,13 @@ export default function CitiesPage() {
 
           <div className="flex-1 overflow-y-auto p-4 max-h-[50vh] lg:max-h-[calc(100vh-16rem)]">
             {selectedCountry ? (
+              citiesLoading ? (
+                <div className="flex items-center justify-center p-8">
+                  <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                {filteredCities.map((city) => (
+                {cities.map((city) => (
                   <Card
                     key={city.id}
                     className="border-border hover:border-primary/50 hover:shadow-md transition-all"
@@ -416,6 +569,7 @@ export default function CitiesPage() {
                   </Card>
                 ))}
               </div>
+              )
             ) : (
               <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
                 <MapPin className="size-12 mb-3 opacity-50" />
