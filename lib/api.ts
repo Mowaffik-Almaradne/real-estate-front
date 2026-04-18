@@ -39,6 +39,7 @@ export interface Country {
   code: string | null
   phone_code: string | null
   is_active: boolean
+  cities_count?: number
 }
 
 export interface City {

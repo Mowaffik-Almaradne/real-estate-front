@@ -1,6 +1,6 @@
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { StatsCards } from "@/components/dashboard/StatsCards";
-import { RecentActivity } from "@/components/dashboard/RecentActivity";
+import { DashboardLayout } from "components/layout/DashboardLayout";
+import { StatsCards } from "components/dashboard/StatsCards";
+import { RecentActivity } from "components/dashboard/RecentActivity";
 
 export default function Home() {
   return (

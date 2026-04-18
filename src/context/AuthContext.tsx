@@ -7,7 +7,7 @@ import {
   useEffect,
   type ReactNode,
 } from "react"
-import { User, login as apiLogin, register as apiRegister } from "@/lib/api"
+import { User, login as apiLogin, register as apiRegister } from "lib/api"
 
 interface AuthContextType {
   user: User | null

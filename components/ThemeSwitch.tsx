@@ -3,8 +3,8 @@
 import { useTheme } from "next-themes"
 import { useState, useEffect } from "react"
 import { Moon, Sun } from "lucide-react"
-import { Switch } from "@/components/ui/switch"
-import { cn } from "@/lib/utils"
+import { Switch } from "components/ui/switch"
+import { cn } from "lib/utils"
 
 interface ThemeSwitchProps {
   className?: string

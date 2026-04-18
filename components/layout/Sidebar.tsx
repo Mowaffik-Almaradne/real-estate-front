@@ -11,10 +11,9 @@ import {
   Settings,
   FileText,
   X,
-  MapPin,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { cn } from "lib/utils"
+import { Button } from "components/ui/button"
 
 interface SidebarProps {
   open?: boolean
@@ -23,8 +22,7 @@ interface SidebarProps {
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: Home },
-  { href: "/dashboard/cities", label: "Cities", icon: MapPin },
-  { href: "/properties", label: "Properties", icon: Building2 },
+  { href: "/dashboard/properties", label: "Properties", icon: Building2 },
   { href: "/leads", label: "Leads", icon: Users },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/reports", label: "Reports", icon: FileText },

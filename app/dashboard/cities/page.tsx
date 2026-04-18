@@ -10,13 +10,13 @@ import {
   Building2,
   Loader2
 } from "lucide-react"
-import { DashboardLayout } from "@/components/layout/DashboardLayout"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { DashboardLayout } from "components/layout/DashboardLayout"
+import { Button } from "components/ui/button"
+import { Input } from "components/ui/input"
 import {
   Card,
   CardContent,
-} from "@/components/ui/card"
+} from "components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -25,16 +25,16 @@ import {
   DialogDescription,
   DialogFooter,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "components/ui/dialog"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { getCountries as apiGetCountries, getCitiesByCountry, saveCountry, saveCity, Country, City } from "@/lib/api"
+} from "components/ui/select"
+import { Switch } from "components/ui/switch"
+import { getCountries as apiGetCountries, getCitiesByCountry, saveCountry, saveCity, Country, City } from "lib/api"
 
 export default function CitiesPage() {
   const [countries, setCountries] = useState<Country[]>([])
@@ -122,10 +122,6 @@ export default function CitiesPage() {
   const handleCountryClick = (country: Country) => {
     setSelectedCountry(country)
     loadCities(country.id)
-  }
-
-  const getCityCount = (countryId: number) => {
-    return cities.filter((c) => c.country_id === countryId).length
   }
 
   const handleAddCountry = () => {
@@ -264,7 +260,7 @@ export default function CitiesPage() {
         <div className="flex h-[calc(100vh-8rem)] items-center justify-center">
           <div className="flex flex-col items-center gap-3 text-destructive">
             <p>Error: {error}</p>
-            <Button onClick={loadCountries}>Retry</Button>
+            <Button onClick={() => loadCountries()}>Retry</Button>
           </div>
         </div>
       </DashboardLayout>
@@ -381,7 +377,7 @@ export default function CitiesPage() {
                     <div>
                       <p className="font-medium text-sm">{country.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {getCityCount(country.id)} cities
+                        {country.cities_count ?? 0} cities
                       </p>
                     </div>
                   </div>
