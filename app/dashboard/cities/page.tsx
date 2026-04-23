@@ -270,11 +270,11 @@ export default function CitiesPage() {
   return (
     <DashboardLayout title="Countries & Cities">
       <div className="flex flex-col gap-6 lg:flex-row">
-        <div className="w-full lg:w-[30%] min-w-[280px] flex flex-col rounded-xl bg-card border border-border shadow-sm">
-          <div className="flex flex-col sm:flex-row items-start sm:justify-between gap-3 border-b border-border p-4">
+        <div className="w-full lg:w-[30%] min-w-[280px] flex flex-col rounded-[6px] bg-card border border-border shadow-sm">
+          <div className="flex flex-col sm:flex-row items-start sm:justify-between gap-3 border-b border-border p-3">
             <div className="flex items-center gap-2">
-              <Globe className="size-5 text-muted-foreground" />
-              <h2 className="font-semibold">Countries</h2>
+              <Globe className="size-4 text-muted-foreground" />
+              <h2 className="font-semibold text-sm">Countries</h2>
             </div>
             <Dialog open={countryDialogOpen} onOpenChange={setCountryDialogOpen}>
               <DialogTrigger asChild>
@@ -360,14 +360,14 @@ export default function CitiesPage() {
                 <CardContent className="flex items-center justify-between p-3">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`flex size-8 items-center justify-center rounded-lg ${
+                      className={`flex size-7 items-center justify-center rounded-[4px] ${
                         selectedCountry?.id === country.id
                           ? "bg-primary text-primary-foreground"
                           : "bg-muted"
                       }`}
                     >
                       <Globe
-                        className={`size-4 ${
+                        className={`size-3.5 ${
                           selectedCountry?.id === country.id
                             ? "text-primary-foreground"
                             : "text-muted-foreground"
@@ -426,11 +426,11 @@ export default function CitiesPage() {
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col rounded-xl bg-card border border-border shadow-sm">
-          <div className="flex flex-col sm:flex-row items-start sm:justify-between gap-3 border-b border-border p-4">
+        <div className="flex-1 flex flex-col rounded-[6px] bg-card border border-border shadow-sm">
+          <div className="flex flex-col sm:flex-row items-start sm:justify-between gap-3 border-b border-border p-3">
             <div className="flex items-center gap-2">
-              <MapPin className="size-5 text-muted-foreground" />
-              <h2 className="font-semibold">
+              <MapPin className="size-4 text-muted-foreground" />
+              <h2 className="font-semibold text-sm">
                 {selectedCountry
                   ? `Cities in ${selectedCountry.name}`
                   : "Select a country"}
@@ -538,8 +538,8 @@ export default function CitiesPage() {
                   >
                     <CardContent className="flex items-center justify-between p-3">
                       <div className="flex items-center gap-2 min-w-0">
-                        <div className="flex size-8 items-center justify-center rounded-lg bg-muted shrink-0">
-                          <Building2 className="size-4 text-muted-foreground" />
+                        <div className="flex size-7 items-center justify-center rounded-[4px] bg-muted shrink-0">
+                          <Building2 className="size-3.5 text-muted-foreground" />
                         </div>
                         <p className="font-medium text-sm truncate">{city.name}</p>
                       </div>

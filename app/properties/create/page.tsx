@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, use } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -18,6 +18,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SearchSelect,
 } from "components/ui/select"
 import {
   Card,
@@ -25,10 +26,8 @@ import {
   CardHeader,
   CardTitle,
 } from "components/ui/card"
-import { DashboardLayout } from "components/layout/DashboardLayout"
 
-import { propertyService } from "src/modules/properties/services/propertyService"
-import type { Property, PropertyFormData, PropertyType, TypeOfContract } from "src/modules/properties/types"
+import type { PropertyType, TypeOfContract } from "src/modules/properties/types"
 import { getCountries, getCitiesByCountry, type Country, type City } from "lib/api"
 
 const propertySchema = z.object({
@@ -61,10 +60,9 @@ const CONTRACT_TYPES: { value: TypeOfContract; label: string }[] = [
   { value: "sale", label: "Sale" },
 ]
 
-export default function PropertyEditPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params)
+export default function PropertyCreatePage() {
   const router = useRouter()
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [countries, setCountries] = useState<Country[]>([])
   const [cities, setCities] = useState<City[]>([])
@@ -99,8 +97,7 @@ export default function PropertyEditPage({ params }: { params: Promise<{ id: str
 
   useEffect(() => {
     loadCountries()
-    fetchProperty()
-  }, [id])
+  }, [])
 
   useEffect(() => {
     if (watchedCountryId) {
@@ -127,84 +124,62 @@ export default function PropertyEditPage({ params }: { params: Promise<{ id: str
     }
   }
 
-  const fetchProperty = async () => {
-    try {
-      setLoading(true)
-      const property = await propertyService.getPropertyById(Number(id))
-      
-      setValue("name", property.name)
-      setValue("description", property.description)
-      setValue("country_id", property.country.id)
-      setValue("city_id", property.city.id)
-      setValue("property_type", property.property_type)
-      setValue("type_of_contract", property.type_of_contract)
-      setValue("rooms", property.rooms)
-      setValue("bathrooms", property.bathrooms)
-      setValue("area", Number(property.area))
-      setValue("detailed_info", property.detailed_info || "")
-      setValue("price", Number(property.price))
-      setValue("currency", property.currency || "USD")
-      
-      setSelectedCountryId(property.country.id)
-      await loadCities(property.country.id)
-    } catch (error) {
-      console.error("Failed to fetch property:", error)
-      toast.error("Failed to load property")
-      router.push("/dashboard/properties")
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const onSubmit = async (data: PropertyFormValues) => {
     try {
       setSaving(true)
-      
-      const formData: PropertyFormData = {
-        name: data.name,
-        description: data.description,
-        country_id: data.country_id,
-        city_id: data.city_id,
-        property_type: data.property_type as PropertyType,
-        type_of_contract: data.type_of_contract as TypeOfContract,
-        rooms: data.rooms,
-        bathrooms: data.bathrooms,
-        area: data.area,
-        detailed_info: data.detailed_info || undefined,
-        price: data.price,
-        currency: data.currency || "USD",
+
+      const token = localStorage.getItem("token")
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/properties`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            name: data.name,
+            description: data.description,
+            country_id: data.country_id,
+            city_id: data.city_id,
+            property_type: data.property_type,
+            type_of_contract: data.type_of_contract,
+            rooms: data.rooms,
+            bathrooms: data.bathrooms,
+            area: data.area,
+            detailed_info: data.detailed_info || undefined,
+            price: data.price,
+            currency: data.currency || "USD",
+          }),
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error("Failed to create property")
       }
 
-      await propertyService.updateProperty(Number(id), formData)
-      toast.success("Property updated successfully")
-      router.push(`/dashboard/properties/${id}`)
+      const property = await response.json()
+      toast.success("Property created successfully")
+      router.push(`/properties/${property.data.id}`)
     } catch (error) {
-      console.error("Failed to update property:", error)
-      toast.error("Failed to update property")
+      console.error("Failed to create property:", error)
+      toast.error("Failed to create property")
     } finally {
       setSaving(false)
     }
   }
 
-  if (loading) {
-    return (
-      <DashboardLayout title="Edit Property">
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      </DashboardLayout>
-    )
-  }
-
   return (
-    <DashboardLayout title="Edit Property">
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <Button variant="ghost" onClick={() => router.push(`/dashboard/properties/${id}`)}>
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="container mx-auto px-4 py-6 max-w-4xl">
+        <div className="flex items-center justify-between mb-6">
+          <Button variant="ghost" onClick={() => router.push("/properties")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Property
+            Back to Properties
           </Button>
         </div>
+
+        <h1 className="text-2xl font-bold text-foreground mb-6">Create Property</h1>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <Card>
@@ -220,7 +195,7 @@ export default function PropertyEditPage({ params }: { params: Promise<{ id: str
                   {...register("name")}
                 />
                 {errors.name && (
-                  <p className="text-sm font-medium text-destructive">{errors.name.message}</p>
+                  <p className="text-sm font-medium text-red-500">{errors.name.message}</p>
                 )}
               </div>
 
@@ -233,7 +208,7 @@ export default function PropertyEditPage({ params }: { params: Promise<{ id: str
                   {...register("description")}
                 />
                 {errors.description && (
-                  <p className="text-sm font-medium text-destructive">{errors.description.message}</p>
+                  <p className="text-sm font-medium text-red-500">{errors.description.message}</p>
                 )}
               </div>
 
@@ -257,50 +232,32 @@ export default function PropertyEditPage({ params }: { params: Promise<{ id: str
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="country_id">Country *</Label>
-                  <Select
+                  <SearchSelect
                     value={watchedCountryId ? String(watchedCountryId) : ""}
                     onValueChange={(value) => {
                       setValue("country_id", Number(value))
                       setValue("city_id", 0)
                       setCities([])
                     }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countries.map((country) => (
-                        <SelectItem key={country.id} value={String(country.id)}>
-                          {country.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    placeholder="Select country"
+                    options={countries.map((c) => ({ value: String(c.id), label: c.name }))}
+                  />
                   {errors.country_id && (
-                    <p className="text-sm font-medium text-destructive">{errors.country_id.message}</p>
+                    <p className="text-sm font-medium text-red-500">{errors.country_id.message}</p>
                   )}
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="city_id">City *</Label>
-                  <Select
+                  <SearchSelect
                     value={watch("city_id") ? String(watch("city_id")) : ""}
                     onValueChange={(value) => setValue("city_id", Number(value))}
+                    placeholder="Select city"
+                    options={cities.map((c) => ({ value: String(c.id), label: c.name }))}
                     disabled={!selectedCountryId || cities.length === 0}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select city" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {cities.map((city) => (
-                        <SelectItem key={city.id} value={String(city.id)}>
-                          {city.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
                   {errors.city_id && (
-                    <p className="text-sm font-medium text-destructive">{errors.city_id.message}</p>
+                    <p className="text-sm font-medium text-red-500">{errors.city_id.message}</p>
                   )}
                 </div>
               </div>
@@ -331,7 +288,7 @@ export default function PropertyEditPage({ params }: { params: Promise<{ id: str
                     </SelectContent>
                   </Select>
                   {errors.property_type && (
-                    <p className="text-sm font-medium text-destructive">{errors.property_type.message}</p>
+                    <p className="text-sm font-medium text-red-500">{errors.property_type.message}</p>
                   )}
                 </div>
 
@@ -353,7 +310,7 @@ export default function PropertyEditPage({ params }: { params: Promise<{ id: str
                     </SelectContent>
                   </Select>
                   {errors.type_of_contract && (
-                    <p className="text-sm font-medium text-destructive">{errors.type_of_contract.message}</p>
+                    <p className="text-sm font-medium text-red-500">{errors.type_of_contract.message}</p>
                   )}
                 </div>
               </div>
@@ -368,7 +325,7 @@ export default function PropertyEditPage({ params }: { params: Promise<{ id: str
                     {...register("rooms", { valueAsNumber: true })}
                   />
                   {errors.rooms && (
-                    <p className="text-sm font-medium text-destructive">{errors.rooms.message}</p>
+                    <p className="text-sm font-medium text-red-500">{errors.rooms.message}</p>
                   )}
                 </div>
 
@@ -381,7 +338,7 @@ export default function PropertyEditPage({ params }: { params: Promise<{ id: str
                     {...register("bathrooms", { valueAsNumber: true })}
                   />
                   {errors.bathrooms && (
-                    <p className="text-sm font-medium text-destructive">{errors.bathrooms.message}</p>
+                    <p className="text-sm font-medium text-red-500">{errors.bathrooms.message}</p>
                   )}
                 </div>
 
@@ -395,7 +352,7 @@ export default function PropertyEditPage({ params }: { params: Promise<{ id: str
                     {...register("area", { valueAsNumber: true })}
                   />
                   {errors.area && (
-                    <p className="text-sm font-medium text-destructive">{errors.area.message}</p>
+                    <p className="text-sm font-medium text-red-500">{errors.area.message}</p>
                   )}
                 </div>
               </div>
@@ -418,7 +375,7 @@ export default function PropertyEditPage({ params }: { params: Promise<{ id: str
                     {...register("price", { valueAsNumber: true })}
                   />
                   {errors.price && (
-                    <p className="text-sm font-medium text-destructive">{errors.price.message}</p>
+                    <p className="text-sm font-medium text-red-500">{errors.price.message}</p>
                   )}
                 </div>
 
@@ -439,17 +396,17 @@ export default function PropertyEditPage({ params }: { params: Promise<{ id: str
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.push(`/dashboard/properties/${id}`)}
+              onClick={() => router.push("/properties")}
             >
               Cancel
             </Button>
             <Button type="submit" disabled={saving}>
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
+              Create Property
             </Button>
           </div>
         </form>
       </div>
-    </DashboardLayout>
+    </div>
   )
 }

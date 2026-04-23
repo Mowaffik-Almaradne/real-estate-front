@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { debounce } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import { Pencil, Trash2, Eye, Search, X, Loader2, MapPin, Bed, Bath, Square, Building } from "lucide-react"
 import axios from "axios"
@@ -16,13 +17,8 @@ import {
   CardHeader,
   CardTitle,
 } from "components/ui/card"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "components/ui/select"
+import { Combobox } from "components/ui/combobox"
 import {
   Dialog,
   DialogContent,
@@ -127,27 +123,27 @@ function StatusCard({
   return (
     <button
       onClick={onClick}
-      className={`p-4 rounded-lg border transition-all text-left ${
+      className={`p-3 rounded-[4px] border transition-all text-left ${
         isActive
           ? "border-ring ring-2 ring-ring/20 bg-accent"
           : "border-border hover:border-ring/50 hover:bg-accent/50"
       }`}
     >
-      <div className="flex items-center gap-3">
-        <div className={`size-3 rounded-full ${color}`} />
+      <div className="flex items-center gap-2.5">
+        <div className={`size-2.5 rounded-full ${color}`} />
         <span className="text-sm font-medium">{label}</span>
       </div>
-      <p className="mt-2 text-2xl font-bold">{count}</p>
+      <p className="mt-2 text-xl font-bold">{count}</p>
     </button>
   )
 }
 
 function PropertyCard({ property, onDelete, onStatusChange }: { property: Property; onDelete: (id: number) => void; onStatusChange: (id: number, status: string) => Promise<void> }) {
   const router = useRouter()
-  
+
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      <div 
+    <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
+      <div
         className="relative h-48 bg-muted cursor-pointer"
         onClick={() => router.push(`/dashboard/properties/${property.id}`)}
       >
@@ -166,27 +162,27 @@ function PropertyCard({ property, onDelete, onStatusChange }: { property: Proper
           <StatusSelect status={property.status} onStatusChange={(newStatus) => onStatusChange(property.id, newStatus)} />
         </div>
         <div className="absolute bottom-2 left-2">
-          <Badge variant="secondary" className="bg-white/90 text-foreground">
+          <span className="inline-flex items-center rounded bg-background/90 px-2 py-0.5 text-xs font-medium text-foreground">
             {property.type_of_contract === "rent" ? "For Rent" : "For Sale"}
-          </Badge>
+          </span>
         </div>
       </div>
-      
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="font-semibold text-lg line-clamp-1">{property.name}</h3>
-          <span className="font-bold text-primary whitespace-nowrap">
+
+      <div className="p-4">
+        <div className="mb-2">
+          <h3 className="font-semibold text-lg truncate">{property.name}</h3>
+          <span className="font-bold text-foreground">
             {property.formatted_price}
           </span>
         </div>
-        
+
         <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
           <MapPin className="size-4" />
-          <span className="line-clamp-1">
+          <span className="truncate">
             {property.city?.name}, {property.country?.name}
           </span>
         </div>
-        
+
         <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
           <div className="flex items-center gap-1">
             <Square className="size-4" />
@@ -201,29 +197,29 @@ function PropertyCard({ property, onDelete, onStatusChange }: { property: Proper
             <span>{property.bathrooms}</span>
           </div>
         </div>
-        
-        <div className="flex items-center justify-between pt-3 border-t">
+
+        <div className="flex items-center justify-between pt-3 border-t border-border">
           <div className="text-xs text-muted-foreground">
             <span className="font-medium">{property.publisher?.name}</span>
           </div>
           <div className="flex gap-1">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="icon-sm"
               onClick={() => router.push(`/dashboard/properties/${property.id}`)}
             >
               <Eye className="h-4 w-4" />
             </Button>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="icon-sm"
               onClick={() => router.push(`/dashboard/properties/${property.id}/edit`)}
             >
               <Pencil className="h-4 w-4" />
             </Button>
-            <Button 
-              variant="ghost" 
-              size="icon-sm" 
+            <Button
+              variant="ghost"
+              size="icon-sm"
               className="text-red-500 hover:text-red-600"
               onClick={() => onDelete(property.id)}
             >
@@ -231,8 +227,8 @@ function PropertyCard({ property, onDelete, onStatusChange }: { property: Proper
             </Button>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
 
@@ -266,6 +262,11 @@ export default function PropertiesPage() {
   const [cities, setCities] = useState<{ id: number; name: string }[]>([])
   const [publishers, setPublishers] = useState<{ id: number; name: string }[]>([])
   const [loadingFilters, setLoadingFilters] = useState(false)
+  const [loadingCountry, setLoadingCountry] = useState(false)
+  const [loadingCity, setLoadingCity] = useState(false)
+
+  const [countrySearch, setCountrySearch] = useState("")
+  const [citySearch, setCitySearch] = useState("")
 
   const [filters, setFilters] = useState({
     search: "",
@@ -359,7 +360,8 @@ export default function PropertiesPage() {
   const handleCountryChange = async (countryId: string) => {
     setFilters((prev) => ({ ...prev, country_id: countryId, city_id: "" }))
     setCities([])
-    
+    setCitySearch("")
+
     if (countryId) {
       try {
         const token = typeof window !== "undefined" ? localStorage.getItem("token") : null
@@ -374,6 +376,54 @@ export default function PropertiesPage() {
       }
     }
   }
+
+  const handleCountrySearch = async (search: string) => {
+    setCountrySearch(search)
+    debouncedCountrySearch(search)
+  }
+
+  const debouncedCountrySearch = useCallback(
+    debounce(async (search: string) => {
+      setLoadingCountry(true)
+      try {
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null
+        const headers = token ? { Authorization: `Bearer ${token}` } : {}
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/search/countries?search=${search}`, { headers })
+        setCountries(res.data.data || [])
+      } catch (error) {
+        console.error("Failed to search countries:", error)
+      } finally {
+        setLoadingCountry(false)
+      }
+    }, 300),
+    []
+  )
+
+  const handleCitySearch = async (search: string) => {
+    setCitySearch(search)
+    debouncedCitySearch(search)
+  }
+
+  const debouncedCitySearch = useCallback(
+    debounce(async (search: string) => {
+      if (!filters.country_id) return
+      setLoadingCity(true)
+      try {
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null
+        const headers = token ? { Authorization: `Bearer ${token}` } : {}
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/search/cities?country_id=${filters.country_id}&search=${search}`,
+          { headers }
+        )
+        setCities(res.data.data || [])
+      } catch (error) {
+        console.error("Failed to search cities:", error)
+      } finally {
+        setLoadingCity(false)
+      }
+    }, 300),
+    [filters.country_id]
+  )
 
   useEffect(() => {
     fetchStatistics()
@@ -605,40 +655,28 @@ export default function PropertiesPage() {
                   </SelectContent>
                 </Select>
 
-                <Select
+                <Combobox
                   value={filters.country_id}
                   onValueChange={(value) => handleCountryChange(value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Country" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {countries.map((country) => (
-                      <SelectItem key={country.id} value={String(country.id)}>
-                        {country.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Country"
+                  options={countries.map((c) => ({ value: String(c.id), label: c.name }))}
+                  onSearch={handleCountrySearch}
+                  loading={loadingCountry}
+                  searchPlaceholder="Search countries..."
+                />
 
-                <Select
+                <Combobox
                   value={filters.city_id}
                   onValueChange={(value) =>
                     setFilters((prev) => ({ ...prev, city_id: value }))
                   }
+                  placeholder="City"
+                  options={cities.map((c) => ({ value: String(c.id), label: c.name }))}
                   disabled={!filters.country_id}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="City" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {cities.map((city) => (
-                      <SelectItem key={city.id} value={String(city.id)}>
-                        {city.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onSearch={handleCitySearch}
+                  loading={loadingCity}
+                  searchPlaceholder="Search cities..."
+                />
 
                 <Select
                   value={filters.publisher_id}

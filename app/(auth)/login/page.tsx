@@ -35,61 +35,61 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center size-12 rounded-xl bg-primary text-primary-foreground mb-4">
-            <Building2 className="size-6" />
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center size-10 rounded-[6px] bg-primary text-primary-foreground mb-3">
+            <Building2 className="size-5" />
           </div>
-          <h1 className="text-2xl font-bold">Welcome Back</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-xl font-bold">Welcome Back</h1>
+          <p className="text-muted-foreground mt-1.5 text-sm">
             Sign in to your RealEstate account
           </p>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-8 shadow-sm">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-card border border-border rounded-[6px] p-6 shadow-sm">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/50 text-destructive text-sm">
+              <div className="p-2.5 rounded-[4px] bg-destructive/10 border border-destructive/50 text-destructive text-sm">
                 {error}
               </div>
             )}
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <label htmlFor="email" className="text-sm font-medium">
                 Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                <Mail className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
+                  className="pl-9"
                   required
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <label htmlFor="password" className="text-sm font-medium">
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                <Lock className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10"
+                  className="pl-9 pr-9"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   {showPassword ? (
                     <EyeOff className="size-4" />
@@ -102,7 +102,7 @@ export default function LoginPage() {
 
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2">
-                <input type="checkbox" className="rounded border-border" />
+                <input type="checkbox" className="rounded border-input" />
                 <span className="text-muted-foreground">Remember me</span>
               </label>
               <Link
@@ -125,7 +125,7 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm">
+          <div className="mt-5 text-center text-sm">
             <span className="text-muted-foreground">
               Don&apos;t have an account?{" "}
             </span>

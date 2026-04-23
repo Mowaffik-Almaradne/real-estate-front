@@ -1,4 +1,4 @@
-import axios from "axios"
+import { apiClient } from "@/lib/apiClient"
 import type {
   Property,
   PropertyFormData,
@@ -6,21 +6,6 @@ import type {
   PropertyStatistics,
   PropertyStatus,
 } from "../types"
-
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
-})
-
-api.interceptors.request.use((config) => {
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
 
 interface ApiResponse<T> {
   success: boolean
@@ -56,7 +41,7 @@ export const propertyService = {
     if (filters.page) params.append("page", String(filters.page))
     if (filters.per_page) params.append("per_page", String(filters.per_page))
 
-    const response = await api.get<ApiResponse<PropertiesResponse>>(`/dashboard/properties?${params}`)
+    const response = await apiClient.get<ApiResponse<PropertiesResponse>>(`/dashboard/properties?${params}`)
     return {
       data: response.data.data.data,
       pagination: response.data.data.pagination,
@@ -64,31 +49,31 @@ export const propertyService = {
   },
 
   async getPropertyById(id: number): Promise<Property> {
-    const response = await api.get<ApiResponse<Property>>(`/dashboard/properties/${id}`)
+    const response = await apiClient.get<ApiResponse<Property>>(`/dashboard/properties/${id}`)
     return response.data.data
   },
 
   async getStatistics(): Promise<PropertyStatistics> {
-    const response = await api.get<ApiResponse<PropertyStatistics>>("/dashboard/properties/statistics")
+    const response = await apiClient.get<ApiResponse<PropertyStatistics>>("/dashboard/properties/statistics")
     return response.data.data
   },
 
   async createProperty(data: PropertyFormData): Promise<Property> {
-    const response = await api.post<ApiResponse<Property>>("/dashboard/properties", data)
+    const response = await apiClient.post<ApiResponse<Property>>("/dashboard/properties", data)
     return response.data.data
   },
 
   async updateProperty(id: number, data: PropertyFormData): Promise<Property> {
-    const response = await api.put<ApiResponse<Property>>(`/dashboard/properties/${id}`, data)
+    const response = await apiClient.put<ApiResponse<Property>>(`/dashboard/properties/${id}`, data)
     return response.data.data
   },
 
   async deleteProperty(id: number): Promise<void> {
-    await api.delete(`/dashboard/properties/${id}`)
+    await apiClient.delete(`/dashboard/properties/${id}`)
   },
 
   async updateStatus(id: number, status: PropertyStatus): Promise<Property> {
-    const response = await api.patch(`/dashboard/properties/${id}/status`, { status })
+    const response = await apiClient.patch(`/dashboard/properties/${id}/status`, { status })
     return response.data.data
   },
 }

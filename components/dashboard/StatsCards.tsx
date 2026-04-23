@@ -18,17 +18,17 @@ interface StatCardProps {
 
 function StatCard({ title, value, change, changeType, icon: Icon }: StatCardProps) {
   return (
-    <Card>
-      <CardContent className="p-6">
+    <Card className="shadow-sm bg-card transition-all duration-200 ease-in-out hover:scale-[1.01]">
+      <CardContent className="p-4">
         <div className="flex items-center justify-between">
-          <div className="flex size-12 items-center justify-center rounded-lg bg-muted">
-            <Icon className="size-6 text-muted-foreground" />
+          <div className="flex size-10 items-center justify-center rounded-[4px] bg-accent-primary-lighter dark:bg-accent-primary-light/30">
+            <Icon className="size-4 text-accent-primary" />
           </div>
           <div
             className={`flex items-center gap-1 text-xs font-medium ${
               changeType === "positive"
-                ? "text-emerald-600 dark:text-emerald-400"
-                : "text-red-600 dark:text-red-400"
+                ? "text-success"
+                : "text-destructive"
             }`}
           >
             {changeType === "positive" ? (
@@ -40,8 +40,8 @@ function StatCard({ title, value, change, changeType, icon: Icon }: StatCardProp
           </div>
         </div>
         <div className="mt-4">
-          <p className="text-2xl font-bold">{value}</p>
-          <p className="text-sm text-muted-foreground">{title}</p>
+          <p className="text-xl font-semibold tracking-tight">{value}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{title}</p>
         </div>
       </CardContent>
     </Card>
@@ -81,7 +81,7 @@ const stats = [
 
 export function StatsCards() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 stagger-children pb-2">
       {stats.map((stat) => (
         <StatCard key={stat.title} {...stat} />
       ))}

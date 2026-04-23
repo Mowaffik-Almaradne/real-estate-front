@@ -35,18 +35,15 @@ import {
   DialogDescription,
   DialogFooter,
 } from "components/ui/dialog"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "components/ui/select"
-import { DashboardLayout } from "components/layout/DashboardLayout"
 
 import { propertyService } from "src/modules/properties/services/propertyService"
-import { StatusSelect } from "src/modules/properties/components/StatusSelect"
-import type { Property, PropertyStatus } from "src/modules/properties/types"
+import type { Property } from "src/modules/properties/types"
+
+interface User {
+  id: number
+  name: string
+  email: string
+}
 
 export default function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -56,6 +53,14 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
   const [deleting, setDeleting] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null)
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("user")
+    if (userStr) {
+      setCurrentUser(JSON.parse(userStr))
+    }
+  }, [])
 
   useEffect(() => {
     fetchProperty()
@@ -68,7 +73,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
       setProperty(data)
     } catch (error) {
       console.error("Failed to fetch property:", error)
-      router.push("/dashboard/properties")
+      router.push("/properties")
     } finally {
       setLoading(false)
     }
@@ -77,68 +82,67 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
   const handleDelete = async () => {
     try {
       setDeleting(true)
-      await propertyService.deleteProperty(Number(id))
-      router.push("/dashboard/properties")
+      const token = localStorage.getItem("token")
+      await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/properties/${id}`,
+        {
+          method: "DELETE",
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      )
+      toast.success("Property deleted successfully")
+      router.push("/properties")
     } catch (error) {
       console.error("Failed to delete property:", error)
+      toast.error("Failed to delete property")
     } finally {
       setDeleting(false)
       setShowDeleteDialog(false)
     }
   }
 
-  const handleStatusUpdateNew = async (newStatus: string) => {
-    try {
-      const updated = await propertyService.updateStatus(Number(id), newStatus as PropertyStatus)
-      setProperty(updated)
-      toast.success(`Property status updated to ${newStatus}`)
-    } catch (error) {
-      console.error("Failed to update status:", error)
-      toast.error("Failed to update status")
-    }
-  }
-
   if (loading) {
     return (
-      <DashboardLayout title="Property Details">
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      </DashboardLayout>
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+      </div>
     )
   }
 
   if (!property) {
     return (
-      <DashboardLayout title="Property Details">
-        <div className="text-center py-12">Property not found</div>
-      </DashboardLayout>
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+        <div className="text-center">Property not found</div>
+      </div>
     )
   }
 
+  const canEdit = currentUser?.id === property.publisher?.id
   const images = [
     { url: property.main_image, thumb: property.main_image_thumb },
     ...(property.gallery || []).map((img) => ({ url: img.url, thumb: img.url_thumb })),
   ].filter((img) => img.url)
 
   return (
-    <DashboardLayout title="Property Details">
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <Button variant="ghost" onClick={() => router.push("/dashboard/properties")}>
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex items-center justify-between mb-6">
+          <Button variant="ghost" onClick={() => router.push("/properties")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Properties
           </Button>
-          <div className="flex gap-2">
-            <Button onClick={() => router.push(`/dashboard/properties/${id}/edit`)}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit Property
-            </Button>
-            <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </Button>
-          </div>
+          {canEdit && (
+            <div className="flex gap-2">
+              <Button onClick={() => router.push(`/properties/${id}/edit`)}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit Property
+              </Button>
+              <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </Button>
+            </div>
+          )}
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
@@ -149,7 +153,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
             <CardContent>
               {images.length > 0 ? (
                 <div className="space-y-4">
-                  <div className="relative aspect-video bg-muted rounded-[4px] overflow-hidden">
+                  <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
                     <img
                       src={images[selectedImageIndex || 0]?.url || images[0]?.url}
                       alt={property.name}
@@ -162,8 +166,8 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                         <button
                           key={index}
                           onClick={() => setSelectedImageIndex(index)}
-                          className={`relative w-16 h-16 rounded-[4px] overflow-hidden flex-shrink-0 border ${
-                            (selectedImageIndex || 0) === index ? "border-primary" : "border-transparent"
+                          className={`relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border ${
+                            (selectedImageIndex || 0) === index ? "border-foreground" : "border-transparent"
                           }`}
                         >
                           <img src={img.thumb || img.url} alt="" className="object-cover w-full h-full" />
@@ -173,7 +177,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                   )}
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-40 bg-muted rounded-[4px]">
+                <div className="flex items-center justify-center h-40 bg-muted rounded-lg">
                   <Building className="size-10 text-muted-foreground" />
                 </div>
               )}
@@ -182,17 +186,11 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
 
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>{property.name}</CardTitle>
-                <StatusSelect
-                  status={property.status}
-                  onStatusChange={handleStatusUpdateNew}
-                />
-              </div>
+              <CardTitle className="text-2xl">{property.name}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="text-3xl font-bold text-primary">{property.formatted_price}</p>
+                <p className="text-3xl font-bold text-foreground">{property.formatted_price}</p>
               </div>
 
               <div className="flex items-center gap-2 text-muted-foreground">
@@ -208,7 +206,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                   <span>{property.area} m²</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Bed className="size-4 text-muted-foreground" />
+                  <Bed className="size-4 text-slate-500" />
                   <span>{property.rooms} Rooms</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -229,7 +227,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
           </Card>
         </div>
 
-        <Card>
+        <Card className="mt-6">
           <CardHeader>
             <CardTitle>Description</CardTitle>
           </CardHeader>
@@ -239,7 +237,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
         </Card>
 
         {property.detailed_info && (
-          <Card>
+          <Card className="mt-6">
             <CardHeader>
               <CardTitle>Detailed Information</CardTitle>
             </CardHeader>
@@ -249,7 +247,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
           </Card>
         )}
 
-        <Card>
+        <Card className="mt-6">
           <CardHeader>
             <CardTitle>Publisher Information</CardTitle>
           </CardHeader>
@@ -267,7 +265,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="mt-6">
           <CardHeader>
             <CardTitle>Additional Details</CardTitle>
           </CardHeader>
@@ -281,14 +279,6 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Updated At</span>
                   <span>{new Date(property.updated_at).toLocaleDateString()}</span>
-                </div>
-              )}
-              {property.longitude && property.latitude && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Location</span>
-                  <span>
-                    {property.latitude}, {property.longitude}
-                  </span>
                 </div>
               )}
             </div>
@@ -335,6 +325,6 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
           />
         </div>
       )}
-    </DashboardLayout>
+    </div>
   )
 }

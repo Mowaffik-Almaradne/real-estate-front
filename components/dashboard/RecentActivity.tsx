@@ -80,28 +80,28 @@ const statusConfig = {
   completed: {
     label: "Completed",
     icon: CheckCircle,
-    variant: "default" as const,
+    className: "bg-success/10 text-success border-success/20",
   },
   pending: {
     label: "Pending",
     icon: Clock,
-    variant: "secondary" as const,
+    className: "bg-warning/10 text-warning border-warning/20",
   },
   rejected: {
     label: "Rejected",
     icon: XCircle,
-    variant: "destructive" as const,
+    className: "bg-destructive/10 text-destructive border-destructive/20",
   },
 }
 
 export function RecentActivity() {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Recent Activity</CardTitle>
+    <Card className="bg-card">
+      <CardHeader className="p-4">
+        <CardTitle className="text-base font-semibold tracking-tight">Recent Activity</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="divide-y divide-border">
+        <div className="divide-y divide-border pb-4">
           {activities.map((activity) => {
             const Icon = typeIcons[activity.type]
             const status = statusConfig[activity.status]
@@ -109,17 +109,23 @@ export function RecentActivity() {
             return (
               <div
                 key={activity.id}
-                className="flex items-start gap-4 p-4 hover:bg-muted/50 transition-colors"
+                className="group flex items-start gap-4 px-4 py-4 transition-all duration-200 ease-in-out hover:bg-accent"
               >
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted">
-                  <Icon className="size-5 text-muted-foreground" />
+                <div className="flex shrink-0 items-center justify-center rounded-[4px] bg-accent-primary-lighter dark:bg-accent-primary-light/20 size-9">
+                  <Icon className="size-[16px] text-accent-primary" />
                 </div>
-                <div className="flex-1 space-y-1">
-                  <p className="text-sm font-medium leading-none">{activity.title}</p>
-                  <p className="text-sm text-muted-foreground">{activity.description}</p>
-                  <p className="text-xs text-muted-foreground">{activity.time}</p>
+                <div className="flex-1 min-w-0 space-y-1">
+                  <p className="text-sm font-medium leading-tight text-foreground">
+                    {activity.title}
+                  </p>
+                  <p className="text-sm text-muted-foreground truncate">
+                    {activity.description}
+                  </p>
+                  <p className="text-xs text-muted-foreground/70">{activity.time}</p>
                 </div>
-                <Badge variant={status.variant} className="shrink-0">
+                <Badge
+                  className={`shrink-0 border font-medium text-xs ${status.className}`}
+                >
                   <status.icon className="mr-1 size-3" />
                   {status.label}
                 </Badge>

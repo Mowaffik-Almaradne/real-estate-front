@@ -1,4 +1,7 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
+import { apiClient, API_URL } from "./apiClient"
+
+export { apiClient } from "./apiClient"
+export { API_URL }
 
 export interface ApiResponse<T> {
   success: boolean
@@ -53,28 +56,9 @@ export interface City {
   is_active: boolean
 }
 
-async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<ApiResponse<T>> {
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null
-  
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...options?.headers,
-    },
-    ...options,
-  })
-
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.status} ${response.statusText}`)
-  }
-
-  return response.json()
-}
-
 export async function getCountries(page: number = 1, perPage: number = 10): Promise<ApiResponse<Country[]>> {
-  const response = await fetchApi<Country[]>(`/location/countries?page=${page}&perPage=${perPage}`)
-  return response
+  const response = await apiClient.get<ApiResponse<Country[]>>(`/dashboard/countries?page=${page}&perPage=${perPage}`)
+  return response.data
 }
 
 export async function saveCountry(
@@ -84,29 +68,28 @@ export async function saveCountry(
   isActive: boolean,
   id?: number
 ): Promise<ApiResponse<Country>> {
-  const body: Record<string, unknown> = {
+  const body = {
     name,
     code,
     phone_code: phoneCode,
     is_active: isActive,
   }
   if (id) {
-    body.id = id
+    const response = await apiClient.put<ApiResponse<Country>>(`/dashboard/countries/${id}`, body)
+    return response.data
   }
-  return fetchApi<Country>("/location/countries", {
-    method: id ? "PUT" : "POST",
-    body: JSON.stringify(body),
-  })
+  const response = await apiClient.post<ApiResponse<Country>>("/dashboard/countries", body)
+  return response.data
 }
 
 export async function getCities(): Promise<City[]> {
-  const response = await fetchApi<City[]>("/location/cities")
-  return response.data
+  const response = await apiClient.get<ApiResponse<City[]>>("/dashboard/cities")
+  return response.data.data
 }
 
 export async function getCitiesByCountry(countryId: number): Promise<City[]> {
-  const response = await fetchApi<City[]>(`/location/cities?country_id=${countryId}`)
-  return response.data
+  const response = await apiClient.get<ApiResponse<City[]>>(`/dashboard/cities?country_id=${countryId}`)
+  return response.data.data
 }
 
 export async function saveCity(
@@ -117,7 +100,7 @@ export async function saveCity(
   isActive: boolean,
   id?: number
 ): Promise<ApiResponse<City>> {
-  const body: Record<string, unknown> = {
+  const body = {
     name,
     country_id: countryId,
     state_provianc: stateProvince,
@@ -125,22 +108,19 @@ export async function saveCity(
     is_active: isActive,
   }
   if (id) {
-    body.id = id
+    const response = await apiClient.put<ApiResponse<City>>(`/dashboard/cities/${id}`, body)
+    return response.data
   }
-  return fetchApi<City>("/location/cities", {
-    method: id ? "PUT" : "POST",
-    body: JSON.stringify(body),
-  })
+  const response = await apiClient.post<ApiResponse<City>>("/dashboard/cities", body)
+  return response.data
 }
 
 export async function login(
   email: string,
   password: string
 ): Promise<ApiResponse<AuthResponse>> {
-  return fetchApi<AuthResponse>("/auth/login", {
-    method: "POST",
-    body: JSON.stringify({ email, password }),
-  })
+  const response = await apiClient.post<ApiResponse<AuthResponse>>("/auth/login", { email, password })
+  return response.data
 }
 
 export async function register(
@@ -149,13 +129,11 @@ export async function register(
   password: string,
   passwordConfirmation: string
 ): Promise<ApiResponse<AuthResponse>> {
-  return fetchApi<AuthResponse>("/auth/register", {
-    method: "POST",
-    body: JSON.stringify({
-      name,
-      email,
-      password,
-      password_confirmation: passwordConfirmation,
-    }),
+  const response = await apiClient.post<ApiResponse<AuthResponse>>("/auth/register", {
+    name,
+    email,
+    password,
+    password_confirmation: passwordConfirmation,
   })
+  return response.data
 }
