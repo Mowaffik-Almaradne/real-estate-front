@@ -12,6 +12,7 @@ import {
   FileText,
   MapPin,
   X,
+  MessageCircle,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "components/ui/button"
@@ -25,6 +26,7 @@ const navItems = [
   { href: "/", label: "Dashboard", icon: Home },
   { href: "/dashboard/properties", label: "Properties", icon: Building2 },
   { href: "/dashboard/cities", label: "Cities", icon: MapPin },
+  { href: "/chat", label: "Chat", icon: MessageCircle },
   { href: "/leads", label: "Leads", icon: Users },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/reports", label: "Reports", icon: FileText },

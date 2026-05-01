@@ -1,0 +1,74 @@
+import { z } from "zod"
+
+export const messageTypeEnum = z.enum(["text", "image", "file"])
+
+export const chatRoomTypeEnum = z.enum(["direct", "group"])
+
+export const sendMessageSchema = z
+  .object({
+    body: z
+      .string()
+      .min(1, "Message body is required")
+      .max(5000, "Message body must not exceed 5000 characters"),
+    type: messageTypeEnum,
+    attachment_url: z.string().url().optional(),
+  })
+  .strict()
+
+export type SendMessageInput = z.infer<typeof sendMessageSchema>
+
+export const createRoomSchema = z
+  .object({
+    name: z
+      .string()
+      .max(100, "Room name must not exceed 100 characters")
+      .optional(),
+    type: chatRoomTypeEnum,
+    participant_ids: z
+      .array(z.number())
+      .min(1, "At least one participant is required"),
+  })
+  .strict()
+
+export type CreateRoomInput = z.infer<typeof createRoomSchema>
+
+export const participantSchema = z
+  .object({
+    id: z.number(),
+    name: z.string(),
+    avatar_url: z.string().optional(),
+  })
+  .strict()
+
+export const lastMessageSchema = z
+  .object({
+    body: z.string(),
+    type: messageTypeEnum,
+    sender_id: z.number(),
+    created_at: z.string(),
+  })
+  .strict()
+
+export const chatRoomResponseSchema = z
+  .object({
+    id: z.number(),
+    name: z.string().optional(),
+    type: chatRoomTypeEnum,
+    participants: z.array(participantSchema),
+    last_message: lastMessageSchema.optional(),
+    unread_count: z.number(),
+    created_at: z.string(),
+  })
+  .strict()
+
+export const messageResponseSchema = z
+  .object({
+    id: z.string(),
+    room_id: z.number(),
+    body: z.string(),
+    type: messageTypeEnum,
+    attachment_url: z.string().optional(),
+    sender: participantSchema,
+    created_at: z.string(),
+  })
+  .strict()

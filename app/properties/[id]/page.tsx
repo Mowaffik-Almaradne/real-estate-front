@@ -16,6 +16,7 @@ import {
   Mail,
   Loader2,
   X,
+  MessageCircle,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -38,6 +39,7 @@ import {
 
 import { propertyService } from "src/modules/properties/services/propertyService"
 import type { Property } from "src/modules/properties/types"
+import { DashboardLayout } from "components/layout/DashboardLayout"
 
 interface User {
   id: number
@@ -54,6 +56,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null)
   const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [creatingChat, setCreatingChat] = useState(false)
 
   useEffect(() => {
     const userStr = localStorage.getItem("user")
@@ -73,7 +76,6 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
       setProperty(data)
     } catch (error) {
       console.error("Failed to fetch property:", error)
-      router.push("/properties")
     } finally {
       setLoading(false)
     }
@@ -101,19 +103,66 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
     }
   }
 
+  const handleContact = async () => {
+    if (!currentUser) {
+      router.push("/login")
+      return
+    }
+
+    if (currentUser.id === property.publisher?.id) {
+      return
+    }
+
+    try {
+      setCreatingChat(true)
+      const token = localStorage.getItem("token")
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/chat/rooms`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+          body: JSON.stringify({
+            type: "property",
+            property_id: property.id,
+          }),
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error("Failed to create chat")
+      }
+
+      const chatRoom = await response.json()
+      toast.success("Chat created successfully")
+      router.push(`/chat?room=${chatRoom.id}`)
+    } catch (error) {
+      console.error("Failed to create chat:", error)
+      toast.error("Failed to contact owner")
+    } finally {
+      setCreatingChat(false)
+    }
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
-      </div>
+      <DashboardLayout title="Property Details">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+        </div>
+      </DashboardLayout>
     )
   }
 
   if (!property) {
     return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-        <div className="text-center">Property not found</div>
-      </div>
+      <DashboardLayout title="Property Details">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">Property not found</div>
+        </div>
+      </DashboardLayout>
     )
   }
 
@@ -124,7 +173,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
   ].filter((img) => img.url)
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <DashboardLayout title="Property Details">
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-6">
           <Button variant="ghost" onClick={() => router.push("/properties")}>
@@ -252,15 +301,33 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
             <CardTitle>Publisher Information</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <User className="size-4 text-muted-foreground" />
-                <span className="font-medium">{property.publisher?.name}</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <User className="size-4 text-muted-foreground" />
+                  <span className="font-medium">{property.publisher?.name}</span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Mail className="size-4" />
+                  <span>{property.publisher?.email}</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Mail className="size-4" />
-                <span>{property.publisher?.email}</span>
-              </div>
+              {currentUser && currentUser.id !== property.publisher?.id && (
+                <Button onClick={handleContact} disabled={creatingChat}>
+                  {creatingChat ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                  )}
+                  Contact
+                </Button>
+              )}
+              {!currentUser && (
+                <Button onClick={() => router.push("/login")}>
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  Contact
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -325,6 +392,6 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
           />
         </div>
       )}
-    </div>
+    </DashboardLayout>
   )
 }

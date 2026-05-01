@@ -2,21 +2,29 @@
 
 import { useState, useEffect, useCallback, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Pencil, Trash2, Eye, Loader2, MapPin, Bed, Bath, Square, Building, Plus, ChevronLeft, ChevronRight } from "lucide-react"
+import { Pencil, Eye, Loader2, Bed, Bath, Square, Plus, MapPin, Building, CheckCircle } from "lucide-react"
 import axios from "axios"
 import { toast } from "sonner"
+import useSWR from "swr"
 
 import { Button } from "components/ui/button"
 import { Badge } from "components/ui/badge"
 import { DashboardLayout } from "components/layout/DashboardLayout"
+import { PropertyCarousel } from "components/properties/PropertyCarousel"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "components/ui/dialog"
+
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
+
+const fetcher = async (url: string) => {
+  const response = await axios.get(url)
+  return response.data
+}
 
 interface Property {
   id: number
@@ -52,8 +60,29 @@ interface User {
   email: string
 }
 
-function PropertyCard({ property, canEdit, onDelete }: { property: Property; canEdit: boolean; onDelete: (id: number) => void }) {
+function PropertyCard({ property, canEdit }: { property: Property; canEdit: boolean }) {
   const router = useRouter()
+  const [changingStatus, setChangingStatus] = useState(false)
+
+  const handleStatusChange = async (id: number) => {
+    try {
+      setChangingStatus(true)
+      const token = localStorage.getItem("token")
+      await axios.patch(
+        `${apiUrl}/properties/${id}/status`,
+        { status: "sold" },
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      )
+      toast.success("Property status updated to sold")
+    } catch (error) {
+      console.error("Failed to update status:", error)
+      toast.error("Failed to update status")
+    } finally {
+      setChangingStatus(false)
+    }
+  }
 
   return (
     <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
@@ -136,21 +165,25 @@ function PropertyCard({ property, canEdit, onDelete }: { property: Property; can
                   size="icon-sm"
                   onClick={(e) => {
                     e.stopPropagation()
-                    router.push(`/properties/${property.id}/edit`)
+                    handleStatusChange(property.id)
                   }}
+                  disabled={changingStatus}
                 >
-                  <Pencil className="h-4 w-4" />
+                  {changingStatus ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <CheckCircle className="h-4 w-4" />
+                  )}
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon-sm"
-                  className="text-destructive hover:text-destructive"
                   onClick={(e) => {
                     e.stopPropagation()
-                    onDelete(property.id)
+                    router.push(`/properties/${property.id}/edit`)
                   }}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Pencil className="h-4 w-4" />
                 </Button>
               </>
             )}
@@ -161,43 +194,11 @@ function PropertyCard({ property, canEdit, onDelete }: { property: Property; can
   )
 }
 
-function FeaturedPropertyCard({ property }: { property: Property }) {
-  const router = useRouter()
-
-  return (
-    <div
-      className="flex-shrink-0 w-72 bg-card rounded-lg border border-border shadow-sm overflow-hidden cursor-pointer"
-      onClick={() => router.push(`/properties/${property.id}`)}
-    >
-      <div className="relative h-40 bg-muted">
-        {property.main_image_thumb || property.main_image ? (
-          <img
-            src={property.main_image_thumb || property.main_image}
-            alt={property.name}
-            className="object-cover w-full h-full"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
-            <Building className="size-10" />
-          </div>
-        )}
-        <div className="absolute bottom-2 left-2">
-          <span className="inline-flex items-center rounded bg-background/90 px-2 py-0.5 text-xs font-medium text-foreground">
-            {property.type_of_contract === "rent" ? "Rent" : "Sale"}
-          </span>
-        </div>
-      </div>
-      <div className="p-3">
-        <h4 className="font-semibold text-sm truncate">{property.name}</h4>
-        <p className="font-bold text-foreground text-sm">{property.formatted_price}</p>
-      </div>
-    </div>
-  )
-}
-
 export default function PropertiesPage() {
   const router = useRouter()
-  const [featuredProperties, setFeaturedProperties] = useState<Property[]>([])
+
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+
   const [data, setData] = useState<Property[]>([])
   const [pagination, setPagination] = useState<PaginationInfo>({
     total: 0,
@@ -207,15 +208,42 @@ export default function PropertiesPage() {
     from: 1,
     to: 1,
   })
-  const [loading, setLoading] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
-  const [currentUser, setCurrentUser] = useState<User | null>(null)
-
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [deletingPropertyId, setDeletingPropertyId] = useState<number | null>(null)
-  const [deleting, setDeleting] = useState(false)
 
   const loaderRef = useRef<HTMLDivElement>(null)
+
+  const {
+    data: featuredData,
+    error: featuredError,
+    isLoading: featuredLoading,
+    mutate: refreshFeatured,
+  } = useSWR(
+    `${apiUrl}/properties/random`,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      dedupingInterval: 30000,
+    }
+  )
+
+  const {
+    data: propertiesData,
+    error: propertiesError,
+    isLoading: propertiesLoading,
+    mutate: refreshProperties,
+  } = useSWR(
+    `${apiUrl}/properties?page=1&per_page=12`,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      dedupingInterval: 5000,
+    }
+  )
+
+  const featuredProperties = featuredData?.data || []
+  const isLoading = featuredLoading || propertiesLoading
 
   useEffect(() => {
     const userStr = localStorage.getItem("user")
@@ -224,53 +252,35 @@ export default function PropertiesPage() {
     }
   }, [])
 
-  const fetchFeaturedProperties = useCallback(async () => {
+  useEffect(() => {
+    if (propertiesData) {
+      setData(propertiesData.data || [])
+      setPagination(propertiesData.pagination)
+    }
+  }, [propertiesData])
+
+  const fetchMoreProperties = useCallback(async (pageNum: number) => {
+    if (pageNum === 1) return
+
+    setLoadingMore(true)
     try {
       const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/properties/random`
+        `${apiUrl}/properties?page=${pageNum}&per_page=12`
       )
-      setFeaturedProperties(res.data.data || [])
-    } catch (error) {
-      console.error("Failed to fetch featured properties:", error)
-    }
-  }, [])
-
-  const fetchProperties = useCallback(async (pageNum: number, append = false) => {
-    if (pageNum === 1) {
-      setLoading(true)
-    } else {
-      setLoadingMore(true)
-    }
-
-    try {
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/properties?page=${pageNum}&per_page=12`
-      )
-
-      if (append) {
-        setData(prev => [...prev, ...(res.data.data || [])])
-      } else {
-        setData(res.data.data || [])
-      }
+      setData(prev => [...prev, ...(res.data.data || [])])
       setPagination(res.data.pagination)
     } catch (error) {
       console.error("Failed to fetch properties:", error)
     } finally {
-      setLoading(false)
       setLoadingMore(false)
     }
   }, [])
 
   useEffect(() => {
-    fetchFeaturedProperties()
-    fetchProperties(1)
-  }, [fetchFeaturedProperties, fetchProperties])
-
-  useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && !loadingMore && pagination.current_page < pagination.last_page) {
-          fetchProperties(pagination.current_page + 1, true)
+          fetchMoreProperties(pagination.current_page + 1)
         }
       },
       { threshold: 1 }
@@ -281,44 +291,7 @@ export default function PropertiesPage() {
     }
 
     return () => observer.disconnect()
-  }, [loadingMore, pagination.current_page, pagination.last_page, fetchProperties])
-
-const handleDeleteClick = (id: number) => {
-    setDeletingPropertyId(id)
-    setShowDeleteDialog(true)
-  }
-
-  const handleDeleteConfirm = async () => {
-    if (!deletingPropertyId) return
-
-    try {
-      setDeleting(true)
-      const token = localStorage.getItem("token")
-      await axios.delete(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/properties/${deletingPropertyId}`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
-      )
-      toast.success("Property deleted successfully")
-      setData(prev => prev.filter(p => p.id !== deletingPropertyId))
-    } catch (error) {
-      console.error("Failed to delete property:", error)
-      toast.error("Failed to delete property")
-    } finally {
-      setDeleting(false)
-      setShowDeleteDialog(false)
-      setDeletingPropertyId(null)
-    }
-  }
-
-  const scrollFeatured = (direction: "left" | "right") => {
-    const container = document.getElementById("featured-scroll")
-    if (container) {
-      const scrollAmount = direction === "left" ? -300 : 300
-      container.scrollBy({ left: scrollAmount, behavior: "smooth" })
-    }
-  }
+  }, [loadingMore, pagination.current_page, pagination.last_page, fetchMoreProperties])
 
   return (
     <DashboardLayout title="Properties">
@@ -331,41 +304,32 @@ const handleDeleteClick = (id: number) => {
           </Button>
         </div>
 
-        {featuredProperties.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold text-foreground900 mb-4">Featured Properties</h2>
-            <div className="relative">
-              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide" id="featured-scroll">
-                {featuredProperties.map((property) => (
-                  <FeaturedPropertyCard key={property.id} property={property} />
-                ))}
-              </div>
-              <button
-                onClick={() => scrollFeatured("left")}
-                className="absolute left-0 top-1/2 -translate-y-1/2 bg-background shadow-md rounded-full p-2 hover:bg-accent"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              <button
-                onClick={() => scrollFeatured("right")}
-                className="absolute right-0 top-1/2 -translate-y-1/2 bg-background shadow-md rounded-full p-2 hover:bg-accent"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-        )}
+        <PropertyCarousel
+          properties={featuredProperties}
+          title="Featured Properties"
+          loading={isLoading}
+          error={featuredError}
+          onRetry={() => refreshFeatured()}
+        />
 
         <h2 className="text-lg font-semibold text-foreground900 mb-4">All Properties</h2>
 
-        {loading && data.length === 0 ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-foreground400" />
-          </div>
+        {isLoading && data.length === 0 ? (
+          <PropertyCarousel
+            properties={[]}
+            title=""
+            loading={true}
+            skeletonCount={12}
+          />
         ) : data.length === 0 ? (
-          <div className="text-center py-12 text-foreground500">
-            No properties found.
-          </div>
+          <PropertyCarousel
+            properties={[]}
+            title=""
+            emptyTitle="No Properties Found"
+            emptyDescription="There are no properties available at the moment. Be the first to create a property listing!"
+            emptyActionLabel="Create Property"
+            onEmptyAction={() => router.push("/properties/create")}
+          />
         ) : (
           <>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -374,7 +338,6 @@ const handleDeleteClick = (id: number) => {
                   key={property.id}
                   property={property}
                   canEdit={currentUser?.id === property.publisher?.id}
-                  onDelete={handleDeleteClick}
                 />
               ))}
             </div>
@@ -392,25 +355,6 @@ const handleDeleteClick = (id: number) => {
         )}
       </div>
 
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Property</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this property? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDeleteConfirm} disabled={deleting}>
-              {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </DashboardLayout>
   )
 }
