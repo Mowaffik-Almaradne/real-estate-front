@@ -26,7 +26,7 @@ export interface ChatRoomDto {
 }
 
 export interface MessageDto {
-  readonly id: string;
+  readonly id: number;
   readonly room_id: number;
   readonly body: string;
   readonly type: MessageType;

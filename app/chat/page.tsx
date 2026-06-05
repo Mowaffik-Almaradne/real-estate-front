@@ -1,18 +1,19 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { Suspense, useState, useEffect, useRef, useCallback } from "react"
 import { useSearchParams } from "next/navigation"
 import { ChatRoomList } from "@/components/features/chat/chat-room-list"
 import { useChatRoomsReact } from "@/hooks/use-chat-rooms-react"
+import { useChatChannel } from "@/hooks/use-chat-channel"
 import { chatService } from "lib/chat-service"
 import { MessageSquare, Send, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DashboardLayout } from "components/layout/DashboardLayout"
-import type { MessageDto, PaginatedMessages } from "src/types/chat"
+import type { MessageDto, PaginatedMessages, ParticipantDto } from "src/types/chat"
 import { toast } from "sonner"
 
-export default function ChatPage() {
+function ChatContent() {
   const searchParams = useSearchParams()
   const roomIdParam = searchParams.get("room")
   const { rooms, loading, error } = useChatRoomsReact()
@@ -68,6 +69,39 @@ export default function ChatPage() {
       setSending(false)
     }
   }
+
+  const handleMessageReceived = useCallback((msg: MessageDto) => {
+    console.log('[ChatPage] handleMessageReceived called:', msg, 'selectedRoomId:', selectedRoomId)
+    if (msg.room_id === selectedRoomId) {
+      setMessages((prev) => {
+        console.log('[ChatPage] Current messages:', prev.length, 'Adding message id:', msg.id)
+        if (prev.some((m) => m.id === msg.id)) {
+          console.log('[ChatPage] Duplicate message, skipping')
+          return prev
+        }
+        const updated = [msg, ...prev]
+        console.log('[ChatPage] Updated messages:', updated.length)
+        return updated
+      })
+    } else {
+      console.log('[ChatPage] room_id mismatch:', msg.room_id, '!==', selectedRoomId)
+    }
+  }, [selectedRoomId])
+
+  const handleMessageDeleted = useCallback((messageId: number) => {
+    setMessages((prev) => prev.filter((m) => m.id !== messageId))
+  }, [])
+
+  const handleUserTyping = useCallback((user: ParticipantDto) => {
+    console.log("User typing:", user.name)
+  }, [])
+
+  useChatChannel({
+    roomId: selectedRoomId,
+    onMessageReceived: handleMessageReceived,
+    onMessageDeleted: handleMessageDeleted,
+    onUserTyping: handleUserTyping,
+  })
 
   return (
     <DashboardLayout title="Chat">
@@ -195,5 +229,13 @@ export default function ChatPage() {
         </div>
       </div>
     </DashboardLayout>
+  )
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+      <ChatContent />
+    </Suspense>
   )
 }

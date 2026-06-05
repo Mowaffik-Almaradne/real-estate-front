@@ -6,10 +6,8 @@ import { usePathname } from "next/navigation"
 import {
   Building2,
   Home,
-  Users,
-  BarChart3,
+  Globe,
   Settings,
-  FileText,
   MapPin,
   X,
   MessageCircle,
@@ -24,12 +22,10 @@ interface SidebarProps {
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: Home },
+  { href: "/properties", label: "Public Properties", icon: Globe },
   { href: "/dashboard/properties", label: "Properties", icon: Building2 },
   { href: "/dashboard/cities", label: "Cities", icon: MapPin },
   { href: "/chat", label: "Chat", icon: MessageCircle },
-  { href: "/leads", label: "Leads", icon: Users },
-  { href: "/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/reports", label: "Reports", icon: FileText },
   { href: "/settings", label: "Settings", icon: Settings },
 ]
 

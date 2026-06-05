@@ -47,7 +47,7 @@ function getRoomDisplayName(room: ChatRoomDto, currentUserId: number): string {
 
 function getRoomAvatar(room: ChatRoomDto, currentUserId: number): {
   imageUrl?: string
-  initials: string
+  initials?: string
 } {
   if (room.type === "direct") {
     const otherParticipant = room.participants.find((p) => p.id !== currentUserId)

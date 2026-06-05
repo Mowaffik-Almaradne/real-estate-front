@@ -4,14 +4,12 @@ import {
   createContext,
   useContext,
   useEffect,
-  useState,
   useMemo,
   type ReactNode,
 } from "react"
 import { useNotificationsReact } from "@/hooks/use-notifications-react"
 import { useChatRoomsReact } from "@/hooks/use-chat-rooms-react"
 import { useUserChannel } from "@/hooks/use-user-channel"
-import { useFcm } from "@/hooks/use-fcm"
 import { destroyEcho } from "@/lib/echo"
 import type { NotificationDto } from "@/types/notification"
 import type { MessageDto } from "@/types/chat"
@@ -32,10 +30,9 @@ interface RealtimeProviderProps {
 export function RealtimeProvider({
   children,
   currentUserId,
-}: RealtimeProviderProps): JSX.Element {
+}: RealtimeProviderProps) {
   const notifications = useNotificationsReact()
   const chatRooms = useChatRoomsReact()
-  const fcm = useFcm()
 
   const handleNewNotification = (notification: NotificationDto): void => {
     notifications.appendNotification(notification)

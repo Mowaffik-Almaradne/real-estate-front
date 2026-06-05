@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import type { ChatRoomDto, LastMessageDto, SendMessageRequest } from "@/types/chat"
+import type { ChatRoomDto, MessageDto, LastMessageDto, SendMessageRequest } from "@/types/chat"
 import { chatService, ChatServiceError } from "@/services/chat-service"
 
 export function useChatRoomsReact() {
@@ -30,7 +30,7 @@ export function useChatRoomsReact() {
     async (
       roomId: number,
       message: SendMessageRequest
-    ): Promise<ChatRoomDto | null> => {
+    ): Promise<MessageDto | null> => {
       try {
         const sentMessage = await chatService.sendMessage(roomId, message)
 
@@ -79,14 +79,22 @@ export function useChatRoomsReact() {
   }, [])
 
   const moveRoomToTop = useCallback(
-    (roomId: number, lastMessage: LastMessageDto): void => {
+    (roomId: number, lastMessage: any): void => {
       setRooms((prev) => {
         const roomIndex = prev.findIndex((r) => r.id === roomId)
         if (roomIndex === -1) return prev
 
         const newRooms = [...prev]
         const [room] = newRooms.splice(roomIndex, 1)
-        newRooms.unshift({ ...room, last_message: lastMessage })
+        newRooms.unshift({
+          ...room,
+          last_message: {
+            body: lastMessage.body,
+            type: lastMessage.type,
+            sender_id: lastMessage.sender?.id || 0,
+            created_at: lastMessage.created_at,
+          },
+        })
         return newRooms
       })
     },

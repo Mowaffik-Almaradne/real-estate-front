@@ -20,6 +20,9 @@ export function useChatChannel({
 }: UseChatChannelProps): void {
   const echoRef = useRef<any>(null)
   const roomIdRef = useRef<number | null>(null)
+  const handlersRef = useRef({ onMessageReceived, onMessageDeleted, onUserTyping })
+
+  handlersRef.current = { onMessageReceived, onMessageDeleted, onUserTyping }
 
   useEffect(() => {
     const echo = getEcho()
@@ -42,7 +45,8 @@ export function useChatChannel({
 
     privateChannel
       .listen(CHAT_EVENTS.MESSAGE_SENT, (payload: any) => {
-        onMessageReceived({
+        console.log('[useChatChannel] MESSAGE_SENT payload:', payload, 'channel:', channelName)
+        handlersRef.current.onMessageReceived({
           id: payload.message_id,
           room_id: payload.room_id,
           body: payload.body,
@@ -53,16 +57,18 @@ export function useChatChannel({
         })
       })
       .listen(CHAT_EVENTS.USER_TYPING, (payload: any) => {
-        onUserTyping({ id: payload.user_id, name: payload.user_name })
+        console.log('[useChatChannel] USER_TYPING payload:', payload)
+        handlersRef.current.onUserTyping({ id: payload.user_id, name: payload.user_name })
       })
 
     echoRef.current = echo
     roomIdRef.current = roomId
 
     return () => {
+      console.log('[useChatChannel] Leaving channel:', channelName)
       echo.leave(channelName)
       roomIdRef.current = null
       echoRef.current = null
     }
-  }, [roomId, onMessageReceived, onMessageDeleted, onUserTyping])
+  }, [roomId])
 }

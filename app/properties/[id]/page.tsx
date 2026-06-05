@@ -109,7 +109,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
       return
     }
 
-    if (currentUser.id === property.publisher?.id) {
+    if (!property || currentUser.id === property.publisher?.id) {
       return
     }
 
