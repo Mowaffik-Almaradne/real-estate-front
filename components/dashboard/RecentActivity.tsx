@@ -111,8 +111,8 @@ export function RecentActivity() {
                 key={activity.id}
                 className="group flex items-start gap-4 px-4 py-4 transition-all duration-200 ease-in-out hover:bg-accent"
               >
-                <div className="flex shrink-0 items-center justify-center rounded-[4px] bg-accent-primary-lighter dark:bg-accent-primary-light/20 size-9">
-                  <Icon className="size-[16px] text-accent-primary" />
+                <div className="flex shrink-0 items-center justify-center rounded-md bg-primary/10 dark:bg-primary/20 size-9">
+                  <Icon className="size-[16px] text-primary" />
                 </div>
                 <div className="flex-1 min-w-0 space-y-1">
                   <p className="text-sm font-medium leading-tight text-foreground">

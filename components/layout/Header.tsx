@@ -58,7 +58,7 @@ export function Header({ onMenuClick, title = "Dashboard" }: HeaderProps) {
           className="relative text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
         >
           <Bell className="size-[18px]" />
-          <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-accent-primary" />
+          <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-primary" />
         </Button>
         
         {!user ? (

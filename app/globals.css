@@ -22,10 +22,44 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-ring-offset: var(--ring-offset);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-border: var(--sidebar-border);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
 
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
+
+  --animate-fade-in: fade-in 0.2s ease-out;
+  --animate-fade-out: fade-out 0.2s ease-in;
+  --animate-slide-in-from-top: slide-in-from-top 0.3s ease-out;
+  --animate-slide-out-to-top: slide-out-to-top 0.3s ease-in;
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  @keyframes slide-in-from-top {
+    from { transform: translateY(-0.5rem); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes slide-out-to-top {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(-0.5rem); opacity: 0; }
+  }
 }
 
 :root {
@@ -56,6 +90,15 @@
   --border: oklch(0.92 0.01 250);
   --input: oklch(0.9 0.01 250);
   --ring: oklch(0.55 0.15 250);
+  --ring-offset: oklch(1 0 0);
+
+  --sidebar: oklch(0.985 0.008 250);
+  --sidebar-border: oklch(0.92 0.01 250);
+
+  --success: oklch(0.527 0.154 142);
+  --success-foreground: oklch(1 0 0);
+  --warning: oklch(0.554 0.135 90);
+  --warning-foreground: oklch(0.145 0.015 250);
 
   --radius: 0.5rem;
 }
@@ -88,13 +131,26 @@
   --border: oklch(1 0 0 / 0.08);
   --input: oklch(1 0 0 / 0.12);
   --ring: oklch(0.65 0.15 250);
+  --ring-offset: oklch(0.12 0.015 250);
+
+  --sidebar: oklch(0.12 0.015 250);
+  --sidebar-border: oklch(1 0 0 / 0.08);
+
+  --success: oklch(0.527 0.154 142);
+  --success-foreground: oklch(1 0 0);
+  --warning: oklch(0.554 0.135 90);
+  --warning-foreground: oklch(0.145 0.015 250);
 }
 
-* {
-  border-color: var(--border);
-}
+@layer base {
+  * {
+    border-color: var(--border);
+  }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }

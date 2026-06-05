@@ -21,8 +21,8 @@ function StatCard({ title, value, change, changeType, icon: Icon }: StatCardProp
     <Card className="shadow-sm bg-card transition-all duration-200 ease-in-out hover:scale-[1.01]">
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
-          <div className="flex size-10 items-center justify-center rounded-[4px] bg-accent-primary-lighter dark:bg-accent-primary-light/30">
-            <Icon className="size-4 text-accent-primary" />
+          <div className="flex size-10 items-center justify-center rounded-md bg-primary/10 dark:bg-primary/20">
+            <Icon className="size-4 text-primary" />
           </div>
           <div
             className={`flex items-center gap-1 text-xs font-medium ${
