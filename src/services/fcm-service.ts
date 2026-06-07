@@ -33,13 +33,13 @@ export const fcmService = {
       ...(appVersion ? { app_version: appVersion } : {}),
     }
 
-    await apiClient.post("/api/v1/fcm/register", request)
+    await apiClient.post("/fcm/register", request)
     localStorage.setItem(FCM_TOKEN_KEY, token)
   },
 
   async revokeFcmToken(token: string): Promise<void> {
     try {
-      await apiClient.delete("/api/v1/fcm/revoke", { data: { token } })
+      await apiClient.delete("/fcm/revoke", { data: { token } })
     } finally {
       localStorage.removeItem(FCM_TOKEN_KEY)
     }

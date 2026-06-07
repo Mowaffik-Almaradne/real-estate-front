@@ -69,7 +69,7 @@ function PropertyCard({ property, canEdit }: { property: Property; canEdit: bool
       setChangingStatus(true)
       const token = localStorage.getItem("token")
       await axios.patch(
-        `${apiUrl}/properties/${id}/status`,
+        `${apiUrl}/dashboard/properties/${id}/status`,
         { status: "sold" },
         {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -218,7 +218,7 @@ export default function PropertiesPage() {
     isLoading: featuredLoading,
     mutate: refreshFeatured,
   } = useSWR(
-    `${apiUrl}/properties/random`,
+    `${apiUrl}/public/properties/random`,
     fetcher,
     {
       revalidateOnFocus: false,
@@ -233,7 +233,7 @@ export default function PropertiesPage() {
     isLoading: propertiesLoading,
     mutate: refreshProperties,
   } = useSWR(
-    `${apiUrl}/properties?page=1&per_page=12`,
+    `${apiUrl}/public/properties/browse?page=1&per_page=12`,
     fetcher,
     {
       revalidateOnFocus: false,
@@ -265,7 +265,7 @@ export default function PropertiesPage() {
     setLoadingMore(true)
     try {
       const res = await axios.get(
-        `${apiUrl}/properties?page=${pageNum}&per_page=12`
+        `${apiUrl}/public/properties/browse?page=${pageNum}&per_page=12`
       )
       setData(prev => [...prev, ...(res.data.data || [])])
       setPagination(res.data.pagination)

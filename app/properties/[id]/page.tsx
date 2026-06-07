@@ -86,7 +86,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
       setDeleting(true)
       const token = localStorage.getItem("token")
       await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/properties/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/dashboard/properties/${id}`,
         {
           method: "DELETE",
           headers: token ? { Authorization: `Bearer ${token}` } : {},

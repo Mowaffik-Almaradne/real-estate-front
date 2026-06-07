@@ -8,7 +8,9 @@ import {
   Trash2, 
   Globe, 
   Building2,
-  Loader2
+  Loader2,
+  AlertCircle,
+  RefreshCw
 } from "lucide-react"
 import { DashboardLayout } from "components/layout/DashboardLayout"
 import { Button } from "components/ui/button"
@@ -257,10 +259,23 @@ export default function CitiesPage() {
   if (error) {
     return (
       <DashboardLayout title="Countries & Cities">
-        <div className="flex h-[calc(100vh-8rem)] items-center justify-center">
-          <div className="flex flex-col items-center gap-3 text-destructive">
-            <p>Error: {error}</p>
-            <Button onClick={() => loadCountries()}>Retry</Button>
+        <div className="flex h-[calc(100vh-8rem)] items-center justify-center p-4">
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="flex flex-col items-center gap-4 max-w-sm text-center p-6 rounded-[6px] bg-destructive/5 border border-destructive/20"
+          >
+            <div className="flex size-12 items-center justify-center rounded-full bg-destructive/10">
+              <AlertCircle className="size-6 text-destructive" aria-hidden="true" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-sm font-semibold text-foreground">Failed to load countries</h3>
+              <p className="text-sm text-muted-foreground">{error}</p>
+            </div>
+            <Button onClick={() => loadCountries(1)} variant="outline" size="sm">
+              <RefreshCw className="mr-1.5 size-3.5" />
+              Try again
+            </Button>
           </div>
         </div>
       </DashboardLayout>

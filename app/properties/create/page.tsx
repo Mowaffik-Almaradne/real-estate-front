@@ -130,7 +130,7 @@ export default function PropertyCreatePage() {
 
       const token = localStorage.getItem("token")
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/properties`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/dashboard/properties`,
         {
           method: "POST",
           headers: {

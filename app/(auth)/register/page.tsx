@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Building2, Loader2, Mail, Lock, User, Eye, EyeOff } from "lucide-react"
+import { Building2, Loader2, Mail, Lock, User, Eye, EyeOff, AlertCircle, X } from "lucide-react"
 import { useAuth } from "src/context/AuthContext"
 import { Button } from "components/ui/button"
 import { Input } from "components/ui/input"
@@ -56,8 +56,21 @@ export default function RegisterPage() {
         <div className="bg-card border border-border rounded-[6px] p-6 shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-2.5 rounded-[4px] bg-destructive/10 border border-destructive/50 text-destructive text-sm">
-                {error}
+              <div
+                role="alert"
+                aria-live="assertive"
+                className="flex items-start gap-2.5 p-3 rounded-[6px] bg-destructive/10 border border-destructive/30 text-destructive animate-in fade-in slide-in-from-top-1 duration-200"
+              >
+                <AlertCircle className="size-4 shrink-0 mt-0.5" aria-hidden="true" />
+                <p className="text-sm font-medium flex-1 leading-snug">{error}</p>
+                <button
+                  type="button"
+                  onClick={() => setError("")}
+                  className="shrink-0 opacity-70 hover:opacity-100 transition-opacity -mt-0.5 -mr-0.5 p-0.5 rounded"
+                  aria-label="Dismiss error"
+                >
+                  <X className="size-3.5" />
+                </button>
               </div>
             )}
 

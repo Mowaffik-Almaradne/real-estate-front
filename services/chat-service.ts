@@ -16,7 +16,7 @@ export class ChatServiceError extends Error {
   }
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api/v1"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
 function getHeaders(): HeadersInit {
   if (typeof window === "undefined") return { "Content-Type": "application/json" }

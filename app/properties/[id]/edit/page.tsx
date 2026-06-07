@@ -131,7 +131,7 @@ export default function PropertyEditPage({ params }: { params: Promise<{ id: str
       setLoading(true)
       const token = localStorage.getItem("token")
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/properties/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/public/properties/${id}/details`,
         {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         }
@@ -173,9 +173,9 @@ export default function PropertyEditPage({ params }: { params: Promise<{ id: str
 
       const token = localStorage.getItem("token")
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/properties/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/dashboard/properties/${id}`,
         {
-          method: "PUT",
+          method: "PATCH",
           headers: {
             "Content-Type": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),

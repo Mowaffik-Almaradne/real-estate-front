@@ -19,7 +19,7 @@ export function useProperties(options?: {
 
   const { data, error, isLoading, mutate, isValidating } = useSWR(
     enabled
-      ? `${apiUrl}/properties?page=${page}&per_page=${perPage}`
+      ? `${apiUrl}/public/properties/browse?page=${page}&per_page=${perPage}`
       : null,
     fetcher,
     {
@@ -44,7 +44,7 @@ export function useFeaturedProperties(options?: { enabled?: boolean }) {
   const { enabled = true } = options || {}
 
   const { data, error, isLoading, mutate, isValidating } = useSWR(
-    enabled ? `${apiUrl}/properties/random` : null,
+    enabled ? `${apiUrl}/public/properties/random` : null,
     fetcher,
     {
       revalidateOnFocus: false,

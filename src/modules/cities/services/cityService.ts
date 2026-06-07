@@ -8,26 +8,26 @@ export const cityService = {
     if (filters.page) params.append('page', String(filters.page))
     if (filters.per_page) params.append('per_page', String(filters.per_page))
 
-    const response = await apiClient.get<CitiesResponse>(`/dashboard/cities?${params.toString()}`)
+    const response = await apiClient.get<CitiesResponse>(`/location/cities?${params.toString()}`)
     return response.data
   },
 
   async getCityById(id: number): Promise<City> {
-    const response = await apiClient.get<City>(`/dashboard/cities/${id}`)
+    const response = await apiClient.get<City>(`/location/cities/${id}`)
     return response.data
   },
 
   async createCity(data: CityFormData): Promise<City> {
-    const response = await apiClient.post<City>('/dashboard/cities', data)
+    const response = await apiClient.post<City>('/location/cities', data)
     return response.data
   },
 
   async updateCity(id: number, data: CityFormData): Promise<City> {
-    const response = await apiClient.put<City>(`/dashboard/cities/${id}`, data)
+    const response = await apiClient.put<City>(`/location/cities/${id}`, data)
     return response.data
   },
 
   async deleteCity(id: number): Promise<void> {
-    await apiClient.delete(`/dashboard/cities/${id}`)
+    await apiClient.delete(`/location/cities/${id}`)
   },
 }

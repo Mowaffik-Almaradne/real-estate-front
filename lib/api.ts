@@ -57,7 +57,7 @@ export interface City {
 }
 
 export async function getCountries(page: number = 1, perPage: number = 10): Promise<ApiResponse<Country[]>> {
-  const response = await apiClient.get<ApiResponse<Country[]>>(`/dashboard/countries?page=${page}&perPage=${perPage}`)
+  const response = await apiClient.get<ApiResponse<Country[]>>(`/location/countries?page=${page}&perPage=${perPage}`)
   return response.data
 }
 
@@ -75,20 +75,20 @@ export async function saveCountry(
     is_active: isActive,
   }
   if (id) {
-    const response = await apiClient.put<ApiResponse<Country>>(`/dashboard/countries/${id}`, body)
+    const response = await apiClient.put<ApiResponse<Country>>(`/location/countries/${id}`, body)
     return response.data
   }
-  const response = await apiClient.post<ApiResponse<Country>>("/dashboard/countries", body)
+  const response = await apiClient.post<ApiResponse<Country>>("/location/countries", body)
   return response.data
 }
 
 export async function getCities(): Promise<City[]> {
-  const response = await apiClient.get<ApiResponse<City[]>>("/dashboard/cities")
+  const response = await apiClient.get<ApiResponse<City[]>>("/location/cities")
   return response.data.data
 }
 
 export async function getCitiesByCountry(countryId: number): Promise<City[]> {
-  const response = await apiClient.get<ApiResponse<City[]>>(`/dashboard/cities?country_id=${countryId}`)
+  const response = await apiClient.get<ApiResponse<City[]>>(`/location/cities?country_id=${countryId}`)
   return response.data.data
 }
 
@@ -108,10 +108,10 @@ export async function saveCity(
     is_active: isActive,
   }
   if (id) {
-    const response = await apiClient.put<ApiResponse<City>>(`/dashboard/cities/${id}`, body)
+    const response = await apiClient.put<ApiResponse<City>>(`/location/cities/${id}`, body)
     return response.data
   }
-  const response = await apiClient.post<ApiResponse<City>>("/dashboard/cities", body)
+  const response = await apiClient.post<ApiResponse<City>>("/location/cities", body)
   return response.data
 }
 

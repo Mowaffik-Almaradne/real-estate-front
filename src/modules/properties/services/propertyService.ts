@@ -50,7 +50,7 @@ export const propertyService = {
     if (filters.page) params.append("page", String(filters.page))
     if (filters.per_page) params.append("per_page", String(filters.per_page))
 
-    const response = await publicApiClient.get<ApiResponse<PropertiesResponse>>(`/properties?${params}`)
+    const response = await publicApiClient.get<ApiResponse<PropertiesResponse>>(`/public/properties/browse?${params}`)
     return {
       data: response.data.data.data,
       pagination: response.data.data.pagination,
@@ -58,7 +58,7 @@ export const propertyService = {
   },
 
   async getPropertyById(id: number): Promise<Property> {
-    const response = await publicApiClient.get<ApiResponse<Property>>(`/properties/${id}`)
+    const response = await publicApiClient.get<ApiResponse<Property>>(`/public/properties/${id}/details`)
     return response.data.data
   },
 
@@ -81,7 +81,7 @@ export const propertyService = {
 
   async updateProperty(id: number, data: PropertyFormData): Promise<Property> {
     const token = localStorage.getItem("token")
-    const response = await axios.put<ApiResponse<Property>>(
+    const response = await axios.patch<ApiResponse<Property>>(
       `${API_URL}/dashboard/properties/${id}`,
       data,
       {
