@@ -87,15 +87,15 @@ interface PropertyStatistics {
 
 function StatusBadge({ status }: { status: string }) {
   const config: Record<string, { className: string; label: string }> = {
-    approved: { className: "bg-emerald-500 hover:bg-emerald-600", label: "Approved" },
-    pending: { className: "bg-amber-500 hover:bg-amber-600", label: "Pending" },
-    rejected: { className: "bg-red-500 hover:bg-red-600", label: "Rejected" },
-    suspended: { className: "bg-orange-500 hover:bg-orange-600", label: "Suspended" },
-    sold: { className: "bg-blue-500 hover:bg-blue-600", label: "Sold" },
-    archived: { className: "bg-gray-500 hover:bg-gray-600", label: "Archived" },
+    approved: { className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20", label: "Approved" },
+    pending: { className: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 hover:bg-amber-500/20", label: "Pending" },
+    rejected: { className: "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 hover:bg-red-500/20", label: "Rejected" },
+    suspended: { className: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 hover:bg-orange-500/20", label: "Suspended" },
+    sold: { className: "bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20", label: "Sold" },
+    archived: { className: "bg-gray-500/10 text-gray-600 dark:text-gray-400 border border-gray-500/20 hover:bg-gray-500/20", label: "Archived" },
   }
-  const { className, label } = config[status] || { className: "bg-gray-500", label: status }
-  return <Badge className={className}>{label}</Badge>
+  const { className, label } = config[status] || { className: "bg-gray-500/10 text-gray-600 border border-gray-500/20", label: status }
+  return <Badge className={`rounded-lg ${className}`}>{label}</Badge>
 }
 
 function StatusCard({
@@ -109,28 +109,28 @@ function StatusCard({
   isActive: boolean
   onClick: () => void
 }) {
-  const config: Record<string, { label: string; color: string }> = {
-    approved: { label: "Approved", color: "bg-emerald-500" },
-    pending: { label: "Pending", color: "bg-amber-500" },
-    rejected: { label: "Rejected", color: "bg-red-500" },
-    suspended: { label: "Suspended", color: "bg-orange-500" },
-    sold: { label: "Sold", color: "bg-blue-500" },
-    archived: { label: "Archived", color: "bg-gray-500" },
-    all: { label: "All", color: "bg-primary" },
+  const config: Record<string, { label: string; color: string; gradient: string }> = {
+    approved: { label: "Approved", color: "bg-emerald-500", gradient: "from-emerald-500/10 to-emerald-500/5" },
+    pending: { label: "Pending", color: "bg-amber-500", gradient: "from-amber-500/10 to-amber-500/5" },
+    rejected: { label: "Rejected", color: "bg-red-500", gradient: "from-red-500/10 to-red-500/5" },
+    suspended: { label: "Suspended", color: "bg-orange-500", gradient: "from-orange-500/10 to-orange-500/5" },
+    sold: { label: "Sold", color: "bg-primary", gradient: "from-primary/10 to-primary/5" },
+    archived: { label: "Archived", color: "bg-gray-500", gradient: "from-gray-500/10 to-gray-500/5" },
+    all: { label: "All", color: "bg-primary", gradient: "from-primary/10 to-primary/5" },
   }
-  const { label, color } = config[status]
+  const { label, color, gradient } = config[status]
 
   return (
     <button
       onClick={onClick}
-      className={`p-3 rounded-[4px] border transition-all text-left ${
+      className={`p-3 rounded-xl border transition-all duration-200 text-left ${
         isActive
-          ? "border-ring ring-2 ring-ring/20 bg-accent"
-          : "border-border hover:border-ring/50 hover:bg-accent/50"
+          ? "border-primary/30 ring-2 ring-primary/20 bg-gradient-to-br " + gradient
+          : "border-border/50 hover:border-primary/20 hover:bg-accent/50"
       }`}
     >
       <div className="flex items-center gap-2.5">
-        <div className={`size-2.5 rounded-full ${color}`} />
+        <div className={`size-2.5 rounded-full ${color} ${isActive ? "ring-2 ring-offset-2 ring-offset-background ring-current" : ""}`} />
         <span className="text-sm font-medium">{label}</span>
       </div>
       <p className="mt-2 text-xl font-bold">{count}</p>
@@ -142,7 +142,7 @@ function PropertyCard({ property, onDelete, onStatusChange }: { property: Proper
   const router = useRouter()
 
   return (
-    <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
+    <div className="group bg-card rounded-xl border border-border/50 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md hover:border-primary/20 hover:-translate-y-0.5">
       <div
         className="relative h-48 bg-muted cursor-pointer"
         onClick={() => router.push(`/dashboard/properties/${property.id}`)}

@@ -54,6 +54,7 @@ export function useChatRoomsReact() {
         const room = { ...updatedRooms[roomIndex] }
 
         room.last_message = {
+          id: lastMessage.id,
           body: lastMessage.body,
           type: lastMessage.type,
           sender_id: lastMessage.sender.id,

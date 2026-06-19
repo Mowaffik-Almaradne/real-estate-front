@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useCallback, useRef } from "react"
+import { useEffect, useRef } from "react"
 import { getEcho } from "@/lib/echo"
 import type { MessageDto, ParticipantDto } from "@/types/chat"
 import { CHAT_EVENTS } from "@/types/websocket-events"
@@ -45,7 +45,6 @@ export function useChatChannel({
 
     privateChannel
       .listen(CHAT_EVENTS.MESSAGE_SENT, (payload: any) => {
-        console.log('[useChatChannel] MESSAGE_SENT payload:', payload, 'channel:', channelName)
         handlersRef.current.onMessageReceived({
           id: payload.message_id,
           room_id: payload.room_id,
@@ -56,8 +55,10 @@ export function useChatChannel({
           created_at: payload.created_at,
         })
       })
+      .listen(CHAT_EVENTS.MESSAGE_DELETED, (payload: any) => {
+        handlersRef.current.onMessageDeleted(payload.message_id)
+      })
       .listen(CHAT_EVENTS.USER_TYPING, (payload: any) => {
-        console.log('[useChatChannel] USER_TYPING payload:', payload)
         handlersRef.current.onUserTyping({ id: payload.user_id, name: payload.user_name })
       })
 
@@ -65,7 +66,6 @@ export function useChatChannel({
     roomIdRef.current = roomId
 
     return () => {
-      console.log('[useChatChannel] Leaving channel:', channelName)
       echo.leave(channelName)
       roomIdRef.current = null
       echoRef.current = null

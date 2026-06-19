@@ -5,10 +5,12 @@ import { RecentActivity } from "components/dashboard/RecentActivity";
 export default function Home() {
   return (
     <DashboardLayout title="Dashboard">
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Welcome back</h2>
-          <p className="text-muted-foreground">
+      <div className="space-y-8">
+        <div className="stagger-children-sm">
+          <h2 className="text-2xl font-bold tracking-tight">
+            Welcome back <span className="text-gradient">!</span>
+          </h2>
+          <p className="text-muted-foreground mt-1">
             Here&apos;s an overview of your real estate business.
           </p>
         </div>

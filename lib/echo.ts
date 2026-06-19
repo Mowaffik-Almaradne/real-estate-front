@@ -90,3 +90,8 @@ export function destroyEcho(): void {
     echoInstance = null
   }
 }
+
+export function getPusherConnection(echo: any): any {
+  if (!echo) return null
+  return echo.pusher ?? null
+}

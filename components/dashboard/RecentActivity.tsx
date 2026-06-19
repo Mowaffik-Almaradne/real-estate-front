@@ -76,6 +76,13 @@ const typeIcons = {
   approval: CheckCircle,
 }
 
+const typeGradients = {
+  property: "gradient-primary",
+  lead: "gradient-success",
+  report: "gradient-warning",
+  approval: "gradient-destructive",
+}
+
 const statusConfig = {
   completed: {
     label: "Completed",
@@ -96,26 +103,27 @@ const statusConfig = {
 
 export function RecentActivity() {
   return (
-    <Card className="bg-card">
-      <CardHeader className="p-4">
-        <CardTitle className="text-base font-semibold tracking-tight">Recent Activity</CardTitle>
+    <Card className="bg-card border-border/50 overflow-hidden">
+      <CardHeader className="p-5 border-b border-border/50">
+        <CardTitle className="text-base font-bold tracking-tight">Recent Activity</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="divide-y divide-border pb-4">
+        <div className="divide-y divide-border/50">
           {activities.map((activity) => {
             const Icon = typeIcons[activity.type]
             const status = statusConfig[activity.status]
+            const gradient = typeGradients[activity.type]
 
             return (
               <div
                 key={activity.id}
-                className="group flex items-start gap-4 px-4 py-4 transition-all duration-200 ease-in-out hover:bg-accent"
+                className="group flex items-start gap-4 px-5 py-4 transition-all duration-200 ease-in-out hover:bg-accent/40"
               >
-                <div className="flex shrink-0 items-center justify-center rounded-md bg-primary/10 dark:bg-primary/20 size-9">
-                  <Icon className="size-[16px] text-primary" />
+                <div className={`flex shrink-0 items-center justify-center rounded-xl ${gradient} shadow-sm size-10`}>
+                  <Icon className="size-[16px] text-white" />
                 </div>
                 <div className="flex-1 min-w-0 space-y-1">
-                  <p className="text-sm font-medium leading-tight text-foreground">
+                  <p className="text-sm font-semibold leading-tight text-foreground">
                     {activity.title}
                   </p>
                   <p className="text-sm text-muted-foreground truncate">

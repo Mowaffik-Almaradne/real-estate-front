@@ -27,25 +27,25 @@ export function Header({ onMenuClick, title = "Dashboard" }: HeaderProps) {
   const logout = auth?.logout
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-border bg-background/80 backdrop-blur-sm px-4 lg:px-5">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border/60 glass px-5 lg:px-6">
       <Button
         variant="ghost"
         size="icon-sm"
-        className="lg:hidden hover:bg-muted transition-colors"
+        className="lg:hidden hover:bg-accent transition-colors"
         onClick={onMenuClick}
       >
         <Menu className="size-[18px]" />
       </Button>
 
-      <h1 className="font-heading text-base font-semibold tracking-tight lg:text-lg">
+      <h1 className="font-heading text-lg font-bold tracking-tight">
         {title}
       </h1>
 
-      <div className="ml-auto flex items-center gap-2">
+      <div className="ml-auto flex items-center gap-1.5">
         <Button
           variant="ghost"
           size="icon-sm"
-          className="text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+          className="text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
         >
           <Search className="size-[18px]" />
         </Button>
@@ -55,21 +55,21 @@ export function Header({ onMenuClick, title = "Dashboard" }: HeaderProps) {
         <Button
           variant="ghost"
           size="icon-sm"
-          className="relative text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+          className="relative text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
         >
           <Bell className="size-[18px]" />
-          <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-primary" />
+          <span className="absolute top-1.5 right-1.5 size-2 rounded-full gradient-primary ring-2 ring-background" />
         </Button>
         
         {!user ? (
           <Link href="/login">
-            <Button size="sm" className="rounded-[4px]">Login</Button>
+            <Button size="sm" className="rounded-lg">Login</Button>
           </Link>
         ) : (
           <Button
             variant="ghost"
             size="icon-sm"
-            className="text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+            className="text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
             onClick={logout}
           >
             <LogOut className="size-4" />

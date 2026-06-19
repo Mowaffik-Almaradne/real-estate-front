@@ -85,29 +85,30 @@ function PropertyCard({ property, canEdit }: { property: Property; canEdit: bool
   }
 
   return (
-    <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
+    <div className="group bg-card rounded-xl border border-border/50 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md hover:border-primary/20 hover:-translate-y-0.5">
       <div
-        className="relative h-48 bg-muted cursor-pointer"
+        className="relative h-48 bg-muted cursor-pointer overflow-hidden"
         onClick={() => router.push(`/properties/${property.id}`)}
       >
         {property.main_image_thumb || property.main_image ? (
           <img
             src={property.main_image_thumb || property.main_image}
             alt={property.name}
-            className="object-cover w-full h-full"
+            className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground">
             <Building className="size-12" />
           </div>
         )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
         <div className="absolute top-2 right-2">
-          <Badge>
+          <Badge className="rounded-lg">
             {property.status === "approved" ? "Approved" : property.status === "pending" ? "Pending" : property.status}
           </Badge>
         </div>
         <div className="absolute bottom-2 left-2">
-          <span className="inline-flex items-center rounded bg-background/90 px-2 py-0.5 text-xs font-medium text-foreground">
+          <span className="inline-flex items-center rounded-lg bg-white/90 dark:bg-background/90 backdrop-blur-sm px-2.5 py-1 text-xs font-medium text-foreground shadow-sm">
             {property.type_of_contract === "rent" ? "For Rent" : "For Sale"}
           </span>
         </div>
@@ -116,13 +117,13 @@ function PropertyCard({ property, canEdit }: { property: Property; canEdit: bool
       <div className="p-4">
         <div className="mb-2">
           <h3 className="font-semibold text-lg truncate">{property.name}</h3>
-          <span className="font-bold text-foreground">
+          <span className="font-bold text-gradient text-lg">
             {property.formatted_price}
           </span>
         </div>
 
         <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
-          <MapPin className="size-4" />
+          <MapPin className="size-4 text-primary" />
           <span className="truncate">
             {property.city?.name}, {property.country?.name}
           </span>
@@ -143,7 +144,7 @@ function PropertyCard({ property, canEdit }: { property: Property; canEdit: bool
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-3 border-t border-border">
+        <div className="flex items-center justify-between pt-3 border-t border-border/50">
           <div className="text-xs text-muted-foreground">
             <span className="font-medium">{property.publisher?.name}</span>
           </div>
@@ -151,6 +152,7 @@ function PropertyCard({ property, canEdit }: { property: Property; canEdit: bool
             <Button
               variant="ghost"
               size="icon-sm"
+              className="rounded-lg"
               onClick={(e) => {
                 e.stopPropagation()
                 router.push(`/properties/${property.id}`)
@@ -163,6 +165,7 @@ function PropertyCard({ property, canEdit }: { property: Property; canEdit: bool
                 <Button
                   variant="ghost"
                   size="icon-sm"
+                  className="rounded-lg"
                   onClick={(e) => {
                     e.stopPropagation()
                     handleStatusChange(property.id)
@@ -178,6 +181,7 @@ function PropertyCard({ property, canEdit }: { property: Property; canEdit: bool
                 <Button
                   variant="ghost"
                   size="icon-sm"
+                  className="rounded-lg"
                   onClick={(e) => {
                     e.stopPropagation()
                     router.push(`/properties/${property.id}/edit`)
@@ -297,8 +301,13 @@ export default function PropertiesPage() {
     <DashboardLayout title="Properties">
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-foreground900">Properties</h1>
-          <Button onClick={() => router.push("/properties/create")}>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              Properties
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">Browse and manage property listings</p>
+          </div>
+          <Button onClick={() => router.push("/properties/create")} className="rounded-lg">
             <Plus className="h-4 w-4 mr-2" />
             Create Property
           </Button>
@@ -312,7 +321,7 @@ export default function PropertiesPage() {
           onRetry={() => refreshFeatured()}
         />
 
-        <h2 className="text-lg font-semibold text-foreground900 mb-4">All Properties</h2>
+        <h2 className="text-lg font-semibold text-foreground mb-4">All Properties</h2>
 
         {isLoading && data.length === 0 ? (
           <PropertyCarousel

@@ -1,4 +1,4 @@
-export type ChatRoomType = "private" | "group";
+export type ChatRoomType = "direct" | "group";
 
 export type MessageType = "text" | "image" | "file";
 
@@ -34,6 +34,7 @@ export interface LastMessageDto {
   readonly id: number;
   readonly body: string;
   readonly type: MessageType;
+  readonly sender_id: number;
   readonly created_at: string;
 }
 

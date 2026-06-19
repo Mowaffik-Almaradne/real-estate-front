@@ -42,6 +42,7 @@ export const participantSchema = z
 
 export const lastMessageSchema = z
   .object({
+    id: z.number(),
     body: z.string(),
     type: messageTypeEnum,
     sender_id: z.number(),
@@ -52,18 +53,20 @@ export const lastMessageSchema = z
 export const chatRoomResponseSchema = z
   .object({
     id: z.number(),
-    name: z.string().optional(),
+    name: z.string().nullable().optional(),
     type: chatRoomTypeEnum,
+    property_id: z.number().optional(),
     participants: z.array(participantSchema),
     last_message: lastMessageSchema.optional(),
     unread_count: z.number(),
     created_at: z.string(),
+    updated_at: z.string().optional(),
   })
   .strict()
 
 export const messageResponseSchema = z
   .object({
-    id: z.string(),
+    id: z.number(),
     room_id: z.number(),
     body: z.string(),
     type: messageTypeEnum,

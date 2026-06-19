@@ -1,6 +1,7 @@
 export const CHAT_EVENTS = {
-  MESSAGE_SENT: ".message.sent",
-  USER_TYPING: ".user.typing",
+  MESSAGE_SENT: "MessageSent",
+  MESSAGE_DELETED: "MessageDeleted",
+  USER_TYPING: "UserTyping",
 } as const
 
 export const USER_EVENTS = {

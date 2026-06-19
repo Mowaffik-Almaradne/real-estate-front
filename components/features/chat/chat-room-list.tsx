@@ -1,6 +1,7 @@
 "use client"
 
 import { ChatRoomDto } from "@/types/chat"
+import { getCurrentUserId } from "@/lib/auth-utils"
 
 interface ChatRoomListProps {
   rooms: ChatRoomDto[]
@@ -66,19 +67,6 @@ function getLastMessagePreview(room: ChatRoomDto): string {
   const prefix = room.last_message.type === "image" ? "📷 Image" : room.last_message.type === "file" ? "📎 File" : ""
 
   return prefix ? `${prefix}: ${room.last_message.body}` : room.last_message.body
-}
-
-function getCurrentUserId(): number {
-  if (typeof window === "undefined") return 0
-  const token = localStorage.getItem("token")
-  if (!token) return 0
-
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]))
-    return payload.sub || payload.user_id || 0
-  } catch {
-    return 0
-  }
 }
 
 export function ChatRoomList({

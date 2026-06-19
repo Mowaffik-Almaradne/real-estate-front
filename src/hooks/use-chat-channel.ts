@@ -52,6 +52,9 @@ export function useChatChannel({
           created_at: payload.created_at,
         })
       })
+      .listen(CHAT_EVENTS.MESSAGE_DELETED, (payload: any) => {
+        onMessageDeleted(payload.message_id)
+      })
       .listen(CHAT_EVENTS.USER_TYPING, (payload: any) => {
         onUserTyping({ id: payload.user_id, name: payload.user_name })
       })

@@ -9,6 +9,7 @@ export interface ParticipantDto {
 }
 
 export interface LastMessageDto {
+  readonly id: number;
   readonly body: string;
   readonly type: MessageType;
   readonly sender_id: number;
@@ -17,12 +18,42 @@ export interface LastMessageDto {
 
 export interface ChatRoomDto {
   readonly id: number;
-  readonly name?: string;
   readonly type: ChatRoomType;
+  readonly name?: string | null;
+  readonly property_id?: number;
+  readonly property?: PropertyDto;
   readonly participants: readonly ParticipantDto[];
   readonly last_message?: LastMessageDto;
   readonly unread_count: number;
   readonly created_at: string;
+  readonly updated_at?: string;
+}
+
+export interface PropertyDto {
+  readonly id: number;
+  readonly title: string;
+}
+
+export interface Sender {
+  readonly id: number;
+  readonly name: string;
+  readonly avatar_url?: string;
+}
+
+export interface PusherMessageEvent {
+  readonly message_id: number;
+  readonly room_id: number;
+  readonly sender: Sender;
+  readonly body: string;
+  readonly type: MessageType;
+  readonly attachment?: MessageAttachment;
+  readonly created_at: string;
+}
+
+export interface MessageAttachment {
+  readonly url: string;
+  readonly name: string;
+  readonly type: string;
 }
 
 export interface MessageDto {

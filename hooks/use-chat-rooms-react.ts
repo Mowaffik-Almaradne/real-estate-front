@@ -1,102 +1,85 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import type { ChatRoomDto, MessageDto, LastMessageDto, SendMessageRequest } from "@/types/chat"
 import { chatService, ChatServiceError } from "@/services/chat-service"
+import type { ChatRoomDto, MessageDto, CreateChatRoomRequest } from "@/types/chat"
+
+interface ChatRoomsState {
+  rooms: ChatRoomDto[]
+  isLoading: boolean
+  error: string | null
+}
 
 export function useChatRoomsReact() {
-  const [rooms, setRooms] = useState<ChatRoomDto[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [state, setState] = useState<ChatRoomsState>({
+    rooms: [],
+    isLoading: false,
+    error: null,
+  })
 
   const fetchRooms = useCallback(async (): Promise<void> => {
-    setLoading(true)
-    setError(null)
+    setState((prev) => ({ ...prev, isLoading: true, error: null }))
     try {
-      const data = await chatService.getRooms()
-      setRooms(data)
-    } catch (e) {
-      if (e instanceof ChatServiceError) {
-        setError(e.message)
-      } else {
-        setError("Failed to fetch chat rooms")
-      }
-    } finally {
-      setLoading(false)
+      const rooms = await chatService.getRooms()
+      setState((prev) => ({ ...prev, rooms, isLoading: false }))
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to fetch rooms"
+      setState((prev) => ({ ...prev, isLoading: false, error: message }))
     }
   }, [])
 
-  const addMessage = useCallback(
-    async (
-      roomId: number,
-      message: SendMessageRequest
-    ): Promise<MessageDto | null> => {
+  const createRoom = useCallback(
+    async (request: CreateChatRoomRequest): Promise<ChatRoomDto | null> => {
       try {
-        const sentMessage = await chatService.sendMessage(roomId, message)
-
-        setRooms((prev) => {
-          const roomIndex = prev.findIndex((r) => r.id === roomId)
-          if (roomIndex === -1) return prev
-
-          const updatedRoom = { ...prev[roomIndex] }
-          updatedRoom.last_message = {
-            body: sentMessage.body,
-            type: sentMessage.type,
-            sender_id: sentMessage.sender.id,
-            created_at: sentMessage.created_at,
-          }
-          updatedRoom.unread_count += 1
-
-          const newRooms = [...prev]
-          newRooms.splice(roomIndex, 1)
-          newRooms.unshift(updatedRoom)
-          return newRooms
-        })
-
-        return sentMessage
-      } catch (e) {
-        if (e instanceof ChatServiceError) {
-          setError(e.message)
-        } else {
-          setError("Failed to send message")
-        }
+        const room = await chatService.createRoom(request)
+        setState((prev) => ({
+          ...prev,
+          rooms: [room, ...prev.rooms],
+        }))
+        return room
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to create room"
+        setState((prev) => ({ ...prev, error: message }))
         return null
       }
     },
     []
   )
 
-  const updateUnreadCount = useCallback((roomId: number, count: number): void => {
-    setRooms((prev) =>
-      prev.map((r) => (r.id === roomId ? { ...r, unread_count: count } : r))
-    )
-  }, [])
-
-  const markRoomAsRead = useCallback((roomId: number): void => {
-    setRooms((prev) =>
-      prev.map((r) => (r.id === roomId ? { ...r, unread_count: 0 } : r))
-    )
-  }, [])
-
   const moveRoomToTop = useCallback(
-    (roomId: number, lastMessage: any): void => {
-      setRooms((prev) => {
-        const roomIndex = prev.findIndex((r) => r.id === roomId)
+    (roomId: number, lastMessage: MessageDto): void => {
+      setState((prev) => {
+        const roomIndex = prev.rooms.findIndex((r) => r.id === roomId)
         if (roomIndex === -1) return prev
 
-        const newRooms = [...prev]
-        const [room] = newRooms.splice(roomIndex, 1)
-        newRooms.unshift({
-          ...room,
-          last_message: {
-            body: lastMessage.body,
-            type: lastMessage.type,
-            sender_id: lastMessage.sender?.id || 0,
-            created_at: lastMessage.created_at,
-          },
-        })
-        return newRooms
+        const updatedRooms = [...prev.rooms]
+        const room = { ...updatedRooms[roomIndex] }
+
+        room.last_message = {
+          id: lastMessage.id,
+          body: lastMessage.body,
+          type: lastMessage.type,
+          sender_id: lastMessage.sender.id,
+          created_at: lastMessage.created_at,
+        }
+
+        updatedRooms.splice(roomIndex, 1)
+        updatedRooms.unshift(room)
+
+        return { ...prev, rooms: updatedRooms }
       })
+    },
+    []
+  )
+
+  const updateRoomUnreadCount = useCallback(
+    (roomId: number, count: number): void => {
+      setState((prev) => ({
+        ...prev,
+        rooms: prev.rooms.map((r) =>
+          r.id === roomId ? { ...r, unread_count: count } : r
+        ),
+      }))
     },
     []
   )
@@ -106,13 +89,12 @@ export function useChatRoomsReact() {
   }, [fetchRooms])
 
   return {
-    rooms,
-    loading,
-    error,
-    addMessage,
-    updateUnreadCount,
-    markRoomAsRead,
+    rooms: state.rooms,
+    isLoading: state.isLoading,
+    error: state.error,
+    createRoom,
     moveRoomToTop,
-    fetchRooms,
+    updateRoomUnreadCount,
+    refreshRooms: fetchRooms,
   }
 }

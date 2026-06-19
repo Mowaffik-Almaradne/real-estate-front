@@ -14,21 +14,22 @@ interface StatCardProps {
   change: string
   changeType: "positive" | "negative"
   icon: React.ComponentType<{ className?: string }>
+  gradient: string
 }
 
-function StatCard({ title, value, change, changeType, icon: Icon }: StatCardProps) {
+function StatCard({ title, value, change, changeType, icon: Icon, gradient }: StatCardProps) {
   return (
-    <Card className="shadow-sm bg-card transition-all duration-200 ease-in-out hover:scale-[1.01]">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex size-10 items-center justify-center rounded-md bg-primary/10 dark:bg-primary/20">
-            <Icon className="size-4 text-primary" />
+    <Card className="group relative overflow-hidden border-border/50 bg-card transition-all duration-300 ease-out hover:shadow-lg hover:shadow-primary/5 hover:border-primary/20 hover:-translate-y-0.5">
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between">
+          <div className={`flex size-11 items-center justify-center rounded-xl ${gradient} shadow-sm`}>
+            <Icon className="size-5 text-white" />
           </div>
           <div
-            className={`flex items-center gap-1 text-xs font-medium ${
+            className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${
               changeType === "positive"
-                ? "text-success"
-                : "text-destructive"
+                ? "bg-success/10 text-success"
+                : "bg-destructive/10 text-destructive"
             }`}
           >
             {changeType === "positive" ? (
@@ -40,7 +41,7 @@ function StatCard({ title, value, change, changeType, icon: Icon }: StatCardProp
           </div>
         </div>
         <div className="mt-4">
-          <p className="text-xl font-semibold tracking-tight">{value}</p>
+          <p className="text-2xl font-bold tracking-tight">{value}</p>
           <p className="mt-1 text-sm text-muted-foreground">{title}</p>
         </div>
       </CardContent>
@@ -55,6 +56,7 @@ const stats = [
     change: "+12.5%",
     changeType: "positive" as const,
     icon: Building2,
+    gradient: "gradient-primary",
   },
   {
     title: "Active Listings",
@@ -62,6 +64,7 @@ const stats = [
     change: "+8.2%",
     changeType: "positive" as const,
     icon: TrendingUp,
+    gradient: "gradient-success",
   },
   {
     title: "New Leads",
@@ -69,6 +72,7 @@ const stats = [
     change: "+23.1%",
     changeType: "positive" as const,
     icon: Users,
+    gradient: "gradient-warning",
   },
   {
     title: "Revenue",
@@ -76,12 +80,13 @@ const stats = [
     change: "-2.3%",
     changeType: "negative" as const,
     icon: DollarSign,
+    gradient: "gradient-destructive",
   },
 ]
 
 export function StatsCards() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 stagger-children pb-2">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 stagger-children">
       {stats.map((stat) => (
         <StatCard key={stat.title} {...stat} />
       ))}

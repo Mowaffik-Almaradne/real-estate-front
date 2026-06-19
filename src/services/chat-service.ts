@@ -19,6 +19,7 @@ export class ChatServiceError extends Error {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 function getHeaders(): HeadersInit {
+  if (typeof window === "undefined") return { "Content-Type": "application/json" }
   const token = localStorage.getItem("token");
   return {
     "Content-Type": "application/json",
@@ -33,7 +34,10 @@ async function handleResponse<T>(response: Response): Promise<T> {
     throw new ChatServiceError(response.status, message);
   }
   const json = await response.json();
-  return json.data as T;
+  if (json && typeof json === "object" && "data" in json) {
+    return json.data as T;
+  }
+  return json as T;
 }
 
 export const chatService = {
