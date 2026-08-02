@@ -2,7 +2,7 @@ import { z } from "zod"
 
 export const messageTypeEnum = z.enum(["text", "image", "file"])
 
-export const chatRoomTypeEnum = z.enum(["direct", "group"])
+export const chatRoomTypeEnum = z.enum(["private", "group"])
 
 export const sendMessageSchema = z
   .object({
@@ -19,14 +19,9 @@ export type SendMessageInput = z.infer<typeof sendMessageSchema>
 
 export const createRoomSchema = z
   .object({
-    name: z
-      .string()
-      .max(100, "Room name must not exceed 100 characters")
-      .optional(),
     type: chatRoomTypeEnum,
-    participant_ids: z
-      .array(z.number())
-      .min(1, "At least one participant is required"),
+    recipient_id: z.number().int().positive().optional(),
+    property_id: z.number().int().positive().optional(),
   })
   .strict()
 

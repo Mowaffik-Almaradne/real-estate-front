@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useCallback, useRef } from "react"
+import { useEffect, useCallback } from "react"
 import { getEcho } from "@/lib/echo"
 import type { MessageDto } from "@/types/chat"
 import type { NotificationDto } from "@/types/notification"
@@ -19,9 +19,6 @@ export function useUserChannel({
   onUnreadCountUpdated,
   onNewChatMessage,
 }: UseUserChannelProps): void {
-  const echoRef = useRef<any>(null)
-  const userIdRef = useRef<number | null>(null)
-
   const handleNewNotification = useCallback(
     (payload: { notification: NotificationDto }) => {
       onNewNotification(payload.notification)
@@ -51,10 +48,6 @@ export function useUserChannel({
       return
     }
 
-    if (userIdRef.current !== null && userIdRef.current !== userId) {
-      echo.leave(`user.${userIdRef.current}`)
-    }
-
     const privateChannel = echo.private(`user.${userId}`)
 
     privateChannel
@@ -65,13 +58,8 @@ export function useUserChannel({
       privateChannel.listen(CHAT_EVENTS.MESSAGE_SENT, handleChatMessageSent)
     }
 
-    echoRef.current = echo
-    userIdRef.current = userId
-
     return () => {
       echo.leave(`user.${userId}`)
-      userIdRef.current = null
-      echoRef.current = null
     }
   }, [
     userId,

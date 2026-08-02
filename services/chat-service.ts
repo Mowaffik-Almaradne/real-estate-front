@@ -1,4 +1,5 @@
-import {
+import { apiClient, getApiData, getApiPagination, ApiClientError, type ApiResponse } from "@/lib/apiClient"
+import type {
   ChatRoomDto,
   CreateChatRoomRequest,
   MessageDto,
@@ -6,56 +7,17 @@ import {
   SendMessageRequest,
 } from "@/types/chat"
 
-export class ChatServiceError extends Error {
-  readonly status: number
-
-  constructor(status: number, message: string) {
-    super(message)
-    this.name = "ChatServiceError"
-    this.status = status
-  }
-}
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
-
-function getHeaders(): HeadersInit {
-  if (typeof window === "undefined") return { "Content-Type": "application/json" }
-  const token = localStorage.getItem("token")
-  return {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  }
-}
-
-async function handleResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}))
-    const message = errorData?.message || `HTTP error ${response.status}`
-    throw new ChatServiceError(response.status, message)
-  }
-  const json = await response.json()
-  if (json && typeof json === "object" && "data" in json) {
-    return json.data as T
-  }
-  return json as T
-}
+export { ApiClientError as ChatServiceError }
 
 export const chatService = {
   async getRooms(): Promise<ChatRoomDto[]> {
-    const response = await fetch(`${API_BASE_URL}/chat/rooms`, {
-      method: "GET",
-      headers: getHeaders(),
-    })
-    return handleResponse<ChatRoomDto[]>(response)
+    const response = await apiClient.get<ApiResponse<ChatRoomDto[]>>("/chat/rooms")
+    return getApiData(response)
   },
 
   async createRoom(request: CreateChatRoomRequest): Promise<ChatRoomDto> {
-    const response = await fetch(`${API_BASE_URL}/chat/rooms`, {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify(request),
-    })
-    return handleResponse<ChatRoomDto>(response)
+    const response = await apiClient.post<ApiResponse<ChatRoomDto>>("/chat/rooms", request)
+    return getApiData(response)
   },
 
   async getMessages(
@@ -63,62 +25,34 @@ export const chatService = {
     page: number = 1,
     perPage: number = 20
   ): Promise<PaginatedMessages> {
-    const params = new URLSearchParams({
-      page: String(page),
-      per_page: String(perPage),
-    })
-    const response = await fetch(
-      `${API_BASE_URL}/chat/rooms/${roomId}/messages?${params}`,
-      {
-        method: "GET",
-        headers: getHeaders(),
-      }
+    const response = await apiClient.get<ApiResponse<MessageDto[]>>(
+      `/chat/rooms/${roomId}/messages`,
+      { params: { page, per_page: perPage } }
     )
-    return handleResponse<PaginatedMessages>(response)
+    const pagination = getApiPagination(response)
+    return {
+      data: getApiData(response),
+      meta: {
+        current_page: pagination?.current_page ?? page,
+        total: pagination?.total ?? 0,
+        per_page: pagination?.per_page ?? perPage,
+      },
+    }
   },
 
-  async sendMessage(
-    roomId: number,
-    request: SendMessageRequest
-  ): Promise<MessageDto> {
-    const response = await fetch(
-      `${API_BASE_URL}/chat/rooms/${roomId}/messages`,
-      {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify(request),
-      }
+  async sendMessage(roomId: number, request: SendMessageRequest): Promise<MessageDto> {
+    const response = await apiClient.post<ApiResponse<MessageDto>>(
+      `/chat/rooms/${roomId}/messages`,
+      request
     )
-    return handleResponse<MessageDto>(response)
+    return getApiData(response)
   },
 
   async sendTyping(roomId: number): Promise<void> {
-    const response = await fetch(
-      `${API_BASE_URL}/chat/rooms/${roomId}/typing`,
-      {
-        method: "POST",
-        headers: getHeaders(),
-      }
-    )
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      const message = errorData?.message || `HTTP error ${response.status}`
-      throw new ChatServiceError(response.status, message)
-    }
+    await apiClient.post(`/chat/rooms/${roomId}/typing`)
   },
 
-  async deleteMessage(roomId: number, messageId: string): Promise<void> {
-    const response = await fetch(
-      `${API_BASE_URL}/chat/rooms/${roomId}/messages/${messageId}`,
-      {
-        method: "DELETE",
-        headers: getHeaders(),
-      }
-    )
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      const message = errorData?.message || `HTTP error ${response.status}`
-      throw new ChatServiceError(response.status, message)
-    }
+  async deleteMessage(roomId: number, messageId: number): Promise<void> {
+    await apiClient.delete(`/chat/rooms/${roomId}/messages/${messageId}`)
   },
 }

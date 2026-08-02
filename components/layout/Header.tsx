@@ -12,19 +12,7 @@ interface HeaderProps {
 }
 
 export function Header({ onMenuClick, title = "Dashboard" }: HeaderProps) {
-  let auth: { user: null; logout: () => void } | { user: any; token?: string; logout: () => void } = { user: null, logout: () => {} }
-  
-  try {
-    const result = useAuth()
-    if (result) {
-      auth = result as any
-    }
-  } catch {
-    console.log("Auth not available yet")
-  }
-
-  const user = auth?.user
-  const logout = auth?.logout
+  const { user, logout } = useAuth()
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border/60 glass px-5 lg:px-6">

@@ -41,6 +41,8 @@ import {
 
 import { propertyService } from "src/modules/properties/services/propertyService"
 import type { Property } from "src/modules/properties/types"
+import { getStoredUser } from "@/lib/auth"
+import { chatService } from "@/services/chat-service"
 import { DashboardLayout } from "components/layout/DashboardLayout"
 
 interface User {
@@ -61,10 +63,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
   const [creatingChat, setCreatingChat] = useState(false)
 
   useEffect(() => {
-    const userStr = localStorage.getItem("user")
-    if (userStr) {
-      setCurrentUser(JSON.parse(userStr))
-    }
+    setCurrentUser(getStoredUser())
   }, [])
 
   useEffect(() => {
@@ -86,14 +85,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
   const handleDelete = async () => {
     try {
       setDeleting(true)
-      const token = localStorage.getItem("token")
-      await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/dashboard/properties/${id}`,
-        {
-          method: "DELETE",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
-      )
+      await propertyService.deleteProperty(Number(id))
       toast.success("Property deleted successfully")
       router.push("/properties")
     } catch (error) {
@@ -117,27 +109,10 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
 
     try {
       setCreatingChat(true)
-      const token = localStorage.getItem("token")
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/chat/rooms`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-          body: JSON.stringify({
-            type: "property",
-            property_id: property.id,
-          }),
-        }
-      )
-
-      if (!response.ok) {
-        throw new Error("Failed to create chat")
-      }
-
-      const chatRoom = await response.json()
+      const chatRoom = await chatService.createRoom({
+        type: "group",
+        property_id: property.id,
+      })
       toast.success("Chat created successfully")
       router.push(`/chat?room=${chatRoom.id}`)
     } catch (error) {

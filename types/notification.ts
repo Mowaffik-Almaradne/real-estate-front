@@ -20,10 +20,13 @@ export function getNotificationCategory(type: string): NotificationCategory {
 export interface NotificationDto {
   readonly id: string
   readonly type: string
-  readonly title: string
-  readonly message: string
+  readonly type_label?: string
+  readonly title: string | null
+  readonly body?: string | null
+  readonly message?: string | null
   readonly data: Record<string, unknown> | null
   readonly read_at: string | null
+  readonly is_read?: boolean
   readonly created_at: string
 }
 

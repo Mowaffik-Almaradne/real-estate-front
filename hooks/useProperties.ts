@@ -1,12 +1,12 @@
 "use client"
 
-import axios from "axios"
 import useSWR from "swr"
+import { apiClient } from "@/lib/apiClient"
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
 const fetcher = async (url: string) => {
-  const response = await axios.get(url)
+  const response = await apiClient.get(url)
   return response.data
 }
 

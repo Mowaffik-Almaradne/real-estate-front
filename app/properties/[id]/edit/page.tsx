@@ -29,6 +29,7 @@ import {
 
 import type { PropertyType, TypeOfContract } from "src/modules/properties/types"
 import { getCountries, getCitiesByCountry, type Country, type City } from "lib/api"
+import { propertyService } from "src/modules/properties/services/propertyService"
 
 const propertySchema = z.object({
   name: z.string().min(1, "Name is required").max(255, "Name is too long"),
@@ -129,19 +130,7 @@ export default function PropertyEditPage({ params }: { params: Promise<{ id: str
   const fetchProperty = async () => {
     try {
       setLoading(true)
-      const token = localStorage.getItem("token")
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/public/properties/${id}/details`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
-      )
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch property")
-      }
-
-      const property = (await response.json()).data
+      const property = await propertyService.getPropertyById(Number(id))
 
       setValue("name", property.name)
       setValue("description", property.description)
@@ -171,35 +160,20 @@ export default function PropertyEditPage({ params }: { params: Promise<{ id: str
     try {
       setSaving(true)
 
-      const token = localStorage.getItem("token")
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/dashboard/properties/${id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({
-            name: data.name,
-            description: data.description,
-            country_id: data.country_id,
-            city_id: data.city_id,
-            property_type: data.property_type,
-            type_of_contract: data.type_of_contract,
-            rooms: data.rooms,
-            bathrooms: data.bathrooms,
-            area: data.area,
-            detailed_info: data.detailed_info || undefined,
-            price: data.price,
-            currency: data.currency || "USD",
-          }),
-        }
-      )
-
-      if (!response.ok) {
-        throw new Error("Failed to update property")
-      }
+      await propertyService.updateProperty(Number(id), {
+        name: data.name,
+        description: data.description,
+        country_id: data.country_id,
+        city_id: data.city_id,
+        property_type: data.property_type as PropertyType,
+        type_of_contract: data.type_of_contract as TypeOfContract,
+        rooms: data.rooms,
+        bathrooms: data.bathrooms,
+        area: data.area,
+        detailed_info: data.detailed_info || undefined,
+        price: data.price,
+        currency: data.currency || "USD",
+      })
 
       toast.success("Property updated successfully")
       router.push(`/properties/${id}`)

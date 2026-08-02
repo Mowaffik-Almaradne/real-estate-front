@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useCallback,
   type ReactNode,
 } from "react"
 import { useNotificationsReact } from "@/hooks/use-notifications-react"
@@ -17,14 +18,14 @@ import type { MessageDto } from "@/types/chat"
 interface RealtimeContextValue {
   notifications: ReturnType<typeof useNotificationsReact>
   chatRooms: ReturnType<typeof useChatRoomsReact>
-  currentUserId: number
+  currentUserId: number | null
 }
 
 const RealtimeContext = createContext<RealtimeContextValue | null>(null)
 
 interface RealtimeProviderProps {
   children: ReactNode
-  currentUserId: number
+  currentUserId: number | null
 }
 
 export function RealtimeProvider({
@@ -34,17 +35,17 @@ export function RealtimeProvider({
   const notifications = useNotificationsReact()
   const chatRooms = useChatRoomsReact()
 
-  const handleNewNotification = (notification: NotificationDto): void => {
+  const handleNewNotification = useCallback((notification: NotificationDto): void => {
     notifications.appendNotification(notification)
-  }
+  }, [notifications.appendNotification])
 
-  const handleUnreadCountUpdated = (count: number): void => {
+  const handleUnreadCountUpdated = useCallback((count: number): void => {
     notifications.updateCount(count)
-  }
+  }, [notifications.updateCount])
 
-  const handleNewChatMessage = (roomId: number, message: MessageDto): void => {
+  const handleNewChatMessage = useCallback((roomId: number, message: MessageDto): void => {
     chatRooms.moveRoomToTop(roomId, message)
-  }
+  }, [chatRooms.moveRoomToTop])
 
   useUserChannel({
     userId: currentUserId,

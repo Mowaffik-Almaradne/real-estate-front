@@ -1,26 +1,17 @@
-import { apiClient, API_URL } from "./apiClient"
+import { apiClient, API_URL, type ApiResponse } from "./apiClient"
 
 export { apiClient } from "./apiClient"
 export { API_URL }
-
-export interface ApiResponse<T> {
-  success: boolean
-  message: string | null
-  data: T
-  pagination?: {
-    total: number
-    per_page: number
-    current_page: number
-    last_page: number
-    from: number
-    to: number
-  }
-}
+export type { ApiResponse }
 
 export interface User {
   id: number
   name: string
   email: string
+  status?: "active" | "inactive"
+  publisher_type?: "individual" | "office" | null
+  is_verified?: boolean
+  roles?: Array<{ id: number; name: string }>
   email_verified_at: string | null
   created_at: string
   updated_at: string

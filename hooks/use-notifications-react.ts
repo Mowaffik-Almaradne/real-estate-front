@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react"
 import { notificationService } from "@/services/notification-service"
 import type { NotificationDto } from "@/types/notification"
 
+const NOTIFICATIONS_PER_PAGE = 20
+
 interface NotificationState {
   notifications: NotificationDto[]
   unreadCount: number
@@ -22,12 +24,11 @@ export function useNotificationsReact() {
   })
 
   const [currentPage, setCurrentPage] = useState(1)
-  const perPage = 20
 
   const fetchNotifications = useCallback(async (): Promise<void> => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }))
     try {
-      const result = await notificationService.getNotifications(1, perPage)
+      const result = await notificationService.getNotifications(1, NOTIFICATIONS_PER_PAGE)
       setState((prev) => ({
         ...prev,
         notifications: result.data,
@@ -56,7 +57,7 @@ export function useNotificationsReact() {
     setState((prev) => ({ ...prev, isLoading: true }))
     try {
       const nextPage = currentPage + 1
-      const result = await notificationService.getNotifications(nextPage, perPage)
+      const result = await notificationService.getNotifications(nextPage, NOTIFICATIONS_PER_PAGE)
       setState((prev) => ({
         ...prev,
         notifications: [...prev.notifications, ...result.data],

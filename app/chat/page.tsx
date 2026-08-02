@@ -150,7 +150,7 @@ function ChatContent() {
   const selectedRoom = rooms.find((r) => r.id === selectedRoomId)
   const currentUserId = getCurrentUserId()
   const roomDisplayName = selectedRoom
-    ? selectedRoom.name || (selectedRoom.type === "direct"
+    ? selectedRoom.name || (selectedRoom.type === "private"
         ? selectedRoom.participants.find((p) => p.id !== currentUserId)?.name || "Unknown"
         : "Group Chat")
     : ""

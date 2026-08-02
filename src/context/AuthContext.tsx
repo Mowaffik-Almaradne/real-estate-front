@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react"
 import { User, login as apiLogin, register as apiRegister } from "@/lib/api"
+import { clearAuthSession, getStoredUser, getAuthToken, setAuthSession } from "@/lib/auth"
 
 interface AuthContextType {
   user: User | null
@@ -25,15 +26,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-const setTokenCookie = (token: string | null) => {
-  if (typeof document === "undefined") return
-  if (token) {
-    document.cookie = `token=${encodeURIComponent(token)}; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=Lax`
-  } else {
-    document.cookie = "token=; Path=/; Max-Age=0; SameSite=Lax"
-  }
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
@@ -41,12 +33,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      const storedToken = localStorage.getItem("token")
-      const storedUser = localStorage.getItem("user")
+      const storedToken = getAuthToken()
+      const storedUser = getStoredUser()
       if (storedToken && storedUser) {
         setToken(storedToken)
-        setUser(JSON.parse(storedUser))
-        setTokenCookie(storedToken)
+        setUser(storedUser)
       }
     } catch {
     } finally {
@@ -56,14 +47,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     const response = await apiLogin(email, password)
-    if (!response.success) {
-      throw new Error(response.message || "Login failed")
-    }
     setUser(response.data.user)
     setToken(response.data.token)
-    localStorage.setItem("token", response.data.token)
-    localStorage.setItem("user", JSON.stringify(response.data.user))
-    setTokenCookie(response.data.token)
+    setAuthSession(response.data.user, response.data.token)
   }
 
   const register = async (
@@ -73,22 +59,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     passwordConfirmation: string
   ) => {
     const response = await apiRegister(name, email, password, passwordConfirmation)
-    if (!response.success) {
-      throw new Error(response.message || "Registration failed")
-    }
     setUser(response.data.user)
     setToken(response.data.token)
-    localStorage.setItem("token", response.data.token)
-    localStorage.setItem("user", JSON.stringify(response.data.user))
-    setTokenCookie(response.data.token)
+    setAuthSession(response.data.user, response.data.token)
   }
 
   const logout = () => {
     setUser(null)
     setToken(null)
-    localStorage.removeItem("token")
-    localStorage.removeItem("user")
-    setTokenCookie(null)
+    clearAuthSession()
     window.location.href = "/login"
   }
 

@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback } from "react"
 import { debounce } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import { Pencil, Trash2, Eye, Search, X, Loader2, MapPin, Bed, Bath, Square, Building } from "lucide-react"
-import axios from "axios"
 import { toast } from "sonner"
+import { apiClient } from "@/lib/apiClient"
 
 import { Button } from "components/ui/button"
 import { Input } from "components/ui/input"
@@ -292,12 +292,8 @@ export default function PropertiesPage() {
 
   const fetchStatistics = useCallback(async () => {
     try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/dashboard/properties/statistics`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
+      const res = await apiClient.get(
+        "/dashboard/properties/statistics"
       )
       setStatistics(res.data.data)
     } catch (error) {
@@ -308,25 +304,23 @@ export default function PropertiesPage() {
   const fetchProperties = useCallback(async () => {
     setLoading(true)
     try {
-      const params = new URLSearchParams()
-      if (debouncedFilters.search) params.append("search", debouncedFilters.search)
-      if (debouncedFilters.status) params.append("status", debouncedFilters.status)
-      if (debouncedFilters.property_type) params.append("property_type", debouncedFilters.property_type)
-      if (debouncedFilters.type_of_contract) params.append("type_of_contract", debouncedFilters.type_of_contract)
-      if (debouncedFilters.country_id) params.append("country_id", debouncedFilters.country_id)
-      if (debouncedFilters.city_id) params.append("city_id", debouncedFilters.city_id)
-      if (debouncedFilters.publisher_id) params.append("publisher_id", debouncedFilters.publisher_id)
-      if (debouncedFilters.rooms) params.append("rooms", debouncedFilters.rooms.replace("+", ""))
-      if (debouncedFilters.bathrooms) params.append("bathrooms", debouncedFilters.bathrooms.replace("+", ""))
-      params.append("page", String(page))
-      params.append("per_page", "15")
+      const params = {
+        search: debouncedFilters.search || undefined,
+        status: debouncedFilters.status || undefined,
+        property_type: debouncedFilters.property_type || undefined,
+        type_of_contract: debouncedFilters.type_of_contract || undefined,
+        country_id: debouncedFilters.country_id || undefined,
+        city_id: debouncedFilters.city_id || undefined,
+        publisher_id: debouncedFilters.publisher_id || undefined,
+        rooms: debouncedFilters.rooms.replace("+", "") || undefined,
+        bathrooms: debouncedFilters.bathrooms.replace("+", "") || undefined,
+        page,
+        per_page: 15,
+      }
 
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/dashboard/properties?${params}`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
+      const res = await apiClient.get(
+        "/dashboard/properties",
+        { params }
       )
       setData(res.data.data)
       setPagination(res.data.pagination)
@@ -340,12 +334,9 @@ export default function PropertiesPage() {
   const loadFilterOptions = async () => {
     setLoadingFilters(true)
     try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null
-      const headers = token ? { Authorization: `Bearer ${token}` } : {}
-      
       const [countriesRes, usersRes] = await Promise.all([
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/search/countries`, { headers }),
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/search/users`, { headers }),
+        apiClient.get("/search/countries"),
+        apiClient.get("/search/users"),
       ])
       
       setCountries(countriesRes.data.data || [])
@@ -364,12 +355,7 @@ export default function PropertiesPage() {
 
     if (countryId) {
       try {
-        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null
-        const headers = token ? { Authorization: `Bearer ${token}` } : {}
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/search/cities?country_id=${countryId}`,
-          { headers }
-        )
+        const res = await apiClient.get("/search/cities", { params: { country_id: countryId } })
         setCities(res.data.data || [])
       } catch (error) {
         console.error("Failed to load cities:", error)
@@ -386,9 +372,7 @@ export default function PropertiesPage() {
     debounce(async (search: string) => {
       setLoadingCountry(true)
       try {
-        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null
-        const headers = token ? { Authorization: `Bearer ${token}` } : {}
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/search/countries?search=${search}`, { headers })
+        const res = await apiClient.get("/search/countries", { params: { search } })
         setCountries(res.data.data || [])
       } catch (error) {
         console.error("Failed to search countries:", error)
@@ -409,12 +393,9 @@ export default function PropertiesPage() {
       if (!filters.country_id) return
       setLoadingCity(true)
       try {
-        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null
-        const headers = token ? { Authorization: `Bearer ${token}` } : {}
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/search/cities?country_id=${filters.country_id}&search=${search}`,
-          { headers }
-        )
+        const res = await apiClient.get("/search/cities", {
+          params: { country_id: filters.country_id, search },
+        })
         setCities(res.data.data || [])
       } catch (error) {
         console.error("Failed to search cities:", error)
@@ -470,13 +451,7 @@ export default function PropertiesPage() {
     
     try {
       setDeleting(true)
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null
-      await axios.delete(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/dashboard/properties/${deletingPropertyId}`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
-      )
+      await apiClient.delete(`/dashboard/properties/${deletingPropertyId}`)
       toast.success("Property deleted successfully")
       fetchProperties()
     } catch (error) {
@@ -491,14 +466,7 @@ export default function PropertiesPage() {
 
   const handleStatusChange = async (id: number, newStatus: string) => {
     try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null
-      await axios.patch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/dashboard/properties/${id}/status`,
-        { status: newStatus },
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
-      )
+      await apiClient.patch(`/dashboard/properties/${id}/status`, { status: newStatus })
       setData((prev) =>
         prev.map((p) => (p.id === id ? { ...p, status: newStatus } : p))
       )

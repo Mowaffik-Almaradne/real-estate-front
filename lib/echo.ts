@@ -1,97 +1,84 @@
 import Echo from "laravel-echo"
 import Pusher from "pusher-js"
+import { API_URL } from "./apiClient"
+import { getAuthToken } from "./auth"
 
-let echoInstance: any = null
+type EchoInstance = Echo<"pusher">
+type AuthResponse = { auth: string; channel_data?: string }
+type AuthorizerCallback = (error: Error | null, data: AuthResponse) => void
 
-function isServer(): boolean {
-  return typeof window === "undefined"
+let echoInstance: EchoInstance | null = null
+let echoToken: string | null = null
+
+function isBrowser(): boolean {
+  return typeof window !== "undefined"
 }
 
-function getReverbConfig(): {
-  key: string
-  host: string
-  port: string
-  scheme: string
-} {
-  const key = process.env.NEXT_PUBLIC_REVERB_APP_KEY || ""
-  const host = process.env.NEXT_PUBLIC_REVERB_HOST || ""
-  const port = process.env.NEXT_PUBLIC_REVERB_PORT || ""
-  const scheme = process.env.NEXT_PUBLIC_REVERB_SCHEME || "https"
-
-  return { key, host, port, scheme }
+function getBroadcastingAuthUrl(): string {
+  return process.env.NEXT_PUBLIC_PUSHER_AUTH_URL || `${API_URL}/broadcasting/auth`
 }
 
-export function getEcho(): any {
-  if (isServer()) {
-    return null
-  }
+export function getEcho(): EchoInstance | null {
+  if (!isBrowser()) return null
 
-  if (echoInstance) {
-    return echoInstance
-  }
+  const token = getAuthToken()
+  if (!token) return null
 
-  const { key, host, port, scheme } = getReverbConfig()
+  if (echoInstance && echoToken === token) return echoInstance
+  destroyEcho()
 
-  if (!key) {
-    console.warn("Reverb app key not configured. WebSocket disabled.")
-    return null
-  }
+  const key = process.env.NEXT_PUBLIC_PUSHER_APP_KEY
+  if (!key) return null
 
-  console.log('[getEcho] Initializing with config:', { key: key.substring(0, 8) + '...', host, port, scheme })
+  const cluster = process.env.NEXT_PUBLIC_PUSHER_APP_CLUSTER || "mt1"
 
-  const pusherClient = new Pusher(key, {
-    cluster: "ap1",
-    forceTLS: true,
-  })
-
-  const wsHost = host ? `${scheme}://${host}${port ? `:${port}` : ""}` : undefined
-
-  echoInstance = new Echo({
+  echoInstance = new Echo<"pusher">({
     broadcaster: "pusher",
     key,
-    cluster: "ap1",
+    cluster,
     forceTLS: true,
-    client: pusherClient,
-    wsHost: "",
-    wsPort: 443,
-    wssPort: 443,
-    enabledTransports: ["ws", "wss"],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    authorizer: (channel: any) => ({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      authorize: (socketId: any, callback: any) => {
-        const token = localStorage.getItem("token")
-        console.log('[getEcho] Authorizer requesting auth for channel:', channel, 'socketId:', socketId)
-        fetch("/broadcasting/auth", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-          body: JSON.stringify({
-            socket_id: socketId,
-            channel_name: channel,
-          }),
-        })
-          .then((res) => res.json())
-          .then((data) => callback(data))
-          .catch(() => callback({ auth: "", channel_data: "" }))
+    authorizer: (channel: { name: string }) => ({
+      authorize: async (socketId: string, callback: AuthorizerCallback) => {
+        try {
+          const response = await fetch(getBroadcastingAuthUrl(), {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${getAuthToken()}`,
+            },
+            body: JSON.stringify({
+              socket_id: socketId,
+              channel_name: channel.name,
+            }),
+          })
+
+          if (!response.ok) {
+            throw new Error(`Pusher authorization failed (${response.status})`)
+          }
+
+          callback(null, (await response.json()) as AuthResponse)
+        } catch (error) {
+          callback(error instanceof Error ? error : new Error("Pusher authorization failed"), {
+            auth: "",
+          })
+        }
       },
     }),
-  } as any)
+  })
+  echoToken = token
 
-  console.log('[getEcho] Echo instance created:', echoInstance)
   return echoInstance
 }
 
 export function destroyEcho(): void {
-  if (echoInstance) {
-    echoInstance.disconnect()
-    echoInstance = null
-  }
+  echoInstance?.disconnect()
+  echoInstance = null
+  echoToken = null
 }
 
-export function getPusherConnection(echo: any): any {
+export function getPusherConnection(echo: EchoInstance | null): Pusher | null {
   if (!echo) return null
-  return echo.pusher ?? null
+  const client = echo as unknown as { pusher?: Pusher }
+  return client.pusher ?? null
 }

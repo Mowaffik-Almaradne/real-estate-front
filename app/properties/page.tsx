@@ -3,9 +3,11 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Pencil, Eye, Loader2, Bed, Bath, Square, Plus, MapPin, Building, CheckCircle } from "lucide-react"
-import axios from "axios"
 import { toast } from "sonner"
 import useSWR from "swr"
+import { apiClient } from "@/lib/apiClient"
+import { getStoredUser } from "@/lib/auth"
+import { propertyService } from "src/modules/properties/services/propertyService"
 
 import { Button } from "components/ui/button"
 import { Badge } from "components/ui/badge"
@@ -22,7 +24,7 @@ import {
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
 const fetcher = async (url: string) => {
-  const response = await axios.get(url)
+  const response = await apiClient.get(url)
   return response.data
 }
 
@@ -67,14 +69,7 @@ function PropertyCard({ property, canEdit }: { property: Property; canEdit: bool
   const handleStatusChange = async (id: number) => {
     try {
       setChangingStatus(true)
-      const token = localStorage.getItem("token")
-      await axios.patch(
-        `${apiUrl}/dashboard/properties/${id}/status`,
-        { status: "sold" },
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
-      )
+      await propertyService.updateStatus(id, "sold")
       toast.success("Property status updated to sold")
     } catch (error) {
       console.error("Failed to update status:", error)
@@ -250,10 +245,8 @@ export default function PropertiesPage() {
   const isLoading = featuredLoading || propertiesLoading
 
   useEffect(() => {
-    const userStr = localStorage.getItem("user")
-    if (userStr) {
-      setCurrentUser(JSON.parse(userStr))
-    }
+    const user = getStoredUser()
+    if (user) setCurrentUser(user)
   }, [])
 
   useEffect(() => {
@@ -268,7 +261,7 @@ export default function PropertiesPage() {
 
     setLoadingMore(true)
     try {
-      const res = await axios.get(
+      const res = await apiClient.get(
         `${apiUrl}/public/properties/browse?page=${pageNum}&per_page=12`
       )
       setData(prev => [...prev, ...(res.data.data || [])])

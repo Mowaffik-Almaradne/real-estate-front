@@ -29,6 +29,7 @@ import {
 
 import type { PropertyType, TypeOfContract } from "src/modules/properties/types"
 import { getCountries, getCitiesByCountry, type Country, type City } from "lib/api"
+import { propertyService } from "src/modules/properties/services/propertyService"
 
 const propertySchema = z.object({
   name: z.string().min(1, "Name is required").max(255, "Name is too long"),
@@ -128,39 +129,22 @@ export default function PropertyCreatePage() {
     try {
       setSaving(true)
 
-      const token = localStorage.getItem("token")
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/dashboard/properties`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({
-            name: data.name,
-            description: data.description,
-            country_id: data.country_id,
-            city_id: data.city_id,
-            property_type: data.property_type,
-            type_of_contract: data.type_of_contract,
-            rooms: data.rooms,
-            bathrooms: data.bathrooms,
-            area: data.area,
-            detailed_info: data.detailed_info || undefined,
-            price: data.price,
-            currency: data.currency || "USD",
-          }),
-        }
-      )
-
-      if (!response.ok) {
-        throw new Error("Failed to create property")
-      }
-
-      const property = await response.json()
+      const property = await propertyService.createProperty({
+        name: data.name,
+        description: data.description,
+        country_id: data.country_id,
+        city_id: data.city_id,
+        property_type: data.property_type as PropertyType,
+        type_of_contract: data.type_of_contract as TypeOfContract,
+        rooms: data.rooms,
+        bathrooms: data.bathrooms,
+        area: data.area,
+        detailed_info: data.detailed_info || undefined,
+        price: data.price,
+        currency: data.currency || "USD",
+      })
       toast.success("Property created successfully")
-      router.push(`/properties/${property.data.id}`)
+      router.push(`/properties/${property.id}`)
     } catch (error) {
       console.error("Failed to create property:", error)
       toast.error("Failed to create property")

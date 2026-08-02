@@ -1,6 +1,22 @@
-export type PropertyStatus = "pending" | "approved" | "rejected" | "suspended" | "sold" | "archived"
+export type PropertyStatus =
+  | "draft"
+  | "pending"
+  | "under_inspection"
+  | "approved"
+  | "rejected"
+  | "suspended"
+  | "sold"
+  | "archived"
 
-export type PropertyType = "apartment" | "house" | "villa" | "land" | "commercial"
+export type PropertyType =
+  | "apartment"
+  | "house"
+  | "villa"
+  | "land"
+  | "commercial"
+  | "office"
+  | "warehouse"
+  | "other"
 
 export type TypeOfContract = "rent" | "sale"
 
@@ -22,9 +38,9 @@ export interface Property {
   currency: string
   formatted_price: string
   status: PropertyStatus
-  main_image: string
-  main_image_thumb: string
-  gallery: { id: number; url: string; url_thumb: string }[]
+  main_image: string | null
+  main_image_thumb: string | null
+  gallery: { id: number; url: string; thumb?: string; url_thumb?: string }[]
   publisher: { id: number; name: string; email: string }
   created_at: string
   updated_at?: string

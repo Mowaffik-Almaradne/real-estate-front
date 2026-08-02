@@ -38,7 +38,7 @@ function getInitials(name: string): string {
 function getRoomDisplayName(room: ChatRoomDto, currentUserId: number): string {
   if (room.name) return room.name
 
-  if (room.type === "direct") {
+  if (room.type === "private") {
     const otherParticipant = room.participants.find((p) => p.id !== currentUserId)
     return otherParticipant?.name || "Unknown"
   }
@@ -50,7 +50,7 @@ function getRoomAvatar(room: ChatRoomDto, currentUserId: number): {
   imageUrl?: string
   initials?: string
 } {
-  if (room.type === "direct") {
+  if (room.type === "private") {
     const otherParticipant = room.participants.find((p) => p.id !== currentUserId)
     if (otherParticipant?.avatar_url) {
       return { imageUrl: otherParticipant.avatar_url }

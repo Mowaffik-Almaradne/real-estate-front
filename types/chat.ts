@@ -1,4 +1,4 @@
-export type ChatRoomType = "direct" | "group";
+export type ChatRoomType = "private" | "group";
 
 export type MessageType = "text" | "image" | "file";
 
@@ -67,9 +67,9 @@ export interface MessageDto {
 }
 
 export interface CreateChatRoomRequest {
-  readonly name?: string;
   readonly type: ChatRoomType;
-  readonly participant_ids: readonly number[];
+  readonly recipient_id?: number;
+  readonly property_id?: number;
 }
 
 export interface SendMessageRequest {

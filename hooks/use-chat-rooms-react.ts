@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { chatService, ChatServiceError } from "@/services/chat-service"
+import { chatService } from "@/services/chat-service"
 import type { ChatRoomDto, MessageDto, CreateChatRoomRequest } from "@/types/chat"
 
 interface ChatRoomsState {
