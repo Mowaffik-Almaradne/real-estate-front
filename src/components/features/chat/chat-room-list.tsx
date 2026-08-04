@@ -87,8 +87,8 @@ export function ChatRoomList({
         <div className="space-y-1 overflow-y-auto max-h-full">
           {rooms.map((room) => {
             const isActive = activeRoomId === room.id
-            const displayName = getRoomDisplayName(room, currentUserId)
-            const avatar = getRoomAvatar(room, currentUserId)
+            const displayName = getRoomDisplayName(room, currentUserId ?? 0)
+            const avatar = getRoomAvatar(room, currentUserId ?? 0)
 
             return (
               <button

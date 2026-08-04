@@ -40,10 +40,14 @@ import {
 } from "components/ui/dialog"
 
 import { propertyService } from "src/modules/properties/services/propertyService"
-import type { Property } from "src/modules/properties/types"
+import type { PropertyDto as Property } from "@/types/dto"
 import { getStoredUser } from "@/lib/auth"
 import { chatService } from "@/services/chat-service"
 import { DashboardLayout } from "components/layout/DashboardLayout"
+import { BookViewingDialog } from "src/modules/viewings/components/BookViewingDialog"
+import { VerifiedBadge } from "src/modules/auth"
+import { FavoriteButton } from "src/modules/properties/components/FavoriteButton"
+import { PropertyStatusBanner } from "src/modules/properties/components/PropertyStatusBanner"
 
 interface User {
   id: number
@@ -147,10 +151,10 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
   }
 
   const canEdit = currentUser?.id === property.publisher?.id
-  const images = [
-    { url: property.main_image, thumb: property.main_image_thumb },
-    ...(property.gallery || []).map((img) => ({ url: img.url, thumb: img.url_thumb })),
-  ].filter((img) => img.url)
+  const images: { url: string; thumb: string }[] = [
+    ...(property.main_image ? [{ url: property.main_image, thumb: property.main_image_thumb ?? property.main_image }] : []),
+    ...(property.gallery || []).map((img) => ({ url: img.url, thumb: img.url_thumb ?? img.url })),
+  ]
 
   return (
     <DashboardLayout title="Property Details">
@@ -182,7 +186,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                   <div className="space-y-3">
                     <div className="relative aspect-video bg-muted overflow-hidden">
                       <img
-                        src={images[selectedImageIndex || 0]?.url || images[0]?.url}
+                        src={images[selectedImageIndex || 0]?.url ?? images[0]?.url ?? ""}
                         alt={property.name}
                         className="object-cover w-full h-full"
                       />
@@ -199,7 +203,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                 : "border-transparent opacity-70 hover:opacity-100"
                             }`}
                           >
-                            <img src={img.thumb || img.url} alt="" className="object-cover w-full h-full" />
+                            <img src={img.thumb ?? img.url} alt="" className="object-cover w-full h-full" />
                           </button>
                         ))}
                       </div>
@@ -215,10 +219,21 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
           </div>
 
           <div className="lg:col-span-2 space-y-4">
+            <PropertyStatusBanner
+              status={property.status}
+              rejectionReason={property.rejection_reason}
+            />
             <Card className="bg-card border-border/50">
               <CardContent className="p-5 space-y-4">
-                <div>
+                <div className="flex items-start justify-between gap-3">
                   <p className="text-3xl font-bold text-gradient">{property.formatted_price}</p>
+                  {currentUser && currentUser.id !== property.publisher?.id && (
+                    <FavoriteButton
+                      propertyId={property.id}
+                      initial={Boolean(property.is_favorited)}
+                      initialCount={property.favorites_count}
+                    />
+                  )}
                 </div>
 
                 <h1 className="text-xl font-bold text-foreground">{property.name}</h1>
@@ -266,26 +281,48 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                     <div className="flex items-center justify-center size-10 rounded-xl gradient-primary text-primary-foreground">
                       <User className="size-4" />
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold">{property.publisher?.name}</p>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold">{property.publisher?.name}</p>
+                        <VerifiedBadge
+                          verified={property.publisher?.is_verified}
+                          label={property.publisher?.publisher_type === "office" ? "Office" : "Verified"}
+                        />
+                      </div>
                       <p className="text-xs text-muted-foreground">{property.publisher?.email}</p>
                     </div>
                   </div>
                   {currentUser && currentUser.id !== property.publisher?.id && (
-                    <Button onClick={handleContact} disabled={creatingChat} size="sm" className="rounded-lg">
-                      {creatingChat ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <MessageCircle className="mr-2 h-4 w-4" />
-                      )}
-                      Contact
-                    </Button>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <Button onClick={handleContact} disabled={creatingChat} size="sm" className="rounded-lg">
+                        {creatingChat ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <MessageCircle className="mr-2 h-4 w-4" />
+                        )}
+                        Contact
+                      </Button>
+                      <BookViewingDialog
+                        propertyId={property.id}
+                        propertyName={property.name}
+                      />
+                    </div>
                   )}
                   {!currentUser && (
-                    <Button onClick={() => router.push("/login")} size="sm" className="rounded-lg">
-                      <MessageCircle className="mr-2 h-4 w-4" />
-                      Contact
-                    </Button>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <Button onClick={() => router.push("/login")} size="sm" className="rounded-lg">
+                        <MessageCircle className="mr-2 h-4 w-4" />
+                        Contact
+                      </Button>
+                      <Button
+                        onClick={() => router.push("/login")}
+                        variant="outline"
+                        size="sm"
+                        className="rounded-lg"
+                      >
+                        Book Viewing
+                      </Button>
+                    </div>
                   )}
                 </div>
               </CardContent>
@@ -372,7 +409,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
             <X className="size-8" />
           </button>
           <img
-            src={images[selectedImageIndex]?.url}
+            src={images[selectedImageIndex ?? 0]?.url ?? ""}
             alt={property.name}
             className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg"
             onClick={(e) => e.stopPropagation()}

@@ -30,7 +30,8 @@ import {
 } from "@/components/ui/card"
 
 import { cityService } from "../services/cityService"
-import type { City, CitiesResponse, PaginationInfo } from "../types"
+import type { City, CitiesResponse } from "@/types/dto"
+import type { PaginationInfo } from "@/types/common"
 import { CityFormModal } from "./CityFormModal"
 import { CityDeleteModal } from "./CityDeleteModal"
 
@@ -48,6 +49,8 @@ export function CitiesList({ initialData }: CitiesListProps) {
       per_page: 10,
       current_page: 1,
       last_page: 1,
+      from: null,
+      to: null,
     }
   )
   const [loading, setLoading] = useState(false)

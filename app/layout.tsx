@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "components/providers/ThemeProvider";
 import { AuthProvider } from "src/context/AuthContext";
+import { Toaster } from "components/ui/sonner";
+import { ApiErrorListener } from "components/providers/ApiErrorListener";
 import "./globals.css";
 
 const fontSans = Plus_Jakarta_Sans({
@@ -35,7 +37,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
+            <ApiErrorListener />
             {children}
+            <Toaster richColors position="top-right" />
           </AuthProvider>
         </ThemeProvider>
       </body>

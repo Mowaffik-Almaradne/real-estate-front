@@ -1,48 +1,15 @@
-import { apiClient, API_URL, type ApiResponse } from "./apiClient"
+import { apiClient, type ApiResponse } from "./apiClient"
+import { ContactPreference, PublisherType, UserStatus } from "@/types/enums"
+import type { AuthResponseDto, CityDto, CountryDto, LoginResponseDto } from "@/types/dto"
 
 export { apiClient } from "./apiClient"
-export { API_URL }
 export type { ApiResponse }
 
-export interface User {
-  id: number
-  name: string
-  email: string
-  status?: "active" | "inactive"
-  publisher_type?: "individual" | "office" | null
-  is_verified?: boolean
-  roles?: Array<{ id: number; name: string }>
-  email_verified_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export interface AuthResponse {
-  user: User
-  token: string
-}
-
-export interface Country {
-  id: number
-  created_at: string
-  updated_at: string
-  name: string
-  code: string | null
-  phone_code: string | null
-  is_active: boolean
-  cities_count?: number
-}
-
-export interface City {
-  id: number
-  created_at: string
-  updated_at: string
-  name: string
-  country_id: number | null
-  state_provianc: string | null
-  postal_code: string | null
-  is_active: boolean
-}
+export type User = import("@/types/dto").UserDto
+export type AuthResponse = AuthResponseDto
+export type LoginResponse = LoginResponseDto
+export type Country = CountryDto
+export type City = CityDto
 
 export async function getCountries(page: number = 1, perPage: number = 10): Promise<ApiResponse<Country[]>> {
   const response = await apiClient.get<ApiResponse<Country[]>>(`/location/countries?page=${page}&perPage=${perPage}`)
@@ -91,7 +58,7 @@ export async function saveCity(
   const body = {
     name,
     country_id: countryId,
-    state_provianc: stateProvince,
+    state_province: stateProvince,
     postal_code: postalCode,
     is_active: isActive,
   }
@@ -103,11 +70,8 @@ export async function saveCity(
   return response.data
 }
 
-export async function login(
-  email: string,
-  password: string
-): Promise<ApiResponse<AuthResponse>> {
-  const response = await apiClient.post<ApiResponse<AuthResponse>>("/auth/login", { email, password })
+export async function login(email: string, password: string): Promise<ApiResponse<LoginResponse>> {
+  const response = await apiClient.post<ApiResponse<LoginResponse>>("/auth/login", { email, password })
   return response.data
 }
 
@@ -125,3 +89,5 @@ export async function register(
   })
   return response.data
 }
+
+export type { ContactPreference, PublisherType, UserStatus }

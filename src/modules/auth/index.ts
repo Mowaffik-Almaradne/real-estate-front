@@ -1,0 +1,5 @@
+export { AvatarUpload } from "./components/AvatarUpload"
+export { ConfirmPasswordDialog } from "./components/ConfirmPasswordDialog"
+export { SocialLinksEditor, SOCIAL_PLATFORMS } from "./components/SocialLinksEditor"
+export type { SocialLinksMap, SocialPlatformId } from "./components/SocialLinksEditor"
+export { VerifiedBadge } from "./components/VerifiedBadge"

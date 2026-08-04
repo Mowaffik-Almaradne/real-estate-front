@@ -1,16 +1,9 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios"
+import { env } from "./env"
 import { clearAuthSession, getAuthToken } from "./auth"
+import type { ApiPagination } from "@/types/common"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
-
-export interface ApiPagination {
-  total: number
-  per_page: number
-  current_page: number
-  last_page: number
-  from: number | null
-  to: number | null
-}
+export type { ApiPagination }
 
 export interface ApiResponse<T> {
   data: T
@@ -25,6 +18,11 @@ export interface ApiErrorPayload {
   errors?: Record<string, string[]>
 }
 
+export type ApiRequestOptions = {
+  silent?: boolean
+  signal?: AbortSignal
+}
+
 export class ApiClientError extends Error {
   readonly status: number
   readonly errors: Record<string, string[]>
@@ -35,13 +33,57 @@ export class ApiClientError extends Error {
     this.status = status
     this.errors = errors
   }
+
+  fieldError(field: string): string | undefined {
+    return this.errors[field]?.[0]
+  }
+
+  isValidation(): boolean {
+    return this.status === 422
+  }
+
+  isUnauthorized(): boolean {
+    return this.status === 401
+  }
+
+  isForbidden(): boolean {
+    return this.status === 403
+  }
+
+  isNotFound(): boolean {
+    return this.status === 404
+  }
+
+  isServerError(): boolean {
+    return this.status >= 500
+  }
+}
+
+type ErrorListener = (error: ApiClientError) => void
+const errorListeners = new Set<ErrorListener>()
+
+export function onApiError(listener: ErrorListener): () => void {
+  errorListeners.add(listener)
+  return () => {
+    errorListeners.delete(listener)
+  }
+}
+
+function emitError(error: ApiClientError): void {
+  for (const listener of errorListeners) {
+    try {
+      listener(error)
+    } catch {
+    }
+  }
 }
 
 const apiClient: AxiosInstance = axios.create({
-  baseURL: API_URL,
+  baseURL: env.apiUrl,
   headers: {
     "Content-Type": "application/json",
   },
+  timeout: 30_000,
 })
 
 apiClient.interceptors.request.use((config) => {
@@ -57,14 +99,22 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const apiError = toApiClientError(error)
+
+    if (apiError.isUnauthorized()) {
       clearAuthSession()
-      if (typeof window !== "undefined" && window.location.pathname !== "/login") {
-        window.location.href = "/login"
+      if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+        const callbackUrl = encodeURIComponent(window.location.pathname + window.location.search)
+        window.location.href = `/login?callbackUrl=${callbackUrl}`
       }
     }
 
-    return Promise.reject(toApiClientError(error))
+    const config = (error as AxiosError).config as (AxiosRequestConfig & { silent?: boolean }) | undefined
+    if (!config?.silent) {
+      emitError(apiError)
+    }
+
+    return Promise.reject(apiError)
   }
 )
 
@@ -113,5 +163,24 @@ export function getApiPagination<T>(
   return undefined
 }
 
-export { apiClient, API_URL }
+export function toFormErrors<T extends Record<string, unknown>>(
+  errors: Record<string, string[]>
+): Partial<Record<keyof T, string>> {
+  const result: Partial<Record<keyof T, string>> = {}
+  for (const [key, messages] of Object.entries(errors)) {
+    if (messages && messages.length > 0) {
+      result[key as keyof T] = messages[0]
+    }
+  }
+  return result
+}
+
+export function firstError(errors: Record<string, string[]>): string | undefined {
+  for (const messages of Object.values(errors)) {
+    if (messages && messages.length > 0) return messages[0]
+  }
+  return undefined
+}
+
+export { apiClient, env as apiEnv }
 export type { AxiosInstance, AxiosRequestConfig, AxiosResponse }

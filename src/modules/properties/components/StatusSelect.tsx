@@ -11,11 +11,13 @@ import {
   SelectValue,
 } from "components/ui/select"
 
-import type { PropertyStatus } from "src/modules/properties/types"
+import type { PropertyStatus } from "@/types/enums"
 
 const STATUS_CONFIG: Record<PropertyStatus, { className: string; label: string }> = {
-  approved: { className: "bg-emerald-500 hover:bg-emerald-600", label: "Approved" },
+  draft: { className: "bg-slate-500 hover:bg-slate-600", label: "Draft" },
   pending: { className: "bg-amber-500 hover:bg-amber-600", label: "Pending" },
+  under_inspection: { className: "bg-cyan-500 hover:bg-cyan-600", label: "Under inspection" },
+  approved: { className: "bg-emerald-500 hover:bg-emerald-600", label: "Approved" },
   rejected: { className: "bg-red-500 hover:bg-red-600", label: "Rejected" },
   suspended: { className: "bg-orange-500 hover:bg-orange-600", label: "Suspended" },
   sold: { className: "bg-blue-500 hover:bg-blue-600", label: "Sold" },

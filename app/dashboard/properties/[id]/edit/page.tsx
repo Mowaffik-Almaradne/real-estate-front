@@ -28,7 +28,8 @@ import {
 import { DashboardLayout } from "components/layout/DashboardLayout"
 
 import { propertyService } from "src/modules/properties/services/propertyService"
-import type { Property, PropertyFormData, PropertyType, TypeOfContract } from "src/modules/properties/types"
+import type { PropertyDto as Property, PropertyFormData } from "@/types/dto"
+import type { PropertyType, TypeOfContract } from "@/types/enums"
 import { getCountries, getCitiesByCountry, type Country, type City } from "lib/api"
 
 const propertySchema = z.object({

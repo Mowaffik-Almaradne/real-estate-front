@@ -34,8 +34,12 @@ function LoginForm() {
     setIsLoading(true)
 
     try {
-      await login(email, password)
-      router.push(callbackUrl)
+      const result = await login(email, password)
+      if (result === "two_factor") {
+        router.push(`/login/two-factor?callbackUrl=${encodeURIComponent(callbackUrl)}`)
+      } else {
+        router.push(callbackUrl)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed")
     } finally {

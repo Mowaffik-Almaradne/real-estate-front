@@ -55,7 +55,7 @@ function getNotificationHref(notification: NotificationDto): string {
 }
 
 function extractTitle(notification: NotificationDto): string {
-  return notification.title
+  return notification.title ?? ""
 }
 
 function extractDescription(notification: NotificationDto): string {
@@ -69,7 +69,7 @@ function extractDescription(notification: NotificationDto): string {
     return String(data.description)
   }
 
-  return notification.message
+  return notification.message ?? notification.body ?? ""
 }
 
 export function NotificationItem({

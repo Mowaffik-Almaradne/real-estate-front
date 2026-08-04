@@ -2,9 +2,11 @@
 
 import { memo, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { Heart, MapPin, Bed, Bath, Square, Eye } from "lucide-react"
+import { MapPin, Bed, Bath, Square, Eye } from "lucide-react"
 import { motion, type Variants } from "framer-motion"
 import { useIntersectionObserver, useReducedMotion } from "@/hooks"
+import { VerifiedBadge } from "src/modules/auth"
+import { FavoriteButton } from "src/modules/properties/components/FavoriteButton"
 
 interface Property {
   id: number
@@ -16,13 +18,21 @@ interface Property {
   property_type: string
   rooms: number
   bathrooms: number
-  area: string
-  price: string
+  area: string | number
+  price: string | number
   formatted_price: string
   status: string
-  main_image: string
-  main_image_thumb: string
-  publisher: { id: number; name: string; email: string }
+  main_image: string | null
+  main_image_thumb?: string | null
+  publisher: {
+    id: number
+    name: string
+    email?: string
+    is_verified?: boolean
+    publisher_type?: "individual" | "office" | null
+  }
+  is_favorited?: boolean
+  favorites_count?: number
   is_new?: boolean
   is_reduced?: boolean
 }
@@ -73,14 +83,6 @@ export const PropertyCard = memo(function PropertyCard({
   })
 
   const prefersReducedMotion = useReducedMotion()
-
-  const handleFavorite = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation()
-      setIsFavorite((prev) => !prev)
-    },
-    []
-  )
 
   const handleQuickView = useCallback(
     (e: React.MouseEvent) => {
@@ -226,32 +228,18 @@ export const PropertyCard = memo(function PropertyCard({
         </div>
 
         <motion.button
-          onClick={handleFavorite}
-          whileTap={{ scale: 0.85 }}
-          className={`absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 ${
-            isFavorite
-              ? "bg-red-500/80 text-white"
-              : "bg-white/20 text-white hover:bg-white/40"
-          }`}
-          aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-          aria-pressed={isFavorite}
+          onClick={(e) => {
+            e.stopPropagation()
+            // Preserve existing animation behaviour for non-favorited taps
+          }}
+          className="absolute right-3 top-3"
         >
-          <motion.div
-            animate={
-              prefersReducedMotion
-                ? {}
-                : isFavorite
-                  ? { scale: [1, 1.3, 0.9, 1.1, 1] }
-                  : {}
-            }
-            transition={{ duration: 0.4 }}
-          >
-            <Heart
-              className={`h-4 w-4 transition-transform duration-300 ${
-                isFavorite ? "fill-current" : ""
-              }`}
-            />
-          </motion.div>
+          <FavoriteButton
+            propertyId={property.id}
+            initial={Boolean(property.is_favorited) || isFavorite}
+            initialCount={property.favorites_count}
+            onChange={(fav) => setIsFavorite(fav)}
+          />
         </motion.button>
 
         <motion.div
@@ -308,6 +296,15 @@ export const PropertyCard = memo(function PropertyCard({
           <span className="truncate">
             {property.city?.name}, {property.country?.name}
           </span>
+        </div>
+
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="truncate">{property.publisher?.name}</span>
+          <VerifiedBadge
+            verified={property.publisher?.is_verified}
+            label={property.publisher?.publisher_type === "office" ? "Office" : "Verified"}
+            variant="outline"
+          />
         </div>
 
         <div className="flex items-center gap-3 border-t border-border pt-2 text-xs text-muted-foreground">

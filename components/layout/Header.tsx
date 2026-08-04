@@ -9,9 +9,10 @@ import { ThemeSwitch } from "components/ThemeSwitch"
 interface HeaderProps {
   onMenuClick: () => void
   title?: string
+  actions?: React.ReactNode
 }
 
-export function Header({ onMenuClick, title = "Dashboard" }: HeaderProps) {
+export function Header({ onMenuClick, title = "Dashboard", actions }: HeaderProps) {
   const { user, logout } = useAuth()
 
   return (
@@ -28,6 +29,8 @@ export function Header({ onMenuClick, title = "Dashboard" }: HeaderProps) {
       <h1 className="font-heading text-lg font-bold tracking-tight">
         {title}
       </h1>
+
+      {actions && <div className="ml-4 flex items-center gap-2">{actions}</div>}
 
       <div className="ml-auto flex items-center gap-1.5">
         <Button

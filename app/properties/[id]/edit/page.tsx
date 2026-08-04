@@ -27,7 +27,7 @@ import {
   CardTitle,
 } from "components/ui/card"
 
-import type { PropertyType, TypeOfContract } from "src/modules/properties/types"
+import type { PropertyType, TypeOfContract } from "@/types/enums"
 import { getCountries, getCitiesByCountry, type Country, type City } from "lib/api"
 import { propertyService } from "src/modules/properties/services/propertyService"
 

@@ -198,7 +198,7 @@ export default function CitiesPage() {
     setEditingCity(city)
     setCityName(city.name)
     setCityCountryId(city.country_id?.toString() || "")
-    setCityStateProvince(city.state_provianc || "")
+    setCityStateProvince(city.state_province || "")
     setCityPostalCode(city.postal_code || "")
     setCityIsActive(city.is_active)
     setCityDialogOpen(true)

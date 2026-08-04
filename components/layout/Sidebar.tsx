@@ -12,8 +12,12 @@ import {
   X,
   MessageCircle,
   Sparkles,
+  CalendarDays,
+  CalendarCheck,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { hasPermission, type PermissionName } from "@/lib/permissions"
+import { useAuth } from "src/context/AuthContext"
 import { Button } from "components/ui/button"
 
 interface SidebarProps {
@@ -24,14 +28,17 @@ interface SidebarProps {
 const navItems = [
   { href: "/", label: "Dashboard", icon: Home },
   { href: "/properties", label: "Public Properties", icon: Globe },
-  { href: "/dashboard/properties", label: "Properties", icon: Building2 },
-  { href: "/dashboard/cities", label: "Cities", icon: MapPin },
+  { href: "/dashboard/properties", label: "Properties", icon: Building2, permission: "properties.list" },
+  { href: "/dashboard/viewings", label: "My Viewings", icon: CalendarCheck },
+  { href: "/dashboard/schedule", label: "Schedule", icon: CalendarDays, permission: "properties.list" },
+  { href: "/dashboard/cities", label: "Cities", icon: MapPin, permission: "cities.list" },
   { href: "/chat", label: "Chat", icon: MessageCircle },
   { href: "/settings", label: "Settings", icon: Settings },
-]
+] satisfies Array<{ href: string; label: string; icon: typeof Home; permission?: PermissionName }>
 
 export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname()
+  const { user } = useAuth()
 
   return (
     <>
@@ -71,7 +78,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         </div>
 
         <nav className="flex-1 space-y-1 px-3 py-2">
-          {navItems.map((item) => {
+          {navItems.filter((item) => !item.permission || hasPermission(user, item.permission)).map((item) => {
             const isActive = pathname === item.href
             return (
               <Link

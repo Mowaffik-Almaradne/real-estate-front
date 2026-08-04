@@ -29,7 +29,7 @@ import {
 } from "components/ui/dialog"
 import { DashboardLayout } from "components/layout/DashboardLayout"
 import { StatusSelect } from "src/modules/properties/components/StatusSelect"
-import type { PropertyStatus } from "src/modules/properties/types"
+import type { PropertyStatus } from "@/types/enums"
 
 const PROPERTY_TYPES = [
   { value: "apartment", label: "Apartment" },

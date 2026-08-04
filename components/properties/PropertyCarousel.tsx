@@ -15,27 +15,9 @@ import { PropertyCard, Skeleton as PropertyCardSkeleton } from "./PropertyCard"
 import { useIntersectionObserver, useReducedMotion, useMediaQuery } from "@/hooks"
 import { Button } from "components/ui/button"
 import { cn } from "lib/utils"
+import type { PropertyDto } from "@/types/dto"
 
-interface Property {
-  id: number
-  name: string
-  description: string
-  country: { name: string }
-  city: { name: string }
-  type_of_contract: string
-  property_type: string
-  rooms: number
-  bathrooms: number
-  area: string
-  price: string
-  formatted_price: string
-  status: string
-  main_image: string
-  main_image_thumb: string
-  publisher: { id: number; name: string; email: string }
-  is_new?: boolean
-  is_reduced?: boolean
-}
+type Property = PropertyDto & { is_new?: boolean; is_reduced?: boolean }
 
 interface PropertyCarouselProps {
   properties: Property[]

@@ -1,6 +1,6 @@
 import Echo from "laravel-echo"
 import Pusher from "pusher-js"
-import { API_URL } from "./apiClient"
+import { env, getBroadcastingAuthUrl } from "./env"
 import { getAuthToken } from "./auth"
 
 type EchoInstance = Echo<"pusher">
@@ -14,10 +14,6 @@ function isBrowser(): boolean {
   return typeof window !== "undefined"
 }
 
-function getBroadcastingAuthUrl(): string {
-  return process.env.NEXT_PUBLIC_PUSHER_AUTH_URL || `${API_URL}/broadcasting/auth`
-}
-
 export function getEcho(): EchoInstance | null {
   if (!isBrowser()) return null
 
@@ -27,16 +23,13 @@ export function getEcho(): EchoInstance | null {
   if (echoInstance && echoToken === token) return echoInstance
   destroyEcho()
 
-  const key = process.env.NEXT_PUBLIC_PUSHER_APP_KEY
-  if (!key) return null
-
-  const cluster = process.env.NEXT_PUBLIC_PUSHER_APP_CLUSTER || "mt1"
+  if (!env.pusher.key) return null
 
   echoInstance = new Echo<"pusher">({
     broadcaster: "pusher",
-    key,
-    cluster,
-    forceTLS: true,
+    key: env.pusher.key,
+    cluster: env.pusher.cluster,
+    forceTLS: env.pusher.forceTLS,
     authorizer: (channel: { name: string }) => ({
       authorize: async (socketId: string, callback: AuthorizerCallback) => {
         try {

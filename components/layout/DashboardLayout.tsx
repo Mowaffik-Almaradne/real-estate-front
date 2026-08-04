@@ -7,9 +7,10 @@ import { Header } from "./Header"
 interface DashboardLayoutProps {
   children: React.ReactNode
   title?: string
+  actions?: React.ReactNode
 }
 
-export function DashboardLayout({ children, title }: DashboardLayoutProps) {
+export function DashboardLayout({ children, title, actions }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = React.useState(false)
 
   return (
@@ -20,6 +21,7 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
         <Header
           onMenuClick={() => setSidebarOpen(true)}
           title={title}
+          actions={actions}
         />
 
         <main className="flex-1 p-4 lg:p-6 xl:p-8">

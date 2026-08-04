@@ -46,7 +46,8 @@ import { DashboardLayout } from "components/layout/DashboardLayout"
 
 import { propertyService } from "src/modules/properties/services/propertyService"
 import { StatusSelect } from "src/modules/properties/components/StatusSelect"
-import type { Property, PropertyStatus } from "src/modules/properties/types"
+import type { PropertyDto as Property } from "@/types/dto"
+import type { PropertyStatus } from "@/types/enums"
 
 export default function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -116,10 +117,10 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
     )
   }
 
-  const images = [
-    { url: property.main_image, thumb: property.main_image_thumb },
-    ...(property.gallery || []).map((img) => ({ url: img.url, thumb: img.url_thumb })),
-  ].filter((img) => img.url)
+  const images: { url: string; thumb: string }[] = [
+    ...(property.main_image ? [{ url: property.main_image, thumb: property.main_image_thumb ?? property.main_image }] : []),
+    ...(property.gallery || []).map((img) => ({ url: img.url, thumb: img.url_thumb ?? img.url })),
+  ]
 
   return (
     <DashboardLayout title="Property Details">
@@ -151,7 +152,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                 <div className="space-y-4">
                   <div className="relative aspect-video bg-muted rounded-[4px] overflow-hidden">
                     <img
-                      src={images[selectedImageIndex || 0]?.url || images[0]?.url}
+                      src={images[selectedImageIndex || 0]?.url ?? images[0]?.url ?? ""}
                       alt={property.name}
                       className="object-cover w-full h-full"
                     />
@@ -166,7 +167,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                             (selectedImageIndex || 0) === index ? "border-primary" : "border-transparent"
                           }`}
                         >
-                          <img src={img.thumb || img.url} alt="" className="object-cover w-full h-full" />
+                          <img src={img.thumb ?? img.url} alt="" className="object-cover w-full h-full" />
                         </button>
                       ))}
                     </div>
@@ -328,7 +329,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
             <X className="size-8" />
           </button>
           <img
-            src={images[selectedImageIndex]?.url}
+            src={images[selectedImageIndex ?? 0]?.url ?? ""}
             alt={property.name}
             className="max-h-[90vh] max-w-[90vw] object-contain"
             onClick={(e) => e.stopPropagation()}
