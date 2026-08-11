@@ -93,3 +93,13 @@ export function StatsCards() {
     </div>
   )
 }
+
+export function StatsCardsSkeleton() {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {[0, 1, 2, 3].map((i) => (
+        <div key={i} className="h-28 animate-pulse rounded-lg bg-muted" />
+      ))}
+    </div>
+  )
+}

@@ -85,7 +85,10 @@ export function useChatRoomsReact() {
   )
 
   useEffect(() => {
-    fetchRooms()
+    const handle = window.setTimeout(() => {
+      void fetchRooms()
+    }, 0)
+    return () => window.clearTimeout(handle)
   }, [fetchRooms])
 
   return {

@@ -1,12 +1,14 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { Bath, Bed, Building, MapPin, Square } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { VerifiedBadge } from "src/modules/auth"
 import { FavoriteButton } from "src/modules/properties/components/FavoriteButton"
+import { CompareToggle } from "src/modules/compare/CompareToggle"
 import { formatNumber, statusLabel, statusTone } from "@/lib/format"
 import type { PropertyDto } from "@/types/dto"
 
@@ -16,6 +18,8 @@ interface PropertyGridCardProps {
 
 export function PropertyGridCard({ property }: PropertyGridCardProps) {
   const router = useRouter()
+  const t = useTranslations("property.card")
+  const tStatus = useTranslations("status")
   const open = () => router.push(`/properties/${property.id}`)
 
   return (
@@ -50,19 +54,20 @@ export function PropertyGridCard({ property }: PropertyGridCardProps) {
             {property.property_type}
           </Badge>
           <Badge variant="outline" className="bg-white/80 text-foreground">
-            {property.type_of_contract === "rent" ? "For Rent" : "For Sale"}
+            {property.type_of_contract === "rent" ? t("forRent") : t("forSale")}
           </Badge>
         </div>
-        <div className="absolute right-2 top-2">
+        <div className="absolute right-2 top-2 flex flex-col gap-1.5">
           <FavoriteButton
             propertyId={property.id}
             initial={Boolean(property.is_favorited)}
             initialCount={property.favorites_count}
           />
+          <CompareToggle propertyId={property.id} />
         </div>
         <div className="absolute right-2 bottom-2">
           <Badge variant={statusTone(property.status) === "muted" ? "secondary" : "default"}>
-            {statusLabel(property.status)}
+            {statusLabel(property.status, tStatus)}
           </Badge>
         </div>
       </div>
@@ -91,12 +96,12 @@ export function PropertyGridCard({ property }: PropertyGridCardProps) {
             </span>
             <span className="flex items-center gap-1">
               <Square className="size-3" />
-              {formatNumber(property.area, "en-US", { maximumFractionDigits: 0 })} m²
+              {formatNumber(property.area, "en-US", { maximumFractionDigits: 0 })} {t("areaUnit")}
             </span>
           </div>
           <VerifiedBadge
             verified={property.publisher.is_verified}
-            label={property.publisher.publisher_type === "office" ? "Office" : "Verified"}
+            label={property.publisher.publisher_type === "office" ? t("officeBadge") : t("verifiedBadge")}
             variant="outline"
             showIcon={false}
           />

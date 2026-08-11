@@ -2,6 +2,7 @@
 
 import { memo, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { MapPin, Bed, Bath, Square, Eye } from "lucide-react"
 import { motion, type Variants } from "framer-motion"
 import { useIntersectionObserver, useReducedMotion } from "@/hooks"
@@ -71,6 +72,7 @@ export const PropertyCard = memo(function PropertyCard({
   "aria-label": ariaLabel,
 }: PropertyCardProps) {
   const router = useRouter()
+  const t = useTranslations("property.card")
   const [isLoaded, setIsLoaded] = useState(false)
   const [thumbLoaded, setThumbLoaded] = useState(false)
   const [isFavorite, setIsFavorite] = useState(false)
@@ -155,6 +157,11 @@ export const PropertyCard = memo(function PropertyCard({
         )}
 
         {property.main_image_thumb && (
+          // The imperative preload-swap pattern (thumb shown first, full image
+          // preloaded via `new Image()` then swapped in via opacity) is
+          // intentional for the LCP path. next/image's loader doesn't expose
+          // the same control, so we keep <img> here intentionally.
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={property.main_image_thumb}
             alt=""
@@ -176,6 +183,7 @@ export const PropertyCard = memo(function PropertyCard({
         )}
 
         {property.main_image && !property.main_image_thumb && (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={property.main_image}
             alt=""
@@ -222,7 +230,7 @@ export const PropertyCard = memo(function PropertyCard({
               transition={{ repeat: Infinity, duration: 2 }}
               className="rounded-full px-3 py-1 text-xs font-medium backdrop-blur-md bg-red-500/80 text-white"
             >
-              Reduced
+              {t("reduced")}
             </motion.span>
           )}
         </div>
@@ -256,10 +264,10 @@ export const PropertyCard = memo(function PropertyCard({
             onClick={handleQuickView}
             whileTap={{ scale: 0.95 }}
             className="flex w-full items-center justify-center gap-2 rounded-full bg-white/90 backdrop-blur-md px-4 py-2.5 text-sm font-medium text-gray-900 transition-colors hover:bg-white"
-            aria-label={`View ${property.name} details`}
+            aria-label={t("viewDetailsAria", { name: property.name })}
           >
             <Eye className="h-4 w-4" aria-hidden="true" />
-            Quick View
+            {t("quickView")}
           </motion.button>
         </motion.div>
       </div>
@@ -302,7 +310,7 @@ export const PropertyCard = memo(function PropertyCard({
           <span className="truncate">{property.publisher?.name}</span>
           <VerifiedBadge
             verified={property.publisher?.is_verified}
-            label={property.publisher?.publisher_type === "office" ? "Office" : "Verified"}
+            label={property.publisher?.publisher_type === "office" ? t("officeBadge") : t("verifiedBadge")}
             variant="outline"
           />
         </div>
@@ -312,20 +320,20 @@ export const PropertyCard = memo(function PropertyCard({
             <Bed className="h-3 w-3" aria-hidden="true" />
             <span>
               {property.rooms}{" "}
-              {property.rooms === 1 ? "Bed" : "Beds"}
+              {property.rooms === 1 ? t("bed_one") : t("bed_other")}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <Bath className="h-3 w-3" aria-hidden="true" />
             <span>
               {property.bathrooms}{" "}
-              {property.bathrooms === 1 ? "Bath" : "Baths"}
+              {property.bathrooms === 1 ? t("bath_one") : t("bath_other")}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <Square className="h-3 w-3" aria-hidden="true" />
             <span>
-              {property.area} m&sup2;
+              {property.area} {t("areaUnit")}
             </span>
           </div>
         </div>

@@ -188,8 +188,19 @@ const STATUS_TONES: Record<string, "default" | "success" | "warning" | "destruct
   failed: "destructive",
 }
 
-export function statusLabel(status: string | null | undefined): string {
+export function statusLabel(
+  status: string | null | undefined,
+  translator?: (key: string) => string
+): string {
   if (!status) return ""
+  if (translator) {
+    try {
+      const translated = translator(status)
+      if (translated && translated !== status) return translated
+    } catch {
+      // fall through to default
+    }
+  }
   return STATUS_LABELS[status] ?? titleCase(status)
 }
 

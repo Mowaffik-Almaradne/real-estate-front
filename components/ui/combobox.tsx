@@ -37,10 +37,11 @@ export function Combobox({
   const [open, setOpen] = React.useState(false)
   const [search, setSearch] = React.useState("")
   const [localOptions, setLocalOptions] = React.useState<ComboboxOption[]>(options)
-
-  React.useEffect(() => {
+  const [prevOptions, setPrevOptions] = React.useState(options)
+  if (options !== prevOptions) {
+    setPrevOptions(options)
     setLocalOptions(options)
-  }, [options])
+  }
 
   const selectedOption = localOptions.find((opt) => opt.value === value)
 

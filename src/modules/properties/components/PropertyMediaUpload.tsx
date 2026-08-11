@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { ChevronLeft, ChevronRight, Image as ImageIcon, Loader2, Star, Trash2, Upload, X } from "lucide-react"
+import { ChevronLeft, ChevronRight, Image as ImageIcon, Loader2, Star, Trash2, Upload } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"

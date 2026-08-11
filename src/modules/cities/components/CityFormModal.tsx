@@ -74,6 +74,7 @@ export function CityFormModal({
     },
   })
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- react-hook-form v7's watch() is not yet React Compiler-compatible; useWatch() is used elsewhere and the selectedCountryId is referenced to trigger the cascading city load below.
   const selectedCountryId = watch("country_id")
 
   useEffect(() => {

@@ -102,6 +102,7 @@ export function ChatRoomList({
               >
                 <div className="relative flex-shrink-0">
                   {avatar.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={avatar.imageUrl}
                       alt={displayName}

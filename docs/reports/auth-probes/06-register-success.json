@@ -1,0 +1,42 @@
+{
+  "id": "06-register-success",
+  "description": "POST /auth/register — expect 201 with { data: { user, token } }",
+  "request": {
+    "method": "POST",
+    "path": "/auth/register",
+    "body": {
+      "name": "Alice",
+      "email": "alice@example.com",
+      "password": "secret123"
+    }
+  },
+  "results": [
+    {
+      "attempt": 1,
+      "status": 201,
+      "headers": {
+        "connection": "keep-alive",
+        "content-length": "167",
+        "content-type": "application/json",
+        "date": "Sun, 09 Aug 2026 19:41:19 GMT",
+        "keep-alive": "timeout=5",
+        "x-ratelimit-limit": "5",
+        "x-ratelimit-remaining": "4"
+      },
+      "body": {
+        "data": {
+          "user": {
+            "id": 3,
+            "name": "Alice",
+            "email": "alice@example.com",
+            "phone": null,
+            "two_factor_enabled": false,
+            "email_verified_at": null
+          },
+          "token": "1|MzoxNzg2MzA0NDc5Mjg0"
+        }
+      },
+      "durationMs": 3
+    }
+  ]
+}

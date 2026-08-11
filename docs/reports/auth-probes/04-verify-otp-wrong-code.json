@@ -1,0 +1,36 @@
+{
+  "id": "04-verify-otp-wrong-code",
+  "description": "POST /auth/verify-otp with wrong code — expect 422 with errors.code",
+  "request": {
+    "method": "POST",
+    "path": "/auth/verify-otp",
+    "body": {
+      "identifier": "user@example.com",
+      "code": "000000"
+    }
+  },
+  "results": [
+    {
+      "attempt": 1,
+      "status": 422,
+      "headers": {
+        "connection": "keep-alive",
+        "content-length": "93",
+        "content-type": "application/json",
+        "date": "Sun, 09 Aug 2026 19:41:19 GMT",
+        "keep-alive": "timeout=5",
+        "x-ratelimit-limit": "5",
+        "x-ratelimit-remaining": "4"
+      },
+      "body": {
+        "message": "Invalid or expired OTP code.",
+        "errors": {
+          "code": [
+            "Invalid or expired OTP code."
+          ]
+        }
+      },
+      "durationMs": 5
+    }
+  ]
+}

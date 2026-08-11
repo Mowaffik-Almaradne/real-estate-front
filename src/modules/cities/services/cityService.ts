@@ -4,6 +4,9 @@ import type { CitiesResponse, CityDto, CityFilters, CityFormData } from "@/types
 export type { CitiesResponse, CityDto, CityFilters, CityFormData }
 
 export const cityService = {
+  /**
+   * Browse all cities with optional search and pagination.
+   */
   async getCities(filters: CityFilters = {}): Promise<CitiesResponse> {
     const params = new URLSearchParams()
     if (filters.search) params.append("search", filters.search)
@@ -25,16 +28,25 @@ export const cityService = {
     }
   },
 
+  /**
+   * Fetch a single city by ID.
+   */
   async getCityById(id: number): Promise<CityDto> {
     const response = await apiClient.get<ApiResponse<CityDto>>(`/location/cities/${id}`)
     return getApiData(response)
   },
 
+  /**
+   * Create a new city (admin action).
+   */
   async createCity(data: CityFormData): Promise<CityDto> {
     const response = await apiClient.post<ApiResponse<CityDto>>("/location/cities", data)
     return getApiData(response)
   },
 
+  /**
+   * Update an existing city (admin action).
+   */
   async updateCity(id: number, data: CityFormData): Promise<CityDto> {
     const response = await apiClient.put<ApiResponse<CityDto>>(`/location/cities/${id}`, data)
     return getApiData(response)

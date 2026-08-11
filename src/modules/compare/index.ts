@@ -1,0 +1,7 @@
+export { CompareProvider, useCompare } from "./CompareProvider"
+export { CompareFloatingBar } from "./CompareFloatingBar"
+export { CompareToggle } from "./CompareToggle"
+export { MAX_COMPARE_ITEMS } from "./types"
+export { isCompareFull } from "./comparisonService"
+export type { CompareState } from "./CompareProvider"
+export type { ComparisonFieldDef, ComparisonFieldKey } from "./types"

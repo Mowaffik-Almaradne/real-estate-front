@@ -38,15 +38,21 @@ export function ConfirmPasswordDialog({
   const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
 
-  useEffect(() => {
+  const [prevOpen, setPrevOpen] = useState(open)
+  if (open !== prevOpen) {
+    setPrevOpen(open)
     if (!open) {
       setPassword("")
       setError(null)
       setSubmitting(false)
-      return
     }
-    const id = window.setTimeout(() => inputRef.current?.focus(), 50)
-    return () => window.clearTimeout(id)
+  }
+
+  useEffect(() => {
+    if (open) {
+      const id = window.setTimeout(() => inputRef.current?.focus(), 50)
+      return () => window.clearTimeout(id)
+    }
   }, [open])
 
   const handleSubmit = async (event: React.FormEvent) => {

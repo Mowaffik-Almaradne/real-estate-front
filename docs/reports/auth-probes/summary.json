@@ -1,0 +1,66 @@
+{
+  "generatedAt": "2026-08-09T19:41:19.333Z",
+  "base": "http://127.0.0.1:8765",
+  "results": [
+    {
+      "id": "01-login-send-otp-email",
+      "status": 200,
+      "durationMs": 86
+    },
+    {
+      "id": "02-login-send-otp-phone",
+      "status": 422,
+      "durationMs": 8
+    },
+    {
+      "id": "04-verify-otp-wrong-code",
+      "status": 422,
+      "durationMs": 5
+    },
+    {
+      "id": "05-login-missing-identifier",
+      "status": 422,
+      "durationMs": 3
+    },
+    {
+      "id": "06-register-success",
+      "status": 201,
+      "durationMs": 3
+    },
+    {
+      "id": "07-logout-with-token",
+      "status": 200,
+      "durationMs": 4
+    },
+    {
+      "id": "08-me-with-token",
+      "status": 401,
+      "durationMs": 3
+    },
+    {
+      "id": "09-forgot-password",
+      "status": 200,
+      "durationMs": 3
+    },
+    {
+      "id": "10-reset-password",
+      "status": 200,
+      "durationMs": 5
+    },
+    {
+      "id": "11-2fa-challenge",
+      "status": 200,
+      "durationMs": 7
+    },
+    {
+      "id": "03-verify-otp-success",
+      "status": 200,
+      "durationMs": 3
+    },
+    {
+      "id": "12-rate-limit-otp",
+      "status": 429,
+      "durationMs": 2
+    }
+  ]
+}

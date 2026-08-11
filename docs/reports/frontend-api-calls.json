@@ -1,0 +1,349 @@
+{
+  "generatedAt": "2026-08-09T19:29:15.886Z",
+  "totalCalls": 22,
+  "byTopLevel": {
+    "services": {
+      "total": 16
+    },
+    "src": {
+      "total": 5
+    },
+    "hooks": {
+      "total": 1
+    }
+  },
+  "calls": [
+    {
+      "file": "services/auth-service.ts",
+      "line": 37,
+      "method": "POST",
+      "raw": "\"/auth/logout\"",
+      "normalized": "/auth/logout"
+    },
+    {
+      "file": "services/auth-service.ts",
+      "line": 57,
+      "method": "POST",
+      "raw": "\"/auth/forgot-password\"",
+      "normalized": "/auth/forgot-password"
+    },
+    {
+      "file": "services/auth-service.ts",
+      "line": 66,
+      "method": "POST",
+      "raw": "\"/auth/reset-password\"",
+      "normalized": "/auth/reset-password"
+    },
+    {
+      "file": "services/auth-service.ts",
+      "line": 75,
+      "method": "POST",
+      "raw": "\"/auth/email/verification-notification\"",
+      "normalized": "/auth/email/verification-notification"
+    },
+    {
+      "file": "services/auth-service.ts",
+      "line": 79,
+      "method": "GET",
+      "raw": "`/auth/email/verify/${id}/${hash}?${query}`",
+      "normalized": "/auth/email/verify/${id}/${hash}?${query}"
+    },
+    {
+      "file": "services/auth-service.ts",
+      "line": 118,
+      "method": "PUT",
+      "raw": "\"/auth/user/password\"",
+      "normalized": "/auth/user/password"
+    },
+    {
+      "file": "services/auth-service.ts",
+      "line": 122,
+      "method": "POST",
+      "raw": "\"/auth/user/confirm-password\"",
+      "normalized": "/auth/user/confirm-password"
+    },
+    {
+      "file": "services/auth-service.ts",
+      "line": 126,
+      "method": "POST",
+      "raw": "\"/auth/user/two-factor-authentication\"",
+      "normalized": "/auth/user/two-factor-authentication"
+    },
+    {
+      "file": "services/auth-service.ts",
+      "line": 130,
+      "method": "POST",
+      "raw": "\"/auth/user/confirmed-two-factor-authentication\"",
+      "normalized": "/auth/user/confirmed-two-factor-authentication"
+    },
+    {
+      "file": "services/auth-service.ts",
+      "line": 134,
+      "method": "DELETE",
+      "raw": "\"/auth/user/two-factor-authentication\"",
+      "normalized": "/auth/user/two-factor-authentication"
+    },
+    {
+      "file": "services/auth-service.ts",
+      "line": 159,
+      "method": "POST",
+      "raw": "\"/auth/user/two-factor-recovery-codes\"",
+      "normalized": "/auth/user/two-factor-recovery-codes"
+    },
+    {
+      "file": "services/chat-service.ts",
+      "line": 52,
+      "method": "POST",
+      "raw": "`/chat/rooms/${roomId}/typing`",
+      "normalized": "/chat/rooms/${roomId}/typing"
+    },
+    {
+      "file": "services/chat-service.ts",
+      "line": 56,
+      "method": "DELETE",
+      "raw": "`/chat/rooms/${roomId}/messages/${messageId}`",
+      "normalized": "/chat/rooms/${roomId}/messages/${messageId}"
+    },
+    {
+      "file": "services/notification-service.ts",
+      "line": 33,
+      "method": "PATCH",
+      "raw": "`/notifications/${id}/read`",
+      "normalized": "/notifications/${id}/read"
+    },
+    {
+      "file": "services/notification-service.ts",
+      "line": 37,
+      "method": "PATCH",
+      "raw": "\"/notifications/read-all\"",
+      "normalized": "/notifications/read-all"
+    },
+    {
+      "file": "services/notification-service.ts",
+      "line": 41,
+      "method": "DELETE",
+      "raw": "`/notifications/${id}`",
+      "normalized": "/notifications/${id}"
+    },
+    {
+      "file": "src/modules/cities/services/cityService.ts",
+      "line": 44,
+      "method": "DELETE",
+      "raw": "`/location/cities/${id}`",
+      "normalized": "/location/cities/${id}"
+    },
+    {
+      "file": "src/modules/properties/services/propertyService.ts",
+      "line": 147,
+      "method": "DELETE",
+      "raw": "`/dashboard/properties/${id}`",
+      "normalized": "/dashboard/properties/${id}"
+    },
+    {
+      "file": "src/modules/viewings/services/viewingService.ts",
+      "line": 147,
+      "method": "DELETE",
+      "raw": "`/dashboard/viewings/${id}`",
+      "normalized": "/dashboard/viewings/${id}"
+    },
+    {
+      "file": "src/services/fcm-service.ts",
+      "line": 36,
+      "method": "POST",
+      "raw": "\"/fcm/register\"",
+      "normalized": "/fcm/register"
+    },
+    {
+      "file": "src/services/fcm-service.ts",
+      "line": 42,
+      "method": "DELETE",
+      "raw": "\"/fcm/revoke\"",
+      "normalized": "/fcm/revoke"
+    },
+    {
+      "file": "hooks/useProperties.ts",
+      "line": 9,
+      "method": "GET",
+      "raw": "url",
+      "normalized": "url"
+    }
+  ],
+  "callsByNormalized": {
+    "POST /auth/logout": {
+      "method": "POST",
+      "normalized": "/auth/logout",
+      "count": 1,
+      "sites": [
+        "services/auth-service.ts:37"
+      ]
+    },
+    "POST /auth/forgot-password": {
+      "method": "POST",
+      "normalized": "/auth/forgot-password",
+      "count": 1,
+      "sites": [
+        "services/auth-service.ts:57"
+      ]
+    },
+    "POST /auth/reset-password": {
+      "method": "POST",
+      "normalized": "/auth/reset-password",
+      "count": 1,
+      "sites": [
+        "services/auth-service.ts:66"
+      ]
+    },
+    "POST /auth/email/verification-notification": {
+      "method": "POST",
+      "normalized": "/auth/email/verification-notification",
+      "count": 1,
+      "sites": [
+        "services/auth-service.ts:75"
+      ]
+    },
+    "GET /auth/email/verify/${id}/${hash}?${query}": {
+      "method": "GET",
+      "normalized": "/auth/email/verify/${id}/${hash}?${query}",
+      "count": 1,
+      "sites": [
+        "services/auth-service.ts:79"
+      ]
+    },
+    "PUT /auth/user/password": {
+      "method": "PUT",
+      "normalized": "/auth/user/password",
+      "count": 1,
+      "sites": [
+        "services/auth-service.ts:118"
+      ]
+    },
+    "POST /auth/user/confirm-password": {
+      "method": "POST",
+      "normalized": "/auth/user/confirm-password",
+      "count": 1,
+      "sites": [
+        "services/auth-service.ts:122"
+      ]
+    },
+    "POST /auth/user/two-factor-authentication": {
+      "method": "POST",
+      "normalized": "/auth/user/two-factor-authentication",
+      "count": 1,
+      "sites": [
+        "services/auth-service.ts:126"
+      ]
+    },
+    "POST /auth/user/confirmed-two-factor-authentication": {
+      "method": "POST",
+      "normalized": "/auth/user/confirmed-two-factor-authentication",
+      "count": 1,
+      "sites": [
+        "services/auth-service.ts:130"
+      ]
+    },
+    "DELETE /auth/user/two-factor-authentication": {
+      "method": "DELETE",
+      "normalized": "/auth/user/two-factor-authentication",
+      "count": 1,
+      "sites": [
+        "services/auth-service.ts:134"
+      ]
+    },
+    "POST /auth/user/two-factor-recovery-codes": {
+      "method": "POST",
+      "normalized": "/auth/user/two-factor-recovery-codes",
+      "count": 1,
+      "sites": [
+        "services/auth-service.ts:159"
+      ]
+    },
+    "POST /chat/rooms/${roomId}/typing": {
+      "method": "POST",
+      "normalized": "/chat/rooms/${roomId}/typing",
+      "count": 1,
+      "sites": [
+        "services/chat-service.ts:52"
+      ]
+    },
+    "DELETE /chat/rooms/${roomId}/messages/${messageId}": {
+      "method": "DELETE",
+      "normalized": "/chat/rooms/${roomId}/messages/${messageId}",
+      "count": 1,
+      "sites": [
+        "services/chat-service.ts:56"
+      ]
+    },
+    "PATCH /notifications/${id}/read": {
+      "method": "PATCH",
+      "normalized": "/notifications/${id}/read",
+      "count": 1,
+      "sites": [
+        "services/notification-service.ts:33"
+      ]
+    },
+    "PATCH /notifications/read-all": {
+      "method": "PATCH",
+      "normalized": "/notifications/read-all",
+      "count": 1,
+      "sites": [
+        "services/notification-service.ts:37"
+      ]
+    },
+    "DELETE /notifications/${id}": {
+      "method": "DELETE",
+      "normalized": "/notifications/${id}",
+      "count": 1,
+      "sites": [
+        "services/notification-service.ts:41"
+      ]
+    },
+    "DELETE /location/cities/${id}": {
+      "method": "DELETE",
+      "normalized": "/location/cities/${id}",
+      "count": 1,
+      "sites": [
+        "src/modules/cities/services/cityService.ts:44"
+      ]
+    },
+    "DELETE /dashboard/properties/${id}": {
+      "method": "DELETE",
+      "normalized": "/dashboard/properties/${id}",
+      "count": 1,
+      "sites": [
+        "src/modules/properties/services/propertyService.ts:147"
+      ]
+    },
+    "DELETE /dashboard/viewings/${id}": {
+      "method": "DELETE",
+      "normalized": "/dashboard/viewings/${id}",
+      "count": 1,
+      "sites": [
+        "src/modules/viewings/services/viewingService.ts:147"
+      ]
+    },
+    "POST /fcm/register": {
+      "method": "POST",
+      "normalized": "/fcm/register",
+      "count": 1,
+      "sites": [
+        "src/services/fcm-service.ts:36"
+      ]
+    },
+    "DELETE /fcm/revoke": {
+      "method": "DELETE",
+      "normalized": "/fcm/revoke",
+      "count": 1,
+      "sites": [
+        "src/services/fcm-service.ts:42"
+      ]
+    },
+    "GET url": {
+      "method": "GET",
+      "normalized": "url",
+      "count": 1,
+      "sites": [
+        "hooks/useProperties.ts:9"
+      ]
+    }
+  }
+}

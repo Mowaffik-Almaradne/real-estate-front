@@ -1,11 +1,11 @@
 "use client"
 
-import { LayoutGrid, List } from "lucide-react"
+import { LayoutGrid, List, Map } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-export type ViewMode = "grid" | "list"
+export type ViewMode = "grid" | "list" | "map"
 
 interface ViewModeToggleProps {
   value: ViewMode
@@ -35,6 +35,16 @@ export function ViewModeToggle({ value, onChange, className }: ViewModeTogglePro
         aria-pressed={value === "list"}
       >
         <List className="size-4" />
+      </Button>
+      <Button
+        type="button"
+        size="icon-sm"
+        variant={value === "map" ? "secondary" : "ghost"}
+        onClick={() => onChange("map")}
+        aria-label="Map view"
+        aria-pressed={value === "map"}
+      >
+        <Map className="size-4" />
       </Button>
     </div>
   )

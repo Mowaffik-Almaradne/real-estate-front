@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Calendar, Clock, Loader2, Users, Video, MapPin, Home as HomeIcon, AlertCircle } from "lucide-react"
 
@@ -55,7 +55,7 @@ export function BookViewingForm({ propertyId, onSuccess, onCancel }: BookViewing
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<BookViewingValues>({
     resolver: zodResolver(bookViewingSchema),
@@ -71,13 +71,16 @@ export function BookViewingForm({ propertyId, onSuccess, onCancel }: BookViewing
     },
   })
 
-  const selectedType = watch("viewing_type")
-  const selectedDuration = watch("duration_minutes")
-  const selectedBuffer = watch("buffer_minutes")
-  const selectedAttendees = watch("max_attendees")
+  const selectedType = useWatch({ control, name: "viewing_type" })
+  const selectedDuration = useWatch({ control, name: "duration_minutes" })
+  const selectedBuffer = useWatch({ control, name: "buffer_minutes" })
+  const selectedAttendees = useWatch({ control, name: "max_attendees" })
 
   useEffect(() => {
-    setConflictHint(null)
+    const handle = window.setTimeout(() => {
+      setConflictHint(null)
+    }, 0)
+    return () => window.clearTimeout(handle)
   }, [selectedType, selectedDuration, selectedBuffer, selectedAttendees])
 
   const onSubmit = handleSubmit(async (values) => {

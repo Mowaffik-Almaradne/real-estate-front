@@ -28,17 +28,6 @@ function getRelativeTime(dateString: string): string {
   return date.toLocaleDateString()
 }
 
-function getNotificationIcon(category: ReturnType<typeof getNotificationCategory>) {
-  switch (category) {
-    case "message":
-      return MessageCircle
-    case "property":
-      return Home
-    default:
-      return Bell
-  }
-}
-
 function getNotificationHref(notification: NotificationDto): string {
   const category = getNotificationCategory(notification.type)
   const data = notification.data as Record<string, unknown> | null
@@ -79,7 +68,6 @@ export function NotificationItem({
   className,
 }: NotificationItemProps) {
   const category = getNotificationCategory(notification.type)
-  const Icon = getNotificationIcon(category)
   const isUnread = notification.read_at === null
   const href = getNotificationHref(notification)
 
@@ -101,7 +89,13 @@ export function NotificationItem({
           category === "system" && "bg-amber-500/10 text-amber-500"
         )}
       >
-        <Icon className="size-4" />
+        {category === "message" ? (
+          <MessageCircle className="size-4" />
+        ) : category === "property" ? (
+          <Home className="size-4" />
+        ) : (
+          <Bell className="size-4" />
+        )}
       </div>
 
       <div className="flex-1 min-w-0">

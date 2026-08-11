@@ -1,37 +1,13 @@
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+import createMiddleware from "next-intl/middleware"
+import { locales, defaultLocale } from "./i18n/config"
 
-const publicPaths = [
-  "/login",
-  "/register",
-  "/forgot-password",
-  "/reset-password",
-  "/verify-email",
-]
-
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
-
-  if (
-    publicPaths.some((path) => pathname.startsWith(path)) ||
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/api") ||
-    pathname.includes(".")
-  ) {
-    return NextResponse.next()
-  }
-
-  const token = request.cookies.get("token")?.value || request.headers.get("authorization")?.replace("Bearer ", "")
-
-  if (!token) {
-    const loginUrl = new URL("/login", request.url)
-    loginUrl.searchParams.set("callbackUrl", `${pathname}${request.nextUrl.search}`)
-    return NextResponse.redirect(loginUrl)
-  }
-
-  return NextResponse.next()
-}
+export default createMiddleware({
+  locales: [...locales],
+  defaultLocale,
+  localePrefix: "always",
+  localeDetection: true,
+})
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|public).*)"],
+  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
 }

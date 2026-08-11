@@ -35,14 +35,76 @@ export interface UserDto extends Timestamps {
   roles?: RoleDto[]
 }
 
-export interface AuthResponseDto {
+export interface AuthSessionDto {
   user: UserDto
   token: string
 }
 
-export interface LoginResponseDto extends Partial<AuthResponseDto> {
-  two_factor_required?: boolean
-  user?: UserDto
+export type OtpDeliveryChannel = "email" | "sms" | "push"
+
+export interface OtpLoginRequest {
+  identifier: string
+}
+
+export interface OtpLoginResponse {
+  message: string
+  channel: OtpDeliveryChannel
+  identifier: string
+}
+
+export interface OtpVerifyRequest {
+  identifier: string
+  code: string
+}
+
+export interface OtpVerifySuccessResponse {
+  data: AuthSessionDto
+}
+
+export interface OtpVerifyTwoFactorRequiredResponse {
+  message: string
+  two_factor_required: true
+  challenge_token: string
+}
+
+export type OtpVerifyResponse =
+  | OtpVerifySuccessResponse
+  | OtpVerifyTwoFactorRequiredResponse
+
+export interface TwoFactorChallengeRequest {
+  code?: string
+  recovery_code?: string
+}
+
+export interface TwoFactorChallengeResponse {
+  data: AuthSessionDto
+}
+
+export interface CurrentUserResponse {
+  data: UserDto
+}
+
+export interface LogoutResponse {
+  message: string
+}
+
+export interface ForgotPasswordRequest {
+  email: string
+}
+
+export interface ResetPasswordRequest {
+  email: string
+  token: string
+  password: string
+  password_confirmation: string
+}
+
+export interface RegisterRequest {
+  name: string
+  email: string
+  phone?: string
+  password: string
+  password_confirmation: string
 }
 
 export interface UpdateProfileRequest {

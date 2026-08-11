@@ -37,15 +37,15 @@ export function RealtimeProvider({
 
   const handleNewNotification = useCallback((notification: NotificationDto): void => {
     notifications.appendNotification(notification)
-  }, [notifications.appendNotification])
+  }, [notifications])
 
   const handleUnreadCountUpdated = useCallback((count: number): void => {
     notifications.updateCount(count)
-  }, [notifications.updateCount])
+  }, [notifications])
 
   const handleNewChatMessage = useCallback((roomId: number, message: MessageDto): void => {
     chatRooms.moveRoomToTop(roomId, message)
-  }, [chatRooms.moveRoomToTop])
+  }, [chatRooms])
 
   useUserChannel({
     userId: currentUserId,

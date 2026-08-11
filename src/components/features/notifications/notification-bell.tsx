@@ -1,7 +1,9 @@
 "use client"
 
 import { useState, useRef, useEffect, useCallback } from "react"
-import { Bell, Check, Loader2 } from "lucide-react"
+import Link from "next/link"
+import { Bell, Check } from "lucide-react"
+import { useLocale } from "next-intl"
 import { cn } from "@/lib/utils"
 import { notificationService, NotificationServiceError } from "@/services/notification-service"
 import type { NotificationDto } from "@/types/notification"
@@ -12,11 +14,12 @@ interface NotificationBellProps {
 }
 
 export function NotificationBell({ className }: NotificationBellProps) {
+  const locale = useLocale()
   const [isOpen, setIsOpen] = useState(false)
   const [notifications, setNotifications] = useState<NotificationDto[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [, setError] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const fetchNotifications = useCallback(async () => {
@@ -84,10 +87,15 @@ export function NotificationBell({ className }: NotificationBellProps) {
   }, [notifications])
 
   useEffect(() => {
-    Promise.all([fetchNotifications(), fetchUnreadCount()])
+    const handle = window.setTimeout(() => {
+      void Promise.all([fetchNotifications(), fetchUnreadCount()])
+    }, 0)
 
     const interval = setInterval(fetchUnreadCount, 30000)
-    return () => clearInterval(interval)
+    return () => {
+      window.clearTimeout(handle)
+      clearInterval(interval)
+    }
   }, [fetchNotifications, fetchUnreadCount])
 
   useEffect(() => {
@@ -181,12 +189,12 @@ export function NotificationBell({ className }: NotificationBellProps) {
               <Check className="size-4" />
               Mark all as read
             </button>
-            <a
-              href="/notifications"
+            <Link
+              href={`/${locale}/notifications`}
               className="text-sm font-medium text-primary hover:underline"
             >
               View all
-            </a>
+            </Link>
           </div>
         </div>
       )}

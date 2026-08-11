@@ -4,53 +4,100 @@ import {
   type ApiResponse,
 } from "@/lib/apiClient"
 import type {
-  AuthResponseDto,
-  LoginResponseDto,
+  AuthSessionDto,
+  CurrentUserResponse,
+  LogoutResponse,
+  OtpDeliveryChannel,
+  OtpLoginRequest,
+  OtpLoginResponse,
+  OtpVerifyRequest,
+  OtpVerifyResponse,
+  OtpVerifySuccessResponse,
+  TwoFactorChallengeRequest,
+  TwoFactorChallengeResponse,
   UserDto,
 } from "@/types/dto"
 
+export type OtpVerifyResult =
+  | { kind: "authenticated"; session: AuthSessionDto }
+  | { kind: "two_factor_required"; challengeToken: string }
+
 export const authService = {
-  async login(email: string, password: string): Promise<LoginResponseDto> {
-    const response = await apiClient.post<ApiResponse<LoginResponseDto>>("/auth/login", {
-      email,
-      password,
-    })
-    return getApiData(response)
-  },
-
-  async register(
-    name: string,
-    email: string,
-    password: string,
-    passwordConfirmation: string
-  ): Promise<AuthResponseDto> {
-    const response = await apiClient.post<ApiResponse<AuthResponseDto>>("/auth/register", {
-      name,
-      email,
-      password,
-      password_confirmation: passwordConfirmation,
-    })
-    return getApiData(response)
-  },
-
-  async logout(): Promise<void> {
-    await apiClient.post("/auth/logout")
-  },
-
-  async getCurrentUser(): Promise<UserDto> {
-    const response = await apiClient.get<ApiResponse<UserDto>>("/user")
-    return getApiData(response)
-  },
-
-  async completeTwoFactor(code?: string, recoveryCode?: string): Promise<AuthResponseDto> {
-    const response = await apiClient.post<ApiResponse<AuthResponseDto>>(
-      "/auth/two-factor-challenge",
-      {
-        ...(code ? { code } : {}),
-        ...(recoveryCode ? { recovery_code: recoveryCode } : {}),
-      }
+  async sendOtp(identifier: string): Promise<OtpLoginResponse> {
+    const body: OtpLoginRequest = { identifier }
+    const response = await apiClient.post<ApiResponse<OtpLoginResponse>>(
+      "/auth/login",
+      body
     )
     return getApiData(response)
+  },
+
+  async verifyOtp(identifier: string, code: string): Promise<OtpVerifyResult> {
+    const body: OtpVerifyRequest = { identifier, code }
+    const response = await apiClient.post<ApiResponse<OtpVerifyResponse>>(
+      "/auth/verify-otp",
+      body
+    )
+    const data = getApiData(response)
+    if (!data) {
+      throw new Error("Malformed verify-otp response")
+    }
+    if ("two_factor_required" in data && data.two_factor_required) {
+      return {
+        kind: "two_factor_required",
+        challengeToken: data.challenge_token,
+      }
+    }
+    const success = data as OtpVerifySuccessResponse
+    if (!success.data) {
+      throw new Error("Malformed verify-otp response")
+    }
+    return { kind: "authenticated", session: success.data }
+  },
+
+  async verifyTwoFactorChallenge(
+    challengeToken: string,
+    payload: TwoFactorChallengeRequest
+  ): Promise<AuthSessionDto> {
+    const response = await apiClient.post<ApiResponse<TwoFactorChallengeResponse>>(
+      "/auth/two-factor-challenge",
+      payload,
+      { headers: { Authorization: `Bearer ${challengeToken}` } }
+    )
+    return getApiData(response).data
+  },
+
+  async me(): Promise<UserDto> {
+    const response = await apiClient.get<ApiResponse<CurrentUserResponse>>("/user")
+    return getApiData(response).data ?? getApiData(response)
+  },
+
+  async register(payload: {
+    name: string
+    email: string
+    phone?: string
+    password: string
+    password_confirmation: string
+  }): Promise<AuthSessionDto> {
+    const response = await apiClient.post<ApiResponse<{ data: AuthSessionDto }>>(
+      "/auth/register",
+      payload
+    )
+    return getApiData(response).data
+  },
+
+  async logout(): Promise<LogoutResponse | void> {
+    try {
+      const response = await apiClient.post<ApiResponse<LogoutResponse>>(
+        "/auth/logout"
+      )
+      return getApiData(response)
+    } catch (error) {
+      if (error && typeof error === "object" && "status" in error && error.status === 401) {
+        return
+      }
+      throw error
+    }
   },
 
   async requestPasswordReset(email: string): Promise<void> {
@@ -158,4 +205,68 @@ export const authService = {
   async regenerateRecoveryCodes(): Promise<void> {
     await apiClient.post("/auth/user/two-factor-recovery-codes")
   },
+
+  async getNotificationPreferences(): Promise<NotificationPreferencesDto> {
+    const response = await apiClient.get<ApiResponse<NotificationPreferencesDto>>(
+      "/user/notification-preferences"
+    )
+    return getApiData(response)
+  },
+
+  async updateNotificationPreferences(
+    preferences: NotificationPreferencesDto
+  ): Promise<NotificationPreferencesDto> {
+    const response = await apiClient.put<ApiResponse<NotificationPreferencesDto>>(
+      "/user/notification-preferences",
+      preferences
+    )
+    return getApiData(response)
+  },
+
+  async getActiveSessions(): Promise<ActiveSessionDto[]> {
+    const response = await apiClient.get<ApiResponse<ActiveSessionDto[]>>(
+      "/user/sessions"
+    )
+    return getApiData(response)
+  },
+
+  async revokeSession(sessionId: string): Promise<void> {
+    await apiClient.delete(`/user/sessions/${sessionId}`)
+  },
+
+  async revokeAllSessions(): Promise<void> {
+    await apiClient.delete("/user/sessions")
+  },
+
+  async deleteAccount(password: string): Promise<void> {
+    await apiClient.delete("/user", { data: { password } })
+  },
+}
+
+export type { OtpDeliveryChannel }
+
+export interface NotificationPreferencesDto {
+  email_messages: boolean
+  email_viewings: boolean
+  email_property_status: boolean
+  email_marketing: boolean
+  push_messages: boolean
+  push_viewings: boolean
+  push_property_status: boolean
+  push_marketing: boolean
+  inapp_messages: boolean
+  inapp_viewings: boolean
+  inapp_property_status: boolean
+  inapp_marketing: boolean
+}
+
+export interface ActiveSessionDto {
+  id: string
+  device: string
+  browser: string
+  platform: string
+  ip_address: string
+  location?: string | null
+  last_active_at: string
+  current: boolean
 }

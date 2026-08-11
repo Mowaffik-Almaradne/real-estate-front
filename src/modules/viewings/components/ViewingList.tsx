@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 import { ViewingActions } from "./ViewingActions"
 import { statusLabel, statusTone, formatDateTime } from "@/lib/format"
+import { useTranslations } from "next-intl"
 import { ViewingStatus } from "@/types/enums"
 import type { PropertyViewingDto } from "@/types/dto"
 
@@ -142,6 +143,7 @@ interface ViewingListItemProps {
 }
 
 function ViewingListItem({ viewing, perspective, onUpdated }: ViewingListItemProps) {
+  const tStatus = useTranslations("status")
   const TypeIcon = VIEWING_TYPE_ICONS[viewing.viewing_type] ?? MapPin
   const participantLabel = perspective === "buyer" ? "Agent" : "Visitor"
   const participant = perspective === "buyer" ? viewing.agent : viewing.user
@@ -193,7 +195,7 @@ function ViewingListItem({ viewing, perspective, onUpdated }: ViewingListItemPro
             )}
           </div>
           <Badge variant={statusTone(viewing.status) === "muted" ? "secondary" : "default"}>
-            {statusLabel(viewing.status)}
+            {statusLabel(viewing.status, tStatus)}
           </Badge>
         </div>
         <ViewingActions viewing={viewing} perspective={perspective} onUpdated={onUpdated} />

@@ -26,7 +26,11 @@ function buildParams(filters: ViewingFilters = {}): Record<string, string | numb
 }
 
 export const viewingService = {
-  async list(filters: ViewingFilters = {}): Promise<ViewingsResponse> {
+  /**
+ * List viewings from the agent/publisher dashboard
+ * (incoming viewing requests on the agent's properties).
+ */
+async list(filters: ViewingFilters = {}): Promise<ViewingsResponse> {
     const response = await apiClient.get<ApiResponse<PropertyViewingDto[]>>("/dashboard/viewings", {
       params: buildParams(filters),
     })
@@ -44,6 +48,9 @@ export const viewingService = {
     }
   },
 
+  /**
+   * List viewings booked by the current user (as a buyer/renter).
+   */
   async listMine(filters: ViewingFilters = {}): Promise<ViewingsResponse> {
     const response = await apiClient.get<ApiResponse<PropertyViewingDto[]>>(
       "/dashboard/viewings/my",
@@ -63,6 +70,9 @@ export const viewingService = {
     }
   },
 
+  /**
+   * Fetch the upcoming schedule view for the agent dashboard calendar widget.
+   */
   async getSchedule(filters: ViewingFilters = {}): Promise<ViewingsResponse> {
     const response = await apiClient.get<ApiResponse<PropertyViewingDto[]>>(
       "/dashboard/viewings/schedule",
@@ -82,7 +92,10 @@ export const viewingService = {
     }
   },
 
-  async getCalendar(from?: string, to?: string): Promise<CalendarViewingEvent[]> {
+  /**
+ * Fetch viewings formatted as calendar events between two ISO dates.
+ */
+async getCalendar(from?: string, to?: string): Promise<CalendarViewingEvent[]> {
     const params: Record<string, string> = {}
     if (from) params.from = from
     if (to) params.to = to
@@ -93,11 +106,18 @@ export const viewingService = {
     return getApiData(response)
   },
 
-  async getById(id: number): Promise<PropertyViewingDto> {
+  /**
+ * Fetch a single viewing by ID.
+ */
+async getById(id: number): Promise<PropertyViewingDto> {
     const response = await apiClient.get<ApiResponse<PropertyViewingDto>>(`/dashboard/viewings/${id}`)
     return getApiData(response)
   },
 
+  /**
+   * Book a new viewing for a property.
+   * Throws `ApiClientError` with status 409 if the slot conflicts — see `isSlotConflict`.
+   */
   async create(request: CreateViewingRequest): Promise<PropertyViewingDto> {
     const response = await apiClient.post<ApiResponse<PropertyViewingDto>>(
       "/dashboard/viewings",
@@ -106,6 +126,9 @@ export const viewingService = {
     return getApiData(response)
   },
 
+  /**
+   * Move a viewing to a new scheduled time (publisher or requester action).
+   */
   async reschedule(id: number, request: RescheduleViewingRequest): Promise<PropertyViewingDto> {
     const response = await apiClient.patch<ApiResponse<PropertyViewingDto>>(
       `/dashboard/viewings/${id}/reschedule`,
@@ -114,6 +137,9 @@ export const viewingService = {
     return getApiData(response)
   },
 
+  /**
+   * Confirm a pending viewing request (publisher action).
+   */
   async confirm(id: number): Promise<PropertyViewingDto> {
     const response = await apiClient.patch<ApiResponse<PropertyViewingDto>>(
       `/dashboard/viewings/${id}/confirm`
@@ -121,6 +147,9 @@ export const viewingService = {
     return getApiData(response)
   },
 
+  /**
+   * Cancel a viewing. Optional reason is forwarded to the backend.
+   */
   async cancel(id: number, request: CancelViewingRequest = {}): Promise<PropertyViewingDto> {
     const response = await apiClient.patch<ApiResponse<PropertyViewingDto>>(
       `/dashboard/viewings/${id}/cancel`,
@@ -129,6 +158,9 @@ export const viewingService = {
     return getApiData(response)
   },
 
+  /**
+   * Mark a viewing as completed (publisher action, post-viewing).
+   */
   async complete(id: number): Promise<PropertyViewingDto> {
     const response = await apiClient.patch<ApiResponse<PropertyViewingDto>>(
       `/dashboard/viewings/${id}/complete`
@@ -136,6 +168,9 @@ export const viewingService = {
     return getApiData(response)
   },
 
+  /**
+   * Mark that the requester did not attend a confirmed viewing.
+   */
   async markNoShow(id: number): Promise<PropertyViewingDto> {
     const response = await apiClient.patch<ApiResponse<PropertyViewingDto>>(
       `/dashboard/viewings/${id}/no-show`
@@ -143,6 +178,9 @@ export const viewingService = {
     return getApiData(response)
   },
 
+  /**
+   * Permanently delete a viewing record.
+   */
   async delete(id: number): Promise<void> {
     await apiClient.delete(`/dashboard/viewings/${id}`)
   },

@@ -124,7 +124,7 @@ export function CitiesList({ initialData }: CitiesListProps) {
       })
       setData(response.data)
       setPagination(response.pagination)
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch cities")
     } finally {
       setLoading(false)
@@ -142,6 +142,7 @@ export function CitiesList({ initialData }: CitiesListProps) {
     fetchCities()
   }, [fetchCities])
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- @tanstack/react-table v8 does not yet expose a React Compiler-compatible API; tracked for when v9 lands.
   const table = useReactTable({
     data,
     columns,

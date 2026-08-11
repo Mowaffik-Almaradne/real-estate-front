@@ -1,13 +1,12 @@
 import { apiClient, type ApiResponse } from "./apiClient"
 import { ContactPreference, PublisherType, UserStatus } from "@/types/enums"
-import type { AuthResponseDto, CityDto, CountryDto, LoginResponseDto } from "@/types/dto"
+import type { AuthSessionDto, CityDto, CountryDto } from "@/types/dto"
 
 export { apiClient } from "./apiClient"
 export type { ApiResponse }
 
 export type User = import("@/types/dto").UserDto
-export type AuthResponse = AuthResponseDto
-export type LoginResponse = LoginResponseDto
+export type AuthResponse = AuthSessionDto
 export type Country = CountryDto
 export type City = CityDto
 
@@ -70,8 +69,11 @@ export async function saveCity(
   return response.data
 }
 
-export async function login(email: string, password: string): Promise<ApiResponse<LoginResponse>> {
-  const response = await apiClient.post<ApiResponse<LoginResponse>>("/auth/login", { email, password })
+export async function login(identifier: string): Promise<ApiResponse<import("@/types/dto").OtpLoginResponse>> {
+  const response = await apiClient.post<ApiResponse<import("@/types/dto").OtpLoginResponse>>(
+    "/auth/login",
+    { identifier }
+  )
   return response.data
 }
 

@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button"
 import { ViewingActions } from "./ViewingActions"
 import { viewingService } from "../services/viewingService"
 import { formatDateTime, statusLabel, statusTone } from "@/lib/format"
+import { useTranslations } from "next-intl"
 import { ApiClientError } from "@/lib/apiClient"
 import type { CalendarViewingEvent, PropertyViewingDto } from "@/types/dto"
 import { useAuth } from "src/context/AuthContext"
@@ -79,6 +80,7 @@ interface ViewingDetailBodyProps {
 
 function ViewingDetailBody({ eventId, onUpdated, onClose }: ViewingDetailBodyProps) {
   const { user } = useAuth()
+  const tStatus = useTranslations("status")
   const [detail, setDetail] = useState<PropertyViewingDto | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -130,7 +132,7 @@ function ViewingDetailBody({ eventId, onUpdated, onClose }: ViewingDetailBodyPro
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <Badge variant={statusTone(detail.status) === "muted" ? "secondary" : "default"}>
-            {statusLabel(detail.status)}
+            {statusLabel(detail.status, tStatus)}
           </Badge>
           <span className="text-xs text-muted-foreground">
             {formatDateTime(detail.scheduled_at)}

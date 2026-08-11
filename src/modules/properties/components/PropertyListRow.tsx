@@ -1,6 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { Bath, Bed, Building, MapPin, Square } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -39,6 +40,8 @@ interface PropertyListRowProps {
 
 export function PropertyListRow({ property, onOpen }: PropertyListRowProps) {
   const router = useRouter()
+  const t = useTranslations("property.card")
+  const tStatus = useTranslations("status")
   const open = () => onOpen?.(property.id) ?? router.push(`/properties/${property.id}`)
 
   return (
@@ -87,10 +90,10 @@ export function PropertyListRow({ property, onOpen }: PropertyListRowProps) {
             {property.property_type}
           </Badge>
           <Badge variant="outline">
-            {property.type_of_contract === "rent" ? "For Rent" : "For Sale"}
+            {property.type_of_contract === "rent" ? t("forRent") : t("forSale")}
           </Badge>
           <Badge variant={statusTone(property.status) === "muted" ? "secondary" : "default"}>
-            {statusLabel(property.status)}
+            {statusLabel(property.status, tStatus)}
           </Badge>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
@@ -100,22 +103,22 @@ export function PropertyListRow({ property, onOpen }: PropertyListRowProps) {
           </span>
           <span className="flex items-center gap-1">
             <Bed className="size-3" />
-            {property.rooms} bd
+            {property.rooms} {property.rooms === 1 ? t("bed_one") : t("bed_other")}
           </span>
           <span className="flex items-center gap-1">
             <Bath className="size-3" />
-            {property.bathrooms} ba
+            {property.bathrooms} {property.bathrooms === 1 ? t("bath_one") : t("bath_other")}
           </span>
           <span className="flex items-center gap-1">
             <Square className="size-3" />
-            {property.area} m²
+            {property.area} {t("areaUnit")}
           </span>
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span>{property.publisher.name}</span>
           <VerifiedBadge
             verified={property.publisher.is_verified}
-            label={property.publisher.publisher_type === "office" ? "Office" : "Verified"}
+            label={property.publisher.publisher_type === "office" ? t("officeBadge") : t("verifiedBadge")}
             variant="outline"
           />
         </div>

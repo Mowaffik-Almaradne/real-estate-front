@@ -39,7 +39,7 @@ export function CityDeleteModal({
       await cityService.deleteCity(city.id)
       toast.success("City deleted successfully")
       onSuccess()
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete city")
     } finally {
       setDeleting(false)

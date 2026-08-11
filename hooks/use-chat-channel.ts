@@ -20,6 +20,10 @@ export function useChatChannel({
 }: UseChatChannelProps): void {
   const handlersRef = useRef({ onMessageReceived, onMessageDeleted, onUserTyping })
 
+  // Latest-ref pattern: keep the ref in sync with the latest handlers so the
+  // Pusher listener (created once in the effect) always calls the current
+  // callbacks without needing to resubscribe on every render.
+  // eslint-disable-next-line react-hooks/refs
   handlersRef.current = { onMessageReceived, onMessageDeleted, onUserTyping }
 
   useEffect(() => {

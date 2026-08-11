@@ -5,6 +5,7 @@ import type {
   MessageDto,
   PaginatedMessages,
   SendMessageRequest,
+  UploadAttachmentResponse,
 } from "@/types/chat"
 
 export { ApiClientError as ChatServiceError }
@@ -54,5 +55,22 @@ export const chatService = {
 
   async deleteMessage(roomId: number, messageId: number): Promise<void> {
     await apiClient.delete(`/chat/rooms/${roomId}/messages/${messageId}`)
+  },
+
+  async markRoomAsRead(roomId: number): Promise<void> {
+    await apiClient.post(`/chat/rooms/${roomId}/read`)
+  },
+
+  async uploadAttachment(roomId: number, file: File): Promise<UploadAttachmentResponse> {
+    const formData = new FormData()
+    formData.append("file", file)
+    const response = await apiClient.post<ApiResponse<UploadAttachmentResponse>>(
+      `/chat/rooms/${roomId}/attachments`,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    )
+    return getApiData(response)
   },
 }

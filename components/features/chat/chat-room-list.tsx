@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { ChatRoomDto } from "@/types/chat"
 import { getCurrentUserId } from "@/lib/auth-utils"
 
@@ -102,9 +103,11 @@ export function ChatRoomList({
               >
                 <div className="relative flex-shrink-0">
                   {avatar.imageUrl ? (
-                    <img
+                    <Image
                       src={avatar.imageUrl}
                       alt={displayName}
+                      width={40}
+                      height={40}
                       className="size-10 rounded-full object-cover"
                     />
                   ) : (

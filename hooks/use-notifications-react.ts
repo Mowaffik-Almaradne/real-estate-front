@@ -161,7 +161,10 @@ export function useNotificationsReact() {
   }, [])
 
   useEffect(() => {
-    Promise.all([fetchNotifications(), fetchUnreadCount()])
+    const handle = window.setTimeout(() => {
+      void Promise.all([fetchNotifications(), fetchUnreadCount()])
+    }, 0)
+    return () => window.clearTimeout(handle)
   }, [fetchNotifications, fetchUnreadCount])
 
   return {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useTheme } from "next-themes"
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Moon, Sun } from "lucide-react"
 import { Switch } from "components/ui/switch"
 import { cn } from "lib/utils"
@@ -15,7 +15,8 @@ export function ThemeSwitch({ className }: ThemeSwitchProps) {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
+    const handle = window.setTimeout(() => setMounted(true), 0)
+    return () => window.clearTimeout(handle)
   }, [])
 
   if (!mounted) {

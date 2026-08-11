@@ -3,6 +3,7 @@
 import { useEffect } from "react"
 import { toast } from "sonner"
 import { onApiError, type ApiClientError } from "@/lib/apiClient"
+import { reportApiError } from "@/lib/sentry"
 
 const MUTED_STATUSES = new Set([401, 404])
 
@@ -20,6 +21,7 @@ function describeError(error: ApiClientError): string {
 export function ApiErrorListener() {
   useEffect(() => {
     return onApiError((error) => {
+      reportApiError(error, { message: error.message })
       if (MUTED_STATUSES.has(error.status)) return
       toast.error(describeError(error), { description: `Status ${error.status}` })
     })

@@ -129,7 +129,7 @@ export function RecentActivity() {
                   <p className="text-sm text-muted-foreground truncate">
                     {activity.description}
                   </p>
-                  <p className="text-xs text-muted-foreground/70">{activity.time}</p>
+                  <p className="text-xs text-muted-foreground">{activity.time}</p>
                 </div>
                 <Badge
                   className={`shrink-0 border font-medium text-xs ${status.className}`}
