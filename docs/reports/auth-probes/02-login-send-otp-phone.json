@@ -1,0 +1,35 @@
+{
+  "id": "02-login-send-otp-phone",
+  "description": "POST /auth/login with phone identifier — confirm field accepts phone",
+  "request": {
+    "method": "POST",
+    "path": "/auth/login",
+    "body": {
+      "identifier": "+212600000001"
+    }
+  },
+  "results": [
+    {
+      "attempt": 1,
+      "status": 422,
+      "headers": {
+        "connection": "keep-alive",
+        "content-length": "105",
+        "content-type": "application/json",
+        "date": "Sun, 09 Aug 2026 19:41:19 GMT",
+        "keep-alive": "timeout=5",
+        "x-ratelimit-limit": "5",
+        "x-ratelimit-remaining": "4"
+      },
+      "body": {
+        "message": "The given data was invalid.",
+        "errors": {
+          "identifier": [
+            "No account matches this identifier."
+          ]
+        }
+      },
+      "durationMs": 8
+    }
+  ]
+}

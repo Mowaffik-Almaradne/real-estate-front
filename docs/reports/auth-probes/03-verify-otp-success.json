@@ -1,0 +1,41 @@
+{
+  "id": "03-verify-otp-success",
+  "description": "POST /auth/verify-otp with correct code (captured from probe 01) — expect { data: { user, token } }",
+  "request": {
+    "method": "POST",
+    "path": "/auth/verify-otp",
+    "body": {
+      "identifier": "user@example.com",
+      "code": "<redacted>"
+    }
+  },
+  "results": [
+    {
+      "attempt": 1,
+      "status": 200,
+      "headers": {
+        "connection": "keep-alive",
+        "content-length": "199",
+        "content-type": "application/json",
+        "date": "Sun, 09 Aug 2026 19:41:19 GMT",
+        "keep-alive": "timeout=5",
+        "x-ratelimit-limit": "5",
+        "x-ratelimit-remaining": "4"
+      },
+      "body": {
+        "data": {
+          "user": {
+            "id": 1,
+            "name": "Test User",
+            "email": "user@example.com",
+            "phone": "+212600000001",
+            "two_factor_enabled": false,
+            "email_verified_at": "2026-01-01T00:00:00Z"
+          },
+          "token": "3|MToxNzg2MzA0NDc5MzEy"
+        }
+      },
+      "durationMs": 3
+    }
+  ]
+}

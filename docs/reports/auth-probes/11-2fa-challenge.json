@@ -1,0 +1,43 @@
+{
+  "id": "11-2fa-challenge",
+  "description": "POST /auth/two-factor-challenge with valid code — expect { data: { user, token } }",
+  "request": {
+    "method": "POST",
+    "path": "/auth/two-factor-challenge",
+    "headers": {
+      "Authorization": "Bearer 1|mock"
+    },
+    "body": {
+      "code": "123456"
+    }
+  },
+  "results": [
+    {
+      "attempt": 1,
+      "status": 200,
+      "headers": {
+        "connection": "keep-alive",
+        "content-length": "196",
+        "content-type": "application/json",
+        "date": "Sun, 09 Aug 2026 19:41:19 GMT",
+        "keep-alive": "timeout=5",
+        "x-ratelimit-limit": "5",
+        "x-ratelimit-remaining": "4"
+      },
+      "body": {
+        "data": {
+          "user": {
+            "id": 2,
+            "name": "2FA User",
+            "email": "2fa@example.com",
+            "phone": "+212600000002",
+            "two_factor_enabled": true,
+            "email_verified_at": "2026-01-01T00:00:00Z"
+          },
+          "token": "2|MjoxNzg2MzA0NDc5MzA4"
+        }
+      },
+      "durationMs": 7
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "01-login-send-otp-email",
+  "description": "POST /auth/login with email identifier — expect OTP sent envelope",
+  "request": {
+    "method": "POST",
+    "path": "/auth/login",
+    "body": {
+      "identifier": "user@example.com"
+    }
+  },
+  "results": [
+    {
+      "attempt": 1,
+      "status": 200,
+      "headers": {
+        "connection": "keep-alive",
+        "content-length": "86",
+        "content-type": "application/json",
+        "date": "Sun, 09 Aug 2026 19:41:19 GMT",
+        "keep-alive": "timeout=5",
+        "x-ratelimit-limit": "5",
+        "x-ratelimit-remaining": "4"
+      },
+      "body": {
+        "message": "OTP sent successfully.",
+        "channel": "email",
+        "identifier": "user@example.com"
+      },
+      "durationMs": 86
+    }
+  ]
+}

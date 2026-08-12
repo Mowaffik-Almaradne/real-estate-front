@@ -1,0 +1,1290 @@
+{
+  "generatedAt": "2026-08-09T19:27:15.647Z",
+  "oldCount": 215,
+  "newCount": 287,
+  "commonCount": 180,
+  "addedCount": 107,
+  "removedCount": 35,
+  "added": [
+    {
+      "path": "/api/admin/statistics/ads",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Admin Statistics"
+      ],
+      "summary": "Ads stats"
+    },
+    {
+      "path": "/api/admin/statistics/communication",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Admin Statistics"
+      ],
+      "summary": "Communication stats"
+    },
+    {
+      "path": "/api/admin/statistics/crm",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Admin Statistics"
+      ],
+      "summary": "CRM stats"
+    },
+    {
+      "path": "/api/admin/statistics/moderation",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Admin Statistics"
+      ],
+      "summary": "Moderation stats"
+    },
+    {
+      "path": "/api/admin/statistics/overview",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Admin Statistics"
+      ],
+      "summary": "Platform overview KPIs"
+    },
+    {
+      "path": "/api/admin/statistics/properties",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Admin Statistics"
+      ],
+      "summary": "Properties stats"
+    },
+    {
+      "path": "/api/admin/statistics/subscriptions",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Admin Statistics"
+      ],
+      "summary": "Subscriptions stats"
+    },
+    {
+      "path": "/api/ai/description/generate",
+      "method": "POST",
+      "operationId": "postApiAiDescriptionGenerate",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/ai/description/improve",
+      "method": "POST",
+      "operationId": "postApiAiDescriptionImprove",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/ai/description/suggest-features",
+      "method": "POST",
+      "operationId": "postApiAiDescriptionSuggestFeatures",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/ai/description/suggest-title",
+      "method": "POST",
+      "operationId": "postApiAiDescriptionSuggestTitle",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/ai/search",
+      "method": "POST",
+      "operationId": "postApiAiSearch",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/auth/email/verification-notification",
+      "method": "POST",
+      "operationId": "sendANewEmailVerificationNotification",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": "Send a new email verification notification."
+    },
+    {
+      "path": "/api/auth/forgot-password",
+      "method": "POST",
+      "operationId": "sendAResetLinkToTheGivenUser",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": "Send a reset link to the given user."
+    },
+    {
+      "path": "/api/auth/login",
+      "method": "POST",
+      "operationId": "postApiAuthLogin",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/auth/logout",
+      "method": "POST",
+      "operationId": "destroyAnAuthenticatedSession",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": "Destroy an authenticated session."
+    },
+    {
+      "path": "/api/auth/register",
+      "method": "POST",
+      "operationId": "createANewRegisteredUser",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": "Create a new registered user."
+    },
+    {
+      "path": "/api/auth/reset-password",
+      "method": "POST",
+      "operationId": "resetTheUsersPassword",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": "Reset the user's password."
+    },
+    {
+      "path": "/api/auth/two-factor-challenge",
+      "method": "POST",
+      "operationId": "attemptToAuthenticateANewSessionUsingTheTwoFactorAuthenticationCode",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": "Attempt to authenticate a new session using the two factor authentication code."
+    },
+    {
+      "path": "/api/auth/user/confirm-password",
+      "method": "POST",
+      "operationId": "confirmTheUsersPassword",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": "Confirm the user's password."
+    },
+    {
+      "path": "/api/auth/user/password",
+      "method": "PUT",
+      "operationId": "updateTheUsersPassword",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": "Update the user's password."
+    },
+    {
+      "path": "/api/auth/user/profile-information",
+      "method": "PUT",
+      "operationId": "updateTheUsersProfileInformation",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": "Update the user's profile information."
+    },
+    {
+      "path": "/api/auth/user/two-factor-authentication",
+      "method": "POST",
+      "operationId": "enableTwoFactorAuthenticationForTheUser",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": "Enable two factor authentication for the user."
+    },
+    {
+      "path": "/api/auth/user/two-factor-authentication",
+      "method": "DELETE",
+      "operationId": "disableTwoFactorAuthenticationForTheUser",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": "Disable two factor authentication for the user."
+    },
+    {
+      "path": "/api/auth/user/two-factor-recovery-codes",
+      "method": "POST",
+      "operationId": "generateAFreshSetOfTwoFactorAuthenticationRecoveryCodes",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": "Generate a fresh set of two factor authentication recovery codes."
+    },
+    {
+      "path": "/api/auth/verify-otp",
+      "method": "POST",
+      "operationId": "postApiAuthVerifyOtp",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/dashboard/appointments",
+      "method": "POST",
+      "operationId": "postApiDashboardAppointments",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/dashboard/appointments/{id}",
+      "method": "DELETE",
+      "operationId": "deleteApiDashboardAppointmentsId",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/dashboard/appointments/{id}/cancel",
+      "method": "PATCH",
+      "operationId": "patchApiDashboardAppointmentsIdCancel",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/dashboard/appointments/{id}/complete",
+      "method": "PATCH",
+      "operationId": "patchApiDashboardAppointmentsIdComplete",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/dashboard/appointments/{id}/confirm",
+      "method": "PATCH",
+      "operationId": "patchApiDashboardAppointmentsIdConfirm",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/dashboard/appointments/{id}/no-show",
+      "method": "PATCH",
+      "operationId": "patchApiDashboardAppointmentsIdNoShow",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/dashboard/appointments/{id}/reschedule",
+      "method": "PATCH",
+      "operationId": "patchApiDashboardAppointmentsIdReschedule",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/dashboard/appointments/calendar",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Appointments"
+      ],
+      "summary": "Get monthly appointment calendar"
+    },
+    {
+      "path": "/api/dashboard/appointments/follow-ups",
+      "method": "POST",
+      "operationId": "postApiDashboardAppointmentsFollowUps",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/dashboard/appointments/my",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Appointments"
+      ],
+      "summary": "Get my appointments"
+    },
+    {
+      "path": "/api/dashboard/appointments/schedule",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Appointments"
+      ],
+      "summary": "Get agent weekly schedule"
+    },
+    {
+      "path": "/api/dashboard/crm/dashboard/summary",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "CRM"
+      ],
+      "summary": "CRM dashboard summary"
+    },
+    {
+      "path": "/api/dashboard/crm/dashboard/today",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "CRM"
+      ],
+      "summary": "Today leads snapshot"
+    },
+    {
+      "path": "/api/dashboard/crm/leads",
+      "method": "POST",
+      "operationId": "postApiDashboardCrmLeads",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/dashboard/crm/leads/{id}",
+      "method": "PATCH",
+      "operationId": "patchApiDashboardCrmLeadsId",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/dashboard/crm/leads/{id}/archive",
+      "method": "POST",
+      "operationId": "postApiDashboardCrmLeadsIdArchive",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/dashboard/crm/leads/{id}/restore",
+      "method": "POST",
+      "operationId": "postApiDashboardCrmLeadsIdRestore",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/dashboard/crm/leads/{id}/status",
+      "method": "PATCH",
+      "operationId": "patchApiDashboardCrmLeadsIdStatus",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/dashboard/crm/leads/{leadId}/notes",
+      "method": "POST",
+      "operationId": "postApiDashboardCrmLeadsLeadIdNotes",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/dashboard/crm/leads/archived",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "CRM"
+      ],
+      "summary": "List archived leads"
+    },
+    {
+      "path": "/api/dashboard/crm/leads/check-duplicate",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "CRM"
+      ],
+      "summary": "Check duplicate lead"
+    },
+    {
+      "path": "/api/dashboard/crm/leads/export",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "CRM"
+      ],
+      "summary": "Export leads as CSV"
+    },
+    {
+      "path": "/api/dashboard/crm/notes/{noteId}",
+      "method": "PATCH",
+      "operationId": "patchApiDashboardCrmNotesNoteId",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/dashboard/crm/notes/{noteId}",
+      "method": "DELETE",
+      "operationId": "deleteApiDashboardCrmNotesNoteId",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/dashboard/deposits",
+      "method": "POST",
+      "operationId": "createANewDepositpendingStatus",
+      "tags": [
+        "Deposits"
+      ],
+      "summary": "Create a new deposit (pending status)."
+    },
+    {
+      "path": "/api/dashboard/deposits/{id}",
+      "method": "PATCH",
+      "operationId": "updateAPendingDepositsMutableFields",
+      "tags": [
+        "Deposits"
+      ],
+      "summary": "Update a pending deposit's mutable fields."
+    },
+    {
+      "path": "/api/dashboard/deposits/{id}",
+      "method": "DELETE",
+      "operationId": "softDeleteADeposit",
+      "tags": [
+        "Deposits"
+      ],
+      "summary": "Soft-delete a deposit."
+    },
+    {
+      "path": "/api/dashboard/deposits/{id}/cancel",
+      "method": "POST",
+      "operationId": "cancelADeposit",
+      "tags": [
+        "Deposits"
+      ],
+      "summary": "Cancel a deposit."
+    },
+    {
+      "path": "/api/dashboard/deposits/{id}/pay",
+      "method": "POST",
+      "operationId": "payAndHoldTheDepositInEscrow",
+      "tags": [
+        "Deposits"
+      ],
+      "summary": "Pay and hold the deposit in escrow."
+    },
+    {
+      "path": "/api/dashboard/deposits/{id}/refund",
+      "method": "POST",
+      "operationId": "refundTheHeldDepositBackToTheBuyer",
+      "tags": [
+        "Deposits"
+      ],
+      "summary": "Refund the held deposit back to the buyer."
+    },
+    {
+      "path": "/api/dashboard/deposits/{id}/release",
+      "method": "POST",
+      "operationId": "releaseTheHeldDepositToTheSeller",
+      "tags": [
+        "Deposits"
+      ],
+      "summary": "Release the held deposit to the seller."
+    },
+    {
+      "path": "/api/dashboard/my-deposits",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Deposits"
+      ],
+      "summary": "List my deposits (as buyer)"
+    },
+    {
+      "path": "/api/dashboard/my-sales",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Deposits"
+      ],
+      "summary": "List my sales (as seller)"
+    },
+    {
+      "path": "/api/dashboard/properties/{property}/stats",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Statistics"
+      ],
+      "summary": "Single property statistics"
+    },
+    {
+      "path": "/api/dashboard/properties/{propertyId}/rental-cards/active",
+      "method": "GET",
+      "operationId": "getTheActiveRentalCardForAPropertyifAny",
+      "tags": [
+        "Rental Cards"
+      ],
+      "summary": "Get the active rental card for a property (if any)."
+    },
+    {
+      "path": "/api/dashboard/properties/{propertyId}/rental-cards/history",
+      "method": "GET",
+      "operationId": "listAllRentalCardshistoryForASpecificProperty",
+      "tags": [
+        "Rental Cards"
+      ],
+      "summary": "List all rental cards (history) for a specific property."
+    },
+    {
+      "path": "/api/dashboard/rental-cards",
+      "method": "GET",
+      "operationId": "listRentalCards",
+      "tags": [
+        "Rental Cards"
+      ],
+      "summary": "List rental cards."
+    },
+    {
+      "path": "/api/dashboard/rental-cards",
+      "method": "POST",
+      "operationId": "createANewRentalCard",
+      "tags": [
+        "Rental Cards"
+      ],
+      "summary": "Create a new rental card."
+    },
+    {
+      "path": "/api/dashboard/rental-cards/{id}",
+      "method": "GET",
+      "operationId": "showASingleRentalCard",
+      "tags": [
+        "Rental Cards"
+      ],
+      "summary": "Show a single rental card."
+    },
+    {
+      "path": "/api/dashboard/rental-cards/{id}",
+      "method": "PATCH",
+      "operationId": "updateARentalCardsMutableFields",
+      "tags": [
+        "Rental Cards"
+      ],
+      "summary": "Update a rental card's mutable fields."
+    },
+    {
+      "path": "/api/dashboard/rental-cards/{id}",
+      "method": "DELETE",
+      "operationId": "softDeleteARentalCard",
+      "tags": [
+        "Rental Cards"
+      ],
+      "summary": "Soft-delete a rental card."
+    },
+    {
+      "path": "/api/dashboard/rental-cards/{id}/end",
+      "method": "PATCH",
+      "operationId": "endARentalCardEarly",
+      "tags": [
+        "Rental Cards"
+      ],
+      "summary": "End a rental card early."
+    },
+    {
+      "path": "/api/dashboard/rental-cards/{id}/renew",
+      "method": "PATCH",
+      "operationId": "renewARentalCard",
+      "tags": [
+        "Rental Cards"
+      ],
+      "summary": "Renew a rental card."
+    },
+    {
+      "path": "/api/dashboard/trader/competitive-map",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Map"
+      ],
+      "summary": "Competitive analysis for trader on map"
+    },
+    {
+      "path": "/api/dashboard/trader/expiring-rentals",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Statistics"
+      ],
+      "summary": "Expiring rental cards"
+    },
+    {
+      "path": "/api/dashboard/trader/export/properties",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Statistics"
+      ],
+      "summary": "Export properties data"
+    },
+    {
+      "path": "/api/dashboard/trader/leads-by-status",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Statistics"
+      ],
+      "summary": "Leads grouped by status"
+    },
+    {
+      "path": "/api/dashboard/trader/properties-by-status",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Statistics"
+      ],
+      "summary": "Properties grouped by status"
+    },
+    {
+      "path": "/api/dashboard/trader/recent-leads",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Statistics"
+      ],
+      "summary": "Recent leads"
+    },
+    {
+      "path": "/api/dashboard/trader/sponsored-ads-summary",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Statistics"
+      ],
+      "summary": "Sponsored ads performance"
+    },
+    {
+      "path": "/api/dashboard/trader/summary",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Statistics"
+      ],
+      "summary": "Trader dashboard KPIs"
+    },
+    {
+      "path": "/api/dashboard/trader/top-properties",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Statistics"
+      ],
+      "summary": "Top performing properties"
+    },
+    {
+      "path": "/api/dashboard/trader/upcoming-appointments",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Statistics"
+      ],
+      "summary": "Upcoming appointments"
+    },
+    {
+      "path": "/api/dashboard/trader/views-trend",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Statistics"
+      ],
+      "summary": "Property views trend"
+    },
+    {
+      "path": "/api/files/{id}",
+      "method": "DELETE",
+      "operationId": "",
+      "tags": [
+        "نظام الملفات"
+      ],
+      "summary": "حذف ملف"
+    },
+    {
+      "path": "/api/files/{id}/move",
+      "method": "POST",
+      "operationId": null,
+      "tags": [
+        "FileSystem"
+      ],
+      "summary": "Move file"
+    },
+    {
+      "path": "/api/files/{id}/rename",
+      "method": "POST",
+      "operationId": "",
+      "tags": [
+        "نظام الملفات"
+      ],
+      "summary": "إعادة تسمية ملف"
+    },
+    {
+      "path": "/api/files/{id}/text",
+      "method": "PUT",
+      "operationId": "",
+      "tags": [
+        "نظام الملفات"
+      ],
+      "summary": "تعديل ملف نصي (اسم أو محتوى أو كلاهما)"
+    },
+    {
+      "path": "/api/files/image",
+      "method": "POST",
+      "operationId": null,
+      "tags": [
+        "FileSystem"
+      ],
+      "summary": "Upload image file"
+    },
+    {
+      "path": "/api/files/text",
+      "method": "POST",
+      "operationId": null,
+      "tags": [
+        "FileSystem"
+      ],
+      "summary": "Create text file"
+    },
+    {
+      "path": "/api/folders",
+      "method": "GET",
+      "operationId": "",
+      "tags": [
+        "نظام الملفات"
+      ],
+      "summary": "قائمة المجلدات في مستوى معيّن (الجذر افتراضيًا)"
+    },
+    {
+      "path": "/api/folders/{id}",
+      "method": "GET",
+      "operationId": "++",
+      "tags": [
+        "نظام الملفات"
+      ],
+      "summary": "عرض محتويات مجلد (مجلدات فرعية + ملفات + مسار تنقّل)"
+    },
+    {
+      "path": "/api/folders/{id}",
+      "method": "PUT",
+      "operationId": "",
+      "tags": [
+        "نظام الملفات"
+      ],
+      "summary": "تحديث اسم المجلد"
+    },
+    {
+      "path": "/api/folders/{id}",
+      "method": "DELETE",
+      "operationId": "",
+      "tags": [
+        "نظام الملفات"
+      ],
+      "summary": "حذف مجلد فارغ (غير محمي)"
+    },
+    {
+      "path": "/api/folders/{id}/move",
+      "method": "POST",
+      "operationId": null,
+      "tags": [
+        "FileSystem"
+      ],
+      "summary": "Move folder"
+    },
+    {
+      "path": "/api/folders/{id}/rename",
+      "method": "POST",
+      "operationId": "",
+      "tags": [
+        "نظام الملفات"
+      ],
+      "summary": "إعادة تسمية مجلد"
+    },
+    {
+      "path": "/api/journal-entries/{journalEntry_id}/post",
+      "method": "POST",
+      "operationId": "postApiJournalEntriesJournalEntry_idPost",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/map/properties",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Map"
+      ],
+      "summary": "Properties on map with filters"
+    },
+    {
+      "path": "/api/market/by-category",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Market"
+      ],
+      "summary": "Listings distribution by category"
+    },
+    {
+      "path": "/api/market/by-city",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Market"
+      ],
+      "summary": "Listings distribution by city"
+    },
+    {
+      "path": "/api/market/by-price-range",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Market"
+      ],
+      "summary": "Listings distribution by price range"
+    },
+    {
+      "path": "/api/market/listings-trend",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Market"
+      ],
+      "summary": "Listings trend over time"
+    },
+    {
+      "path": "/api/market/overview",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Market"
+      ],
+      "summary": "Market overview KPIs"
+    },
+    {
+      "path": "/api/market/top-saved",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Market"
+      ],
+      "summary": "Most saved properties"
+    },
+    {
+      "path": "/api/market/top-viewed",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Market"
+      ],
+      "summary": "Most viewed properties"
+    },
+    {
+      "path": "/api/payroll/{id}",
+      "method": "PUT",
+      "operationId": "putApiPayrollId",
+      "tags": [
+        "Endpoints"
+      ],
+      "summary": ""
+    },
+    {
+      "path": "/api/properties/{propertyId}/files",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "FileSystem"
+      ],
+      "summary": "Get files of a property folder"
+    },
+    {
+      "path": "/api/search/{type}",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Search"
+      ],
+      "summary": "Global search across the platform"
+    },
+    {
+      "path": "/api/storage/packages",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "FileSystem"
+      ],
+      "summary": "List storage upgrade packages"
+    },
+    {
+      "path": "/api/storage/status",
+      "method": "GET",
+      "operationId": "",
+      "tags": [
+        "نظام الملفات"
+      ],
+      "summary": "عرض حالة الحصة التخزينية للمستخدم الحالي"
+    },
+    {
+      "path": "/api/storage/upgrade",
+      "method": "POST",
+      "operationId": "",
+      "tags": [
+        "نظام الملفات"
+      ],
+      "summary": "ترقية المساحة التخزينية إلى باقة جديدة"
+    }
+  ],
+  "removed": [
+    {
+      "path": "/api/accounts",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Ledger"
+      ],
+      "summary": "List all accounts"
+    },
+    {
+      "path": "/api/accounts/{id}",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Ledger"
+      ],
+      "summary": "Get an account"
+    },
+    {
+      "path": "/api/admin/subscription/discounts",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Admin Subscriptions"
+      ],
+      "summary": "List all discounts"
+    },
+    {
+      "path": "/api/admin/subscription/discounts/{id}",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Admin Subscriptions"
+      ],
+      "summary": "Get discount detail"
+    },
+    {
+      "path": "/api/admin/subscription/features",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Admin Subscriptions"
+      ],
+      "summary": "List all features"
+    },
+    {
+      "path": "/api/admin/subscription/features/{id}",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Admin Subscriptions"
+      ],
+      "summary": "Get feature detail"
+    },
+    {
+      "path": "/api/admin/subscription/plans",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Admin Subscriptions"
+      ],
+      "summary": "List all plans (admin)"
+    },
+    {
+      "path": "/api/admin/subscription/plans/{id}",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Admin Subscriptions"
+      ],
+      "summary": "Get plan detail"
+    },
+    {
+      "path": "/api/categories",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Categories"
+      ],
+      "summary": "List all categories (admin)"
+    },
+    {
+      "path": "/api/categories/{id}",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Categories"
+      ],
+      "summary": "Get a category (admin)"
+    },
+    {
+      "path": "/api/chat/rooms",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Chat"
+      ],
+      "summary": "List user's chat rooms"
+    },
+    {
+      "path": "/api/chat/rooms/{roomId}/messages",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Chat"
+      ],
+      "summary": "Get messages in a chat room (paginated)"
+    },
+    {
+      "path": "/api/dashboard/ad-groups",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Ad Groups"
+      ],
+      "summary": "List user's ad groups"
+    },
+    {
+      "path": "/api/dashboard/ad-groups/{id}",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Ad Groups"
+      ],
+      "summary": "Get ad group detail"
+    },
+    {
+      "path": "/api/dashboard/ads",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Ads"
+      ],
+      "summary": "List user's ads"
+    },
+    {
+      "path": "/api/dashboard/ads/{id}",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Ads"
+      ],
+      "summary": "Get ad detail"
+    },
+    {
+      "path": "/api/dashboard/properties",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Dashboard Properties"
+      ],
+      "summary": "List user's properties (dashboard)"
+    },
+    {
+      "path": "/api/dashboard/properties/{id}",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Dashboard Properties"
+      ],
+      "summary": "Get property detail (dashboard)"
+    },
+    {
+      "path": "/api/dashboard/sponsored-ads",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Sponsored Ads"
+      ],
+      "summary": "List user's sponsored ads"
+    },
+    {
+      "path": "/api/dashboard/viewings",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Viewings"
+      ],
+      "summary": "List all viewings (filterable)"
+    },
+    {
+      "path": "/api/dashboard/viewings/{id}",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Viewings"
+      ],
+      "summary": "Get viewing detail"
+    },
+    {
+      "path": "/api/journal-entries",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Ledger"
+      ],
+      "summary": "List journal entries"
+    },
+    {
+      "path": "/api/journal-entries/{id}",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Ledger"
+      ],
+      "summary": "Get journal entry detail"
+    },
+    {
+      "path": "/api/location/cities",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Location"
+      ],
+      "summary": "List all cities (public)"
+    },
+    {
+      "path": "/api/location/cities/{id}",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Location"
+      ],
+      "summary": "Get a city"
+    },
+    {
+      "path": "/api/location/countries",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Location"
+      ],
+      "summary": "List all countries (public)"
+    },
+    {
+      "path": "/api/location/countries/{id}",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Location"
+      ],
+      "summary": "Get a country"
+    },
+    {
+      "path": "/api/roles",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Role Management"
+      ],
+      "summary": "List all roles"
+    },
+    {
+      "path": "/api/roles/{id}",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Role Management"
+      ],
+      "summary": "Get a role with permissions"
+    },
+    {
+      "path": "/api/service-provider/profile",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Provider Portal"
+      ],
+      "summary": "Get my service provider profile"
+    },
+    {
+      "path": "/api/service-requests",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Service Requests"
+      ],
+      "summary": "List my service requests (client view)"
+    },
+    {
+      "path": "/api/upload",
+      "method": "POST",
+      "operationId": null,
+      "tags": [
+        "Files"
+      ],
+      "summary": "Upload a temporary file (image/video) — returns file IDs for use in property/ad creation"
+    },
+    {
+      "path": "/api/users",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "User Management"
+      ],
+      "summary": "List all users (admin)"
+    },
+    {
+      "path": "/api/users/{id}",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "User Management"
+      ],
+      "summary": "Get a user (admin)"
+    },
+    {
+      "path": "/search/{type}",
+      "method": "GET",
+      "operationId": null,
+      "tags": [
+        "Search"
+      ],
+      "summary": "Global search across entities"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "id": "05-login-missing-identifier",
+  "description": "POST /auth/login with empty body — expect 422",
+  "request": {
+    "method": "POST",
+    "path": "/auth/login",
+    "body": {}
+  },
+  "results": [
+    {
+      "attempt": 1,
+      "status": 422,
+      "headers": {
+        "connection": "keep-alive",
+        "content-length": "103",
+        "content-type": "application/json",
+        "date": "Sun, 09 Aug 2026 19:41:19 GMT",
+        "keep-alive": "timeout=5",
+        "x-ratelimit-limit": "5",
+        "x-ratelimit-remaining": "4"
+      },
+      "body": {
+        "message": "The given data was invalid.",
+        "errors": {
+          "identifier": [
+            "The identifier field is required."
+          ]
+        }
+      },
+      "durationMs": 3
+    }
+  ]
+}

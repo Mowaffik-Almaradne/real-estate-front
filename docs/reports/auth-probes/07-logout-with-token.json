@@ -1,0 +1,30 @@
+{
+  "id": "07-logout-with-token",
+  "description": "POST /auth/logout with bearer token",
+  "request": {
+    "method": "POST",
+    "path": "/auth/logout",
+    "headers": {
+      "Authorization": "Bearer 1|mock"
+    }
+  },
+  "results": [
+    {
+      "attempt": 1,
+      "status": 200,
+      "headers": {
+        "connection": "keep-alive",
+        "content-length": "25",
+        "content-type": "application/json",
+        "date": "Sun, 09 Aug 2026 19:41:19 GMT",
+        "keep-alive": "timeout=5",
+        "x-ratelimit-limit": "5",
+        "x-ratelimit-remaining": "4"
+      },
+      "body": {
+        "message": "Logged out."
+      },
+      "durationMs": 4
+    }
+  ]
+}
