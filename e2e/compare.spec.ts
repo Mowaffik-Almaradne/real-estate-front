@@ -6,8 +6,8 @@ for (const locale of LOCALES) {
   test.describe(`Compare flow (${locale})`, () => {
     test("/compare page resolves without crashing", async ({ page }) => {
       await page.goto(`/${locale}/compare`, { waitUntil: "domcontentloaded" })
-      const main = page.getByRole("main")
-      await expect(main).toBeVisible()
+      const heading = page.getByRole("heading", { level: 1 })
+      await expect(heading).toBeVisible()
     })
 
     test("empty state shows when no properties selected", async ({ page }) => {

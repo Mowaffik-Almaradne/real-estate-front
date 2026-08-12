@@ -124,8 +124,12 @@ function PublicPropertiesPageInner() {
     }
   }, [])
 
+  const isFetchingPropertiesRef = useRef(false)
+
   const fetchProperties = useCallback(
     async (page: number, append: boolean) => {
+      if (isFetchingPropertiesRef.current) return
+      isFetchingPropertiesRef.current = true
       if (append) setLoadingMore(true)
       else setLoading(true)
       try {
@@ -140,10 +144,16 @@ function PublicPropertiesPageInner() {
       } finally {
         setLoading(false)
         setLoadingMore(false)
+        isFetchingPropertiesRef.current = false
       }
     },
     [buildApiFilters, tProperty]
   )
+
+  const fetchPropertiesRef = useRef(fetchProperties)
+  useEffect(() => {
+    fetchPropertiesRef.current = fetchProperties
+  })
 
   const [featured, setFeatured] = useState<PropertyDto[]>([])
 
@@ -170,12 +180,16 @@ function PublicPropertiesPageInner() {
     },
   })
 
+  const lastFetchKeyRef = useRef<string | null>(null)
   useEffect(() => {
+    const fetchKey = JSON.stringify([debouncedFilters, debouncedSort, advanced])
+    if (fetchKey === lastFetchKeyRef.current) return
+    lastFetchKeyRef.current = fetchKey
     const handle = window.setTimeout(() => {
-      void fetchProperties(1, false)
+      void fetchPropertiesRef.current(1, false)
     }, 0)
     return () => window.clearTimeout(handle)
-  }, [fetchProperties])
+  }, [debouncedFilters, debouncedSort, advanced])
 
   const chips = useMemo<ActiveFilterChip[]>(() => {
     const out: ActiveFilterChip[] = []
@@ -229,23 +243,30 @@ function PublicPropertiesPageInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedFilters, filters, tProperty])
 
+  const loadingMoreRef = useRef(loadingMore)
+  const paginationRef = useRef(pagination)
+  useEffect(() => {
+    loadingMoreRef.current = loadingMore
+    paginationRef.current = pagination
+  })
+
   useEffect(() => {
     if (!loaderRef.current) return
     const observer = new IntersectionObserver(
       (entries) => {
         if (
           entries[0].isIntersecting &&
-          !loadingMore &&
-          pagination.current_page < pagination.last_page
+          !loadingMoreRef.current &&
+          paginationRef.current.current_page < paginationRef.current.last_page
         ) {
-          void fetchProperties(pagination.current_page + 1, true)
+          void fetchPropertiesRef.current(paginationRef.current.current_page + 1, true)
         }
       },
       { threshold: 1 }
     )
     observer.observe(loaderRef.current)
     return () => observer.disconnect()
-  }, [fetchProperties, loadingMore, pagination.current_page, pagination.last_page])
+  }, [])
 
   const headerActions = (
     <div className="flex items-center gap-2">

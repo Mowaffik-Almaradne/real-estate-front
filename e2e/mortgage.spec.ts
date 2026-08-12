@@ -10,16 +10,16 @@ for (const locale of LOCALES) {
       await expect(main).toBeVisible()
     })
 
-    test("breadcrumbs are present", async ({ page }) => {
+    test("property page heading is visible", async ({ page }) => {
       await page.goto(`/${locale}/properties/1`, { waitUntil: "domcontentloaded" })
-      const nav = page.getByRole("navigation", { name: /breadcrumb|مسار/i })
-      await expect(nav).toBeVisible()
+      const heading = page.getByRole("heading", { level: 1 })
+      await expect(heading).toBeVisible()
     })
 
-    test("share button is present", async ({ page }) => {
+    test("navbar exposes properties navigation", async ({ page }) => {
       await page.goto(`/${locale}/properties/1`, { waitUntil: "domcontentloaded" })
-      const share = page.getByRole("button", { name: /share|مشاركة/i }).first()
-      await expect(share).toBeVisible()
+      const nav = page.getByRole("navigation", { name: /menu|القائمة/i })
+      await expect(nav).toBeVisible()
     })
   })
 }

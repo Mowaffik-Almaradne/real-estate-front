@@ -1,4 +1,4 @@
-import { env } from "lib/env"
+import { env } from "@/lib/env"
 import { defaultLocale, locales, type Locale } from "@/i18n/config"
 
 export const SITE_NAME = "Real Estate"

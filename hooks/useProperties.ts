@@ -10,6 +10,12 @@ const fetcher = async (url: string) => {
   return response.data
 }
 
+function isRetryableError(err: unknown): boolean {
+  const status =
+    (err as { response?: { status?: number } })?.response?.status ?? 0
+  return status === 0 || status === 408 || status === 429
+}
+
 export function useProperties(options?: {
   page?: number
   perPage?: number
@@ -27,6 +33,9 @@ export function useProperties(options?: {
       revalidateOnReconnect: true,
       dedupingInterval: 5000,
       fallbackData: undefined,
+      shouldRetryOnError: isRetryableError,
+      errorRetryCount: 2,
+      errorRetryInterval: 5000,
     }
   )
 
@@ -42,7 +51,6 @@ export function useProperties(options?: {
 
 export function useFeaturedProperties(options?: { enabled?: boolean }) {
   const { enabled = true } = options || {}
-
   const { data, error, isLoading, mutate, isValidating } = useSWR(
     enabled ? `${apiUrl}/public/properties/random` : null,
     fetcher,
@@ -51,6 +59,9 @@ export function useFeaturedProperties(options?: { enabled?: boolean }) {
       revalidateOnReconnect: true,
       dedupingInterval: 30000,
       fallbackData: undefined,
+      shouldRetryOnError: isRetryableError,
+      errorRetryCount: 2,
+      errorRetryInterval: 5000,
     }
   )
 

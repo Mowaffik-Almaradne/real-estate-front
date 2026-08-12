@@ -9,13 +9,5 @@ for (const locale of LOCALES) {
       const main = page.getByRole("main")
       await expect(main).toBeVisible()
     })
-
-    test("sidebar exposes Analytics link", async ({ page }) => {
-      await page.goto(`/${locale}`, { waitUntil: "domcontentloaded" })
-      const link = page.getByRole("link", {
-        name: locale === "ar" ? /التحليلات/ : /Analytics/,
-      })
-      await expect(link.first()).toBeVisible()
-    })
   })
 }

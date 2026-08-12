@@ -618,6 +618,7 @@
       "account": "الحساب"
     },
     "profile": {
+      "loadingAccount": "جاري تحميل الحساب...",
       "verifyEmailBanner": "تحقق من بريدك",
       "verifyEmailDescription": "أرسلنا رابط تحقق إلى {email}. أكده لفتح جميع الميزات.",
       "resendVerification": "إعادة إرسال بريد التحقق",
@@ -802,6 +803,13 @@
     "installDescription": "وصول سريع من شاشتك الرئيسية.",
     "install": "تثبيت",
     "dismiss": "إخفاء",
-    "installSuccess": "تم تثبيت التطبيق"
+    "installSuccess": "تم تثبيت التطبيق",
+    "retry": "إعادة المحاولة"
+  },
+  "errors": {
+    "notFoundTitle": "الصفحة غير موجودة",
+    "notFoundDescription": "الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
+    "goHome": "العودة إلى الرئيسية",
+    "browseProperties": "تصفح العقارات"
   }
 }

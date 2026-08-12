@@ -35,7 +35,6 @@ export function ThemeSwitch({ className }: ThemeSwitchProps) {
       <Switch
         checked={theme === "dark"}
         onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
-        size="sm"
         aria-label="Toggle theme"
       />
       <Moon className="size-4 text-muted-foreground" />

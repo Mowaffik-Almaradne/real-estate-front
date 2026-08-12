@@ -11,7 +11,13 @@ import { OfflineBanner } from "src/components/features/pwa/OfflineBanner"
 import { NextIntlClientProvider } from "next-intl"
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server"
 import { notFound } from "next/navigation"
-import { locales, rtlLocales, isLocale } from "@/i18n/config"
+import { defaultLocale, locales, rtlLocales, isLocale } from "@/i18n/config"
+import {
+  buildAlternates,
+  DEFAULT_OG_IMAGE,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+} from "src/lib/seo"
 import { LanguageSwitcher } from "components/i18n/LanguageSwitcher"
 import "../globals.css"
 
@@ -44,9 +50,6 @@ export async function generateMetadata({
   const { locale: rawLocale } = await params
   const locale = isLocale(rawLocale) ? rawLocale : defaultLocale
   const t = await getTranslations({ locale, namespace: "home" })
-  const { buildAlternates, SITE_DESCRIPTION, SITE_NAME, DEFAULT_OG_IMAGE } = await import(
-    "src/lib/seo"
-  )
   const alternates = buildAlternates("/", locale)
   return {
     title: { default: t("title"), template: `%s · ${SITE_NAME}` },
@@ -90,7 +93,6 @@ export async function generateMetadata({
       description: t("description") || SITE_DESCRIPTION,
       images: [DEFAULT_OG_IMAGE],
     },
-    applicationName: SITE_NAME,
     appleWebApp: {
       capable: true,
       statusBarStyle: "default",
