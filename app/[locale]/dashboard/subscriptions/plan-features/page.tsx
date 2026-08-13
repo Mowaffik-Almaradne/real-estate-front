@@ -10,7 +10,7 @@ import { Input } from "components/ui/input"
 import { Label } from "components/ui/label"
 import { Switch } from "components/ui/switch"
 
-import { ApiClientError, getApiData, type ApiResponse } from "@/lib/apiClient"
+import { ApiClientError } from "@/lib/apiClient"
 
 import {
   adminSubscriptionPlanFeatureService,
