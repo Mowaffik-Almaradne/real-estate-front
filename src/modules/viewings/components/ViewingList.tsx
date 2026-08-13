@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
 import { Calendar, Clock, MapPin, Video, Home as HomeIcon, AlertCircle, Filter } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -14,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Link } from "@/i18n/navigation"
 
 import { ViewingActions } from "./ViewingActions"
 import { statusLabel, statusTone, formatDateTime } from "@/lib/format"

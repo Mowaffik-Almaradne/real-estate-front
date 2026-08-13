@@ -3,15 +3,17 @@ import type { ApiPagination } from "./common"
 export interface ReviewDto {
   readonly id: number
   readonly reviewer: ReviewerSummary | null
-  readonly property_id: number
+  readonly property_id?: number | null
   readonly property_title?: string | null
-  readonly publisher_id: number
+  readonly publisher_id?: number
+  readonly reviewed_id?: number
   readonly rating: number
-  readonly title: string | null
-  readonly body: string | null
-  readonly is_anonymous: boolean
+  readonly title?: string | null
+  readonly body?: string | null
+  readonly comment?: string | null
+  readonly is_anonymous?: boolean
   readonly created_at: string
-  readonly updated_at: string | null
+  readonly updated_at?: string | null
 }
 
 export interface ReviewerSummary {
@@ -36,8 +38,15 @@ export interface ReviewStatistics {
 }
 
 export interface CreateReviewRequest {
-  viewing_id: number
+  /** OpenAPI: office/publisher being reviewed */
+  reviewed_id?: number
+  publisher_id?: number
+  property_id?: number | null
   rating: number
+  /** OpenAPI field */
+  comment?: string | null
+  /** Legacy form fields mapped onto `comment` */
+  viewing_id?: number
   title?: string | null
   body?: string | null
   is_anonymous?: boolean

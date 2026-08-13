@@ -1,8 +1,7 @@
 "use client"
 
-import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { Bath, Bed, Building, MapPin, Square } from "lucide-react"
+import { Bath, Bed, MapPin, Square } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -10,6 +9,8 @@ import { VerifiedBadge } from "src/modules/auth"
 import { FavoriteButton } from "src/modules/properties/components/FavoriteButton"
 import { CompareToggle } from "src/modules/compare/CompareToggle"
 import { formatNumber, statusLabel, statusTone } from "@/lib/format"
+import { resolvePropertyImage } from "@/lib/property-images"
+import { useRouter } from "@/i18n/navigation"
 import type { PropertyDto } from "@/types/dto"
 
 interface PropertyGridCardProps {
@@ -21,6 +22,7 @@ export function PropertyGridCard({ property }: PropertyGridCardProps) {
   const t = useTranslations("property.card")
   const tStatus = useTranslations("status")
   const open = () => router.push(`/properties/${property.id}`)
+  const imageSrc = resolvePropertyImage(property, { forceFallback: true })
 
   return (
     <Card
@@ -36,19 +38,13 @@ export function PropertyGridCard({ property }: PropertyGridCardProps) {
       className="group flex h-full cursor-pointer flex-col overflow-hidden border-border/50 transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        {property.main_image || property.main_image_thumb ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={property.main_image_thumb || property.main_image!}
-            alt={property.name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            loading="lazy"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-            <Building className="size-12" />
-          </div>
-        )}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={imageSrc}
+          alt={property.name}
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+        />
         <div className="absolute left-2 top-2 flex flex-col gap-1">
           <Badge variant="secondary" className="capitalize">
             {property.property_type}

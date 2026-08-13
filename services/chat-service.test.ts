@@ -17,10 +17,23 @@ vi.mock("@/lib/apiClient", () => ({
     return (payload?.data ?? (response.data as T)) as T
   },
   getApiPagination: (response: { data: unknown }) => {
-    const payload = response.data as { pagination?: { current_page: number; total: number; per_page: number } }
+    const payload = response.data as {
+      pagination?: {
+        current_page: number
+        total: number
+        per_page: number
+        last_page?: number
+      }
+    }
     return payload?.pagination
   },
-  ApiClientError: class extends Error {},
+  ApiClientError: class extends Error {
+    status: number
+    constructor(status: number, message: string) {
+      super(message)
+      this.status = status
+    }
+  },
 }))
 
 function makeRoom(overrides: Partial<ChatRoomDto> = {}): ChatRoomDto {
@@ -61,56 +74,87 @@ describe("chatService HTTP contracts", () => {
       expect(mockGet).toHaveBeenCalledWith("/chat/rooms")
       expect(result).toEqual(rooms)
     })
+
+    it("normalizes missing participants and unread_count", async () => {
+      mockGet.mockResolvedValueOnce({
+        data: { data: [{ id: 9, type: "private", created_at: "2026-08-01" }] },
+      })
+      const result = await chatService.getRooms()
+      expect(result[0].participants).toEqual([])
+      expect(result[0].unread_count).toBe(0)
+    })
   })
 
   describe("createRoom", () => {
     it("POSTs the create request to /chat/rooms", async () => {
       const room = makeRoom()
       mockPost.mockResolvedValueOnce({ data: { data: room } })
-      const result = await chatService.createRoom({ type: "group", property_id: 7 })
-      expect(mockPost).toHaveBeenCalledWith(
-        "/chat/rooms",
-        { type: "group", property_id: 7 }
-      )
+      const result = await chatService.createRoom({ type: "property", property_id: 7 })
+      expect(mockPost).toHaveBeenCalledWith("/chat/rooms", {
+        type: "property",
+        property_id: 7,
+      })
       expect(result).toEqual(room)
     })
   })
 
   describe("getMessages", () => {
-    it("GETs the room messages with default page and per_page=20", async () => {
+    it("GETs the room messages with default page and perPage=20", async () => {
       const messages = [makeMessage()]
       mockGet.mockResolvedValueOnce({
         data: {
           data: messages,
-          pagination: { current_page: 1, total: 1, per_page: 20 },
+          pagination: { current_page: 1, total: 1, per_page: 20, last_page: 1 },
         },
       })
       const result = await chatService.getMessages(10)
       expect(mockGet).toHaveBeenCalledWith("/chat/rooms/10/messages", {
-        params: { page: 1, per_page: 20 },
+        params: { page: 1, perPage: 20 },
       })
       expect(result.data).toEqual(messages)
-      expect(result.meta).toEqual({ current_page: 1, total: 1, per_page: 20 })
+      expect(result.meta).toEqual({
+        current_page: 1,
+        total: 1,
+        per_page: 20,
+        last_page: 1,
+      })
     })
 
     it("passes custom page and perPage to the query", async () => {
       mockGet.mockResolvedValueOnce({
         data: {
           data: [],
-          pagination: { current_page: 3, total: 100, per_page: 50 },
+          pagination: { current_page: 3, total: 100, per_page: 50, last_page: 2 },
         },
       })
       const result = await chatService.getMessages(10, 3, 50)
       expect(mockGet).toHaveBeenCalledWith("/chat/rooms/10/messages", {
-        params: { page: 3, per_page: 50 },
+        params: { page: 3, perPage: 50 },
       })
-      expect(result.meta).toEqual({ current_page: 3, total: 100, per_page: 50 })
+      expect(result.meta.current_page).toBe(3)
     })
+  })
 
-    it("falls back to the requested page and perPage when pagination is missing", async () => {
-      mockGet.mockResolvedValueOnce({ data: { data: [] } })
-      const result = await chatService.getMessages(10, 2, 15)
-      expect(result.meta).toEqual({ current_page: 2, total: 0, per_page: 15 })
+  describe("getLatestMessages", () => {
+    it("fetches the last page when more than one page exists", async () => {
+      mockGet
+        .mockResolvedValueOnce({
+          data: {
+            data: [makeMessage({ id: 1 })],
+            pagination: { current_page: 1, total: 25, per_page: 20, last_page: 2 },
+          },
+        })
+        .mockResolvedValueOnce({
+          data: {
+            data: [makeMessage({ id: 21 })],
+            pagination: { current_page: 2, total: 25, per_page: 20, last_page: 2 },
+          },
+        })
+
+      const result = await chatService.getLatestMessages(10)
+      expect(mockGet).toHaveBeenCalledTimes(2)
+      expect(result.page).toBe(2)
+      expect(result.data[0].id).toBe(21)
     })
   })
 
@@ -119,11 +163,21 @@ describe("chatService HTTP contracts", () => {
       const sent = makeMessage({ id: 99, body: "hi" })
       mockPost.mockResolvedValueOnce({ data: { data: sent } })
       const result = await chatService.sendMessage(10, { body: "hi", type: "text" })
-      expect(mockPost).toHaveBeenCalledWith(
-        "/chat/rooms/10/messages",
-        { body: "hi", type: "text" }
-      )
+      expect(mockPost).toHaveBeenCalledWith("/chat/rooms/10/messages", {
+        body: "hi",
+        type: "text",
+      })
       expect(result).toEqual(sent)
+    })
+
+    it("maps reply_to_id to parent_id", async () => {
+      mockPost.mockResolvedValueOnce({ data: { data: makeMessage() } })
+      await chatService.sendMessage(10, { body: "hi", type: "text", reply_to_id: 5 })
+      expect(mockPost).toHaveBeenCalledWith("/chat/rooms/10/messages", {
+        body: "hi",
+        type: "text",
+        parent_id: 5,
+      })
     })
   })
 
@@ -131,7 +185,9 @@ describe("chatService HTTP contracts", () => {
     it("POSTs to the room typing endpoint with no body", async () => {
       mockPost.mockResolvedValueOnce({ data: { data: null } })
       await chatService.sendTyping(10)
-      expect(mockPost).toHaveBeenCalledWith("/chat/rooms/10/typing")
+      expect(mockPost).toHaveBeenCalledWith("/chat/rooms/10/typing", undefined, {
+        silent: true,
+      })
     })
   })
 

@@ -170,7 +170,7 @@ function PublisherProfileInner() {
 
         {tab === "reviews" && (
           <ReviewsSection
-            propertyId={-1}
+            officeId={publisher.id}
             initialAverage={publisher.average_rating}
             initialCount={publisher.reviews_count}
           />

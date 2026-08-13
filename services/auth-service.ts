@@ -3,6 +3,7 @@ import {
   getApiData,
   type ApiResponse,
 } from "@/lib/apiClient"
+import { getOriginUrl } from "@/lib/env"
 import type {
   AuthSessionDto,
   CurrentUserResponse,
@@ -68,8 +69,18 @@ export const authService = {
   },
 
   async me(): Promise<UserDto> {
-    const response = await apiClient.get<ApiResponse<CurrentUserResponse>>("/user")
-    return getApiData(response).data ?? getApiData(response)
+    // Sanctum serves this at `/user` (not under `/api`).
+    const response = await apiClient.get<ApiResponse<CurrentUserResponse> | UserDto>(
+      getOriginUrl("/user")
+    )
+    const data = getApiData(response) as UserDto | CurrentUserResponse | null
+    if (data && typeof data === "object" && "id" in data) {
+      return data as UserDto
+    }
+    if (data && typeof data === "object" && "data" in data && data.data) {
+      return data.data
+    }
+    throw new Error("Malformed current-user response")
   },
 
   async register(payload: {
@@ -79,11 +90,17 @@ export const authService = {
     password: string
     password_confirmation: string
   }): Promise<AuthSessionDto> {
-    const response = await apiClient.post<ApiResponse<{ data: AuthSessionDto }>>(
-      "/auth/register",
-      payload
-    )
-    return getApiData(response).data
+    const response = await apiClient.post<
+      ApiResponse<AuthSessionDto | { data: AuthSessionDto }>
+    >("/auth/register", payload)
+    const data = getApiData(response)
+    if (data && typeof data === "object" && "user" in data && "token" in data) {
+      return data
+    }
+    if (data && typeof data === "object" && "data" in data && data.data) {
+      return data.data
+    }
+    throw new Error("Malformed register response")
   },
 
   async logout(): Promise<LogoutResponse | void> {
@@ -208,7 +225,7 @@ export const authService = {
 
   async getNotificationPreferences(): Promise<NotificationPreferencesDto> {
     const response = await apiClient.get<ApiResponse<NotificationPreferencesDto>>(
-      "/user/notification-preferences"
+      getOriginUrl("/user/notification-preferences")
     )
     return getApiData(response)
   },
@@ -217,7 +234,7 @@ export const authService = {
     preferences: NotificationPreferencesDto
   ): Promise<NotificationPreferencesDto> {
     const response = await apiClient.put<ApiResponse<NotificationPreferencesDto>>(
-      "/user/notification-preferences",
+      getOriginUrl("/user/notification-preferences"),
       preferences
     )
     return getApiData(response)
@@ -225,21 +242,21 @@ export const authService = {
 
   async getActiveSessions(): Promise<ActiveSessionDto[]> {
     const response = await apiClient.get<ApiResponse<ActiveSessionDto[]>>(
-      "/user/sessions"
+      getOriginUrl("/user/sessions")
     )
     return getApiData(response)
   },
 
   async revokeSession(sessionId: string): Promise<void> {
-    await apiClient.delete(`/user/sessions/${sessionId}`)
+    await apiClient.delete(getOriginUrl(`/user/sessions/${sessionId}`))
   },
 
   async revokeAllSessions(): Promise<void> {
-    await apiClient.delete("/user/sessions")
+    await apiClient.delete(getOriginUrl("/user/sessions"))
   },
 
   async deleteAccount(password: string): Promise<void> {
-    await apiClient.delete("/user", { data: { password } })
+    await apiClient.delete(getOriginUrl("/user"), { data: { password } })
   },
 }
 

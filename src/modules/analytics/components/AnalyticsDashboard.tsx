@@ -123,6 +123,14 @@ export function AnalyticsDashboard({
         />
       </div>
 
+      {summary.source === "basic" && (
+        <Card className="border-amber-500/30 bg-amber-500/5">
+          <CardContent className="p-4 text-sm text-muted-foreground">
+            {t("basicNotice")}
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <AnalyticsKpiCard
           title={t("metrics.views")}

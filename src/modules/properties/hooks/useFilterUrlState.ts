@@ -93,52 +93,62 @@ export interface UseFilterUrlStateResult {
   hasActiveFilters: boolean
 }
 
+function buildUrl(pathname: string, params: URLSearchParams): string {
+  const qs = params.toString()
+  return qs ? `${pathname}?${qs}` : pathname
+}
+
+function currentUrl(pathname: string, searchParams: URLSearchParams | null): string {
+  const qs = searchParams?.toString() ?? ""
+  return qs ? `${pathname}?${qs}` : pathname
+}
+
 export function useFilterUrlState(): UseFilterUrlStateResult {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const queryString = searchParams?.toString() ?? ""
+
   const filters = useMemo<PropertyFilterValues>(() => {
-    if (!searchParams) return EMPTY_FILTERS
-    return readFiltersFromParams(new URLSearchParams(searchParams.toString()))
-  }, [searchParams])
+    return readFiltersFromParams(new URLSearchParams(queryString))
+  }, [queryString])
+
   const advanced = useMemo<AdvancedFilterValues>(() => {
-    if (!searchParams) return { area_min: "", area_max: "", year_built_min: "", year_built_max: "", keywords: "" }
-    return readAdvancedFromParams(new URLSearchParams(searchParams.toString()))
-  }, [searchParams])
+    return readAdvancedFromParams(new URLSearchParams(queryString))
+  }, [queryString])
+
+  const replaceIfChanged = useCallback(
+    (url: string) => {
+      if (url === currentUrl(pathname, searchParams)) return
+      router.replace(url, { scroll: false })
+    },
+    [pathname, router, searchParams]
+  )
 
   const setFilters = useCallback(
     (next: PropertyFilterValues) => {
-      const params = writeFiltersToParams(next)
-      const qs = params.toString()
-      const url = qs ? `${pathname}?${qs}` : pathname
-      router.replace(url, { scroll: false })
+      replaceIfChanged(buildUrl(pathname, writeFiltersToParams(next)))
     },
-    [pathname, router]
+    [pathname, replaceIfChanged]
   )
 
   const setAdvanced = useCallback(
     (next: AdvancedFilterValues) => {
-      const base = searchParams
-        ? new URLSearchParams(searchParams.toString())
-        : new URLSearchParams()
-      const merged = new URLSearchParams(base)
+      const merged = new URLSearchParams(queryString)
       Object.entries(writeAdvancedToParams(next)).forEach(([k, v]) => merged.set(k, v))
-      // remove advanced keys that are now empty
-      const advancedKeys: Array<keyof AdvancedFilterValues> = [
+      const keys: Array<keyof AdvancedFilterValues> = [
         "area_min",
         "area_max",
         "year_built_min",
         "year_built_max",
         "keywords",
       ]
-      advancedKeys.forEach((key) => {
+      keys.forEach((key) => {
         if (!next[key]) merged.delete(key)
       })
-      const qs = merged.toString()
-      const url = qs ? `${pathname}?${qs}` : pathname
-      router.replace(url, { scroll: false })
+      replaceIfChanged(buildUrl(pathname, merged))
     },
-    [pathname, router, searchParams]
+    [pathname, queryString, replaceIfChanged]
   )
 
   const patchFilters = useCallback(
@@ -146,9 +156,7 @@ export function useFilterUrlState(): UseFilterUrlStateResult {
       patch: Partial<PropertyFilterValues>,
       advancedPatch?: Partial<AdvancedFilterValues>
     ) => {
-      const base = searchParams
-        ? new URLSearchParams(searchParams.toString())
-        : new URLSearchParams()
+      const base = new URLSearchParams(queryString)
       const next = { ...filters, ...patch }
       const merged = writeFiltersToParams(next)
       base.forEach((value, key) => {
@@ -162,16 +170,14 @@ export function useFilterUrlState(): UseFilterUrlStateResult {
           else merged.delete(key)
         })
       }
-      const qs = merged.toString()
-      const url = qs ? `${pathname}?${qs}` : pathname
-      router.replace(url, { scroll: false })
+      replaceIfChanged(buildUrl(pathname, merged))
     },
-    [pathname, router, searchParams, filters, advanced]
+    [pathname, queryString, filters, advanced, replaceIfChanged]
   )
 
   const reset = useCallback(() => {
-    router.replace(pathname, { scroll: false })
-  }, [pathname, router])
+    replaceIfChanged(pathname)
+  }, [pathname, replaceIfChanged])
 
   const hasActiveFilters =
     JSON.stringify(filters) !== JSON.stringify(EMPTY_FILTERS) ||

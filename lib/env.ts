@@ -22,16 +22,20 @@ function ensureTrailingSlash(value: string): string {
   return value.endsWith("/") ? value : `${value}/`
 }
 
+const resolvedApiUrl = stripTrailingSlash(
+  readEnv("NEXT_PUBLIC_API_URL", DEFAULT_API_URL) ?? DEFAULT_API_URL
+)
+const resolvedApiOrigin = stripTrailingSlash(resolvedApiUrl.replace(/\/api\/?$/, ""))
+
 export const env = {
-  apiUrl: stripTrailingSlash(
-    readEnv("NEXT_PUBLIC_API_URL", DEFAULT_API_URL) ?? DEFAULT_API_URL
-  ),
+  apiUrl: resolvedApiUrl,
   pusher: {
     key: readEnvRequired("NEXT_PUBLIC_PUSHER_APP_KEY"),
     cluster: readEnv("NEXT_PUBLIC_PUSHER_APP_CLUSTER", DEFAULT_PUSHER_CLUSTER) ?? DEFAULT_PUSHER_CLUSTER,
+    // Laravel serves broadcasting auth at `/broadcasting/auth` (not under `/api`).
     authUrl: readEnv(
       "NEXT_PUBLIC_PUSHER_AUTH_URL",
-      `${stripTrailingSlash(readEnv("NEXT_PUBLIC_API_URL", DEFAULT_API_URL) ?? DEFAULT_API_URL)}${DEFAULT_PUSHER_AUTH_PATH}`
+      `${resolvedApiOrigin}${DEFAULT_PUSHER_AUTH_PATH}`
     ) ?? "",
     forceTLS: (readEnv("NEXT_PUBLIC_PUSHER_FORCE_TLS", "true") ?? "true").toLowerCase() !== "false",
   },
@@ -57,11 +61,29 @@ export const env = {
 
 export function getBroadcastingAuthUrl(): string {
   if (env.pusher.authUrl) return env.pusher.authUrl
-  return `${env.apiUrl}${DEFAULT_PUSHER_AUTH_PATH}`
+  return `${getApiOrigin()}${DEFAULT_PUSHER_AUTH_PATH}`
 }
 
 export function getApiBaseUrl(path = ""): string {
   if (!path) return ensureTrailingSlash(env.apiUrl)
   if (path.startsWith("/")) return `${env.apiUrl}${path}`
   return `${env.apiUrl}/${path}`
+}
+
+/** Origin without trailing `/api` — used for Sanctum routes like `/user`. */
+export function getApiOrigin(): string {
+  return stripTrailingSlash(env.apiUrl.replace(/\/api\/?$/, ""))
+}
+
+/**
+ * Build a URL for Sanctum/root routes (e.g. `/user`).
+ * In the browser, go through the Next `/api/sanctum-proxy` route to avoid CORS
+ * (Laravel only applies CORS to `/api/*` on the backend).
+ */
+export function getOriginUrl(path = ""): string {
+  const normalized = !path ? "" : path.startsWith("/") ? path : `/${path}`
+  if (typeof window !== "undefined") {
+    return `${window.location.origin}/api/sanctum-proxy${normalized}`
+  }
+  return `${getApiOrigin()}${normalized}`
 }

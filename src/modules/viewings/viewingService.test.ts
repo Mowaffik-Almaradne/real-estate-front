@@ -82,7 +82,20 @@ vi.mock("@/lib/apiClient", () => ({
       this.status = status
       this.errors = errors
     }
+    isNotFound() {
+      return this.status === 404
+    }
+    isForbidden() {
+      return this.status === 403
+    }
+    isUnauthorized() {
+      return this.status === 401
+    }
   },
+}))
+
+vi.mock("@/lib/auth", () => ({
+  getStoredUser: () => ({ id: 1, name: "Tester", email: "t@example.com", roles: [] }),
 }))
 
 function makeViewing(overrides: Record<string, unknown> = {}) {
@@ -106,6 +119,12 @@ function makeViewing(overrides: Record<string, unknown> = {}) {
 describe("viewingService HTTP contracts", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    try {
+      window.sessionStorage.clear()
+      window.localStorage.clear()
+    } catch {
+      void 0
+    }
   })
 
   describe("list / listMine / getSchedule", () => {
@@ -119,13 +138,38 @@ describe("viewingService HTTP contracts", () => {
       })
       expect(mockGet).toHaveBeenCalledWith("/dashboard/viewings", {
         params: { status: "pending", property_id: 10, page: 2, perPage: 25 },
+        silent: true,
       })
     })
 
-    it("listMine GETs /dashboard/viewings/my", async () => {
-      mockGet.mockResolvedValueOnce({ data: { data: [] } })
-      await viewingService.listMine()
-      expect(mockGet).toHaveBeenCalledWith("/dashboard/viewings/my", { params: {} })
+    it("listMine GETs /dashboard/viewings first (avoids /my 403 for publishers)", async () => {
+      mockGet.mockResolvedValueOnce({ data: { data: [makeViewing()] } })
+      const result = await viewingService.listMine()
+      expect(mockGet).toHaveBeenCalledWith("/dashboard/viewings", {
+        params: {},
+        silent: true,
+      })
+      expect(mockGet).not.toHaveBeenCalledWith(
+        "/dashboard/viewings/my",
+        expect.anything()
+      )
+      expect(result.source).toBe("viewings")
+      expect(result.denied).toBe(false)
+    })
+
+    it("listMine falls back to /viewings/my when list is forbidden", async () => {
+      const { ApiClientError } = await import("@/lib/apiClient")
+      mockGet
+        .mockRejectedValueOnce(new ApiClientError(403, "Forbidden"))
+        .mockResolvedValueOnce({ data: { data: [makeViewing()] } })
+
+      const result = await viewingService.listMine()
+      expect(mockGet.mock.calls.map((c) => c[0])).toEqual([
+        "/dashboard/viewings",
+        "/dashboard/viewings/my",
+      ])
+      expect(result.source).toBe("viewings/my")
+      expect(result.data).toHaveLength(1)
     })
 
     it("getSchedule GETs /dashboard/viewings/schedule", async () => {
@@ -133,6 +177,7 @@ describe("viewingService HTTP contracts", () => {
       await viewingService.getSchedule({ from: "2026-09-01", to: "2026-09-30" })
       expect(mockGet).toHaveBeenCalledWith("/dashboard/viewings/schedule", {
         params: { from: "2026-09-01", to: "2026-09-30" },
+        silent: true,
       })
     })
   })
@@ -143,13 +188,17 @@ describe("viewingService HTTP contracts", () => {
       await viewingService.getCalendar("2026-09-01", "2026-09-30")
       expect(mockGet).toHaveBeenCalledWith("/dashboard/viewings/calendar", {
         params: { from: "2026-09-01", to: "2026-09-30" },
+        silent: true,
       })
     })
 
     it("omits from/to when not provided", async () => {
       mockGet.mockResolvedValueOnce({ data: { data: [] } })
       await viewingService.getCalendar()
-      expect(mockGet).toHaveBeenCalledWith("/dashboard/viewings/calendar", { params: {} })
+      expect(mockGet).toHaveBeenCalledWith("/dashboard/viewings/calendar", {
+        params: {},
+        silent: true,
+      })
     })
   })
 
@@ -158,7 +207,7 @@ describe("viewingService HTTP contracts", () => {
       const viewing = makeViewing({ id: 7 })
       mockGet.mockResolvedValueOnce({ data: { data: viewing } })
       const result = await viewingService.getById(7)
-      expect(mockGet).toHaveBeenCalledWith("/dashboard/viewings/7")
+      expect(mockGet).toHaveBeenCalledWith("/dashboard/viewings/7", { silent: true })
       expect(result).toEqual(viewing)
     })
   })

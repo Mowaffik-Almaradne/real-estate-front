@@ -1,4 +1,4 @@
-import { apiClient, type ApiResponse } from "./apiClient"
+import { apiClient, getApiData, type ApiResponse } from "./apiClient"
 import { ContactPreference, PublisherType, UserStatus } from "@/types/enums"
 import type { AuthSessionDto, CityDto, CountryDto } from "@/types/dto"
 
@@ -10,9 +10,52 @@ export type AuthResponse = AuthSessionDto
 export type Country = CountryDto
 export type City = CityDto
 
-export async function getCountries(page: number = 1, perPage: number = 10): Promise<ApiResponse<Country[]>> {
-  const response = await apiClient.get<ApiResponse<Country[]>>(`/location/countries?page=${page}&perPage=${perPage}`)
-  return response.data
+type SearchItem = {
+  id: number
+  name: string
+  country_id?: number | null
+}
+
+function normalizeCountry(item: SearchItem): Country {
+  return {
+    id: item.id,
+    name: item.name,
+    code: null,
+    phone_code: null,
+    is_active: true,
+    created_at: "",
+    updated_at: "",
+  }
+}
+
+function normalizeCity(item: SearchItem, countryId: number | null = null): City {
+  return {
+    id: item.id,
+    name: item.name,
+    country_id: item.country_id ?? countryId,
+    state_province: null,
+    postal_code: null,
+    is_active: true,
+    created_at: "",
+    updated_at: "",
+  }
+}
+
+/**
+ * Public country lookup.
+ * OpenAPI `/api/location/countries` requires auth on this backend (403).
+ * Use `/api/search/countries` (documented as public `GET /api/search/{type}`).
+ */
+export async function getCountries(
+  _page: number = 1,
+  _perPage: number = 10
+): Promise<ApiResponse<Country[]>> {
+  const response = await apiClient.get<ApiResponse<SearchItem[]>>("/search/countries")
+  const items = getApiData(response) ?? []
+  return {
+    ...response.data,
+    data: items.map(normalizeCountry),
+  }
 }
 
 export async function saveCountry(
@@ -36,14 +79,21 @@ export async function saveCountry(
   return response.data
 }
 
+/**
+ * Public city lookup via `/api/search/cities`.
+ */
 export async function getCities(): Promise<City[]> {
-  const response = await apiClient.get<ApiResponse<City[]>>("/location/cities")
-  return response.data.data
+  const response = await apiClient.get<ApiResponse<SearchItem[]>>("/search/cities")
+  const items = getApiData(response) ?? []
+  return items.map((item) => normalizeCity(item))
 }
 
 export async function getCitiesByCountry(countryId: number): Promise<City[]> {
-  const response = await apiClient.get<ApiResponse<City[]>>(`/location/cities?country_id=${countryId}`)
-  return response.data.data
+  const response = await apiClient.get<ApiResponse<SearchItem[]>>("/search/cities", {
+    params: { country_id: countryId },
+  })
+  const items = getApiData(response) ?? []
+  return items.map((item) => normalizeCity(item, countryId))
 }
 
 export async function saveCity(

@@ -1,118 +1,96 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { describe, it, expect, beforeEach, vi } from "vitest"
 import { savedSearchService } from "../services/savedSearchService"
-import { EMPTY_SAVED_SEARCH_FILTERS, type SavedSearch } from "../types"
+import { EMPTY_SAVED_SEARCH_FILTERS } from "../types"
 
-const mockGet = vi.fn()
-const mockPost = vi.fn()
-const mockPatch = vi.fn()
-const mockDelete = vi.fn()
+const STORAGE_KEY = "re:saved-searches:v1"
 
-vi.mock("@/lib/apiClient", () => ({
-  apiClient: {
-    get: (...args: unknown[]) => mockGet(...args),
-    post: (...args: unknown[]) => mockPost(...args),
-    patch: (...args: unknown[]) => mockPatch(...args),
-    delete: (...args: unknown[]) => mockDelete(...args),
-  },
-  getApiData: <T,>(response: { data: unknown }) => {
-    const payload = response.data as { data?: T }
-    return (payload?.data ?? (response.data as T)) as T
-  },
-  ApiClientError: class extends Error {},
-}))
-
-function makeSavedSearch(overrides: Partial<SavedSearch> = {}): SavedSearch {
-  return {
-    id: 1,
-    name: "Apartments in Riyadh",
-    filters: { ...EMPTY_SAVED_SEARCH_FILTERS, search: "Riyadh" },
-    alert_enabled: true,
-    alert_frequency: "daily",
-    new_matches_count: 0,
-    last_match_at: null,
-    created_at: "2026-08-11T10:00:00Z",
-    updated_at: "2026-08-11T10:00:00Z",
-    ...overrides,
+function installMemoryStorage() {
+  const store = new Map<string, string>()
+  const memoryStorage: Storage = {
+    get length() {
+      return store.size
+    },
+    clear() {
+      store.clear()
+    },
+    getItem(key: string) {
+      return store.has(key) ? store.get(key)! : null
+    },
+    key(index: number) {
+      return Array.from(store.keys())[index] ?? null
+    },
+    removeItem(key: string) {
+      store.delete(key)
+    },
+    setItem(key: string, value: string) {
+      store.set(key, String(value))
+    },
   }
+  vi.stubGlobal("localStorage", memoryStorage)
+  Object.defineProperty(window, "localStorage", {
+    configurable: true,
+    value: memoryStorage,
+  })
 }
 
-describe("savedSearchService", () => {
+describe("savedSearchService (localStorage)", () => {
   beforeEach(() => {
-    mockGet.mockReset()
-    mockPost.mockReset()
-    mockPatch.mockReset()
-    mockDelete.mockReset()
+    installMemoryStorage()
   })
 
   describe("list", () => {
-    it("returns array from { data: [] } response", async () => {
-      const items = [makeSavedSearch({ id: 1 }), makeSavedSearch({ id: 2, name: "Villas" })]
-      mockGet.mockResolvedValueOnce({ data: { data: items } })
-      const result = await savedSearchService.list()
-      expect(mockGet).toHaveBeenCalledWith("/saved-searches")
-      expect(result).toHaveLength(2)
-      expect(result[0].id).toBe(1)
+    it("returns empty array when nothing is stored", async () => {
+      await expect(savedSearchService.list()).resolves.toEqual([])
     })
 
-    it("returns array from bare array response", async () => {
-      const items = [makeSavedSearch()]
-      mockGet.mockResolvedValueOnce({ data: items })
+    it("returns stored searches", async () => {
+      const created = await savedSearchService.create({
+        name: "Villas",
+        filters: { ...EMPTY_SAVED_SEARCH_FILTERS, search: "villa" },
+      })
       const result = await savedSearchService.list()
       expect(result).toHaveLength(1)
-    })
-
-    it("returns empty array when payload missing", async () => {
-      mockGet.mockResolvedValueOnce({ data: null })
-      const result = await savedSearchService.list()
-      expect(result).toEqual([])
+      expect(result[0]).toMatchObject({ id: created.id, name: "Villas" })
     })
   })
 
   describe("create", () => {
-    it("POSTs to /saved-searches and unwraps data", async () => {
-      const created = makeSavedSearch({ id: 42, name: "Houses" })
-      mockPost.mockResolvedValueOnce({ data: { data: created } })
+    it("persists a new saved search", async () => {
       const result = await savedSearchService.create({
         name: "Houses",
         filters: EMPTY_SAVED_SEARCH_FILTERS,
         alert_enabled: true,
         alert_frequency: "instant",
       })
-      expect(mockPost).toHaveBeenCalledWith("/saved-searches", {
-        name: "Houses",
-        filters: EMPTY_SAVED_SEARCH_FILTERS,
-        alert_enabled: true,
-        alert_frequency: "instant",
-      })
-      expect(result.id).toBe(42)
-    })
-
-    it("accepts bare-object response", async () => {
-      const created = makeSavedSearch({ id: 7 })
-      mockPost.mockResolvedValueOnce({ data: created })
-      const result = await savedSearchService.create({
-        name: "test",
-        filters: EMPTY_SAVED_SEARCH_FILTERS,
-      })
-      expect(result.id).toBe(7)
+      expect(result.id).toBeGreaterThan(0)
+      expect(result.name).toBe("Houses")
+      expect(result.alert_frequency).toBe("instant")
+      const raw = window.localStorage.getItem(STORAGE_KEY)
+      expect(raw).toContain("Houses")
     })
   })
 
   describe("update", () => {
-    it("PATCHes /saved-searches/{id} and unwraps data", async () => {
-      const updated = makeSavedSearch({ id: 5, alert_enabled: false })
-      mockPatch.mockResolvedValueOnce({ data: { data: updated } })
-      const result = await savedSearchService.update(5, { alert_enabled: false })
-      expect(mockPatch).toHaveBeenCalledWith("/saved-searches/5", { alert_enabled: false })
-      expect(result.alert_enabled).toBe(false)
+    it("updates alert flags on an existing search", async () => {
+      const created = await savedSearchService.create({
+        name: "Apt",
+        filters: EMPTY_SAVED_SEARCH_FILTERS,
+      })
+      const updated = await savedSearchService.update(created.id, { alert_enabled: false })
+      expect(updated.alert_enabled).toBe(false)
+      const listed = await savedSearchService.list()
+      expect(listed[0].alert_enabled).toBe(false)
     })
   })
 
   describe("remove", () => {
-    it("DELETEs /saved-searches/{id}", async () => {
-      mockDelete.mockResolvedValueOnce({})
-      await savedSearchService.remove(9)
-      expect(mockDelete).toHaveBeenCalledWith("/saved-searches/9")
+    it("deletes a saved search", async () => {
+      const created = await savedSearchService.create({
+        name: "Gone",
+        filters: EMPTY_SAVED_SEARCH_FILTERS,
+      })
+      await savedSearchService.remove(created.id)
+      await expect(savedSearchService.list()).resolves.toEqual([])
     })
   })
 })

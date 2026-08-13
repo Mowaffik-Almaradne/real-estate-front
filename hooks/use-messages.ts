@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { chatService } from "@/services/chat-service"
 import { useChatChannel } from "@/hooks/use-chat-channel"
 import { getEcho, getPusherConnection } from "@/lib/echo"
-import type { MessageDto, MessageType } from "@/types/chat"
+import type { MessageDto, MessageType, SendMessageRequest } from "@/types/chat"
 
 export interface UseMessagesResult {
   messages: MessageDto[]
@@ -13,7 +13,11 @@ export interface UseMessagesResult {
   isConnected: boolean
   hasMore: boolean
   error: string | null
-  sendMessage: (body: string, type?: MessageType) => Promise<MessageDto>
+  sendMessage: (
+    body: string,
+    type?: MessageType,
+    extras?: Partial<Pick<SendMessageRequest, "attachment_url" | "reply_to_id">>
+  ) => Promise<MessageDto>
   loadMore: () => Promise<void>
   refresh: () => Promise<void>
 }
@@ -32,6 +36,10 @@ const INITIAL_FETCH_STATE: FetchState = {
   page: 1,
   isLoading: false,
   error: null,
+}
+
+function sortByIdAsc(messages: MessageDto[]): MessageDto[] {
+  return [...messages].sort((a, b) => a.id - b.id)
 }
 
 export function useMessages(roomId: number | null): UseMessagesResult {
@@ -77,12 +85,12 @@ export function useMessages(roomId: number | null): UseMessagesResult {
 
     const fetchInitial = async () => {
       try {
-        const data = await chatService.getMessages(roomId, 1)
+        const data = await chatService.getLatestMessages(roomId)
         if (cancelled) return
         setState({
-          messages: [...data.data],
-          hasMore: data.meta.current_page * data.meta.per_page < data.meta.total,
-          page: 1,
+          messages: sortByIdAsc([...data.data]),
+          hasMore: data.page > 1,
+          page: data.page,
           isLoading: false,
           error: null,
         })
@@ -95,7 +103,7 @@ export function useMessages(roomId: number | null): UseMessagesResult {
       }
     }
 
-    fetchInitial()
+    void fetchInitial()
 
     return () => {
       cancelled = true
@@ -105,7 +113,7 @@ export function useMessages(roomId: number | null): UseMessagesResult {
   const handleMessageReceived = useCallback((msg: MessageDto) => {
     setState((prev) => {
       if (prev.messages.some((m) => m.id === msg.id)) return prev
-      return { ...prev, messages: [msg, ...prev.messages] }
+      return { ...prev, messages: sortByIdAsc([...prev.messages, msg]) }
     })
   }, [])
 
@@ -126,7 +134,11 @@ export function useMessages(roomId: number | null): UseMessagesResult {
   })
 
   const sendMessage = useCallback(
-    async (body: string, type: MessageType = "text"): Promise<MessageDto> => {
+    async (
+      body: string,
+      type: MessageType = "text",
+      extras?: Partial<Pick<SendMessageRequest, "attachment_url" | "reply_to_id">>
+    ): Promise<MessageDto> => {
       if (roomId === null) {
         throw new Error("No room selected")
       }
@@ -137,10 +149,14 @@ export function useMessages(roomId: number | null): UseMessagesResult {
       }
 
       try {
-        const sent = await chatService.sendMessage(roomId, { body: trimmed, type })
+        const sent = await chatService.sendMessage(roomId, {
+          body: trimmed,
+          type,
+          ...extras,
+        })
         setState((prev) => {
           if (prev.messages.some((m) => m.id === sent.id)) return prev
-          return { ...prev, messages: [sent, ...prev.messages] }
+          return { ...prev, messages: sortByIdAsc([...prev.messages, sent]) }
         })
         return sent
       } catch (err) {
@@ -154,19 +170,20 @@ export function useMessages(roomId: number | null): UseMessagesResult {
 
   const loadMore = useCallback(async () => {
     if (roomId === null || isLoadingMore || !stateRef.current.hasMore) return
+    if (stateRef.current.page <= 1) return
 
     try {
       setIsLoadingMore(true)
-      const nextPage = stateRef.current.page + 1
-      const data = await chatService.getMessages(roomId, nextPage)
+      const olderPage = stateRef.current.page - 1
+      const data = await chatService.getMessages(roomId, olderPage)
       setState((prev) => {
         const existing = new Set(prev.messages.map((m) => m.id))
         const incoming = data.data.filter((m) => !existing.has(m.id))
         return {
           ...prev,
-          messages: [...prev.messages, ...incoming],
-          page: nextPage,
-          hasMore: nextPage * data.meta.per_page < data.meta.total,
+          messages: sortByIdAsc([...incoming, ...prev.messages]),
+          page: olderPage,
+          hasMore: olderPage > 1,
         }
       })
     } catch (err) {
@@ -184,11 +201,11 @@ export function useMessages(roomId: number | null): UseMessagesResult {
 
     try {
       setState((prev) => ({ ...prev, isLoading: true, error: null }))
-      const data = await chatService.getMessages(roomId, 1)
+      const data = await chatService.getLatestMessages(roomId)
       setState({
-        messages: [...data.data],
-        hasMore: data.meta.current_page * data.meta.per_page < data.meta.total,
-        page: 1,
+        messages: sortByIdAsc([...data.data]),
+        hasMore: data.page > 1,
+        page: data.page,
         isLoading: false,
         error: null,
       })

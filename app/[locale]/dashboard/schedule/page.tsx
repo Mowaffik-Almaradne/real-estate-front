@@ -11,11 +11,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 import { viewingService } from "src/modules/viewings/services/viewingService"
+import { canListViewingsFromApi } from "src/modules/viewings/localViewings"
 import { ViewingList } from "src/modules/viewings/components/ViewingList"
 import { ViewingCalendar } from "src/modules/viewings/components/ViewingCalendar"
 import { ViewingDetailDialog } from "src/modules/viewings/components/ViewingDetailDialog"
 import { useViewingRealtime } from "src/modules/viewings/hooks/useViewingRealtime"
 import { ApiClientError } from "@/lib/apiClient"
+import { useAuth } from "src/context/AuthContext"
 import { ViewingStatus } from "@/types/enums"
 import type { CalendarViewingEvent, PropertyViewingDto } from "@/types/dto"
 
@@ -27,6 +29,7 @@ function isoDate(value: Date): string {
 
 export default function ViewingsSchedulePage() {
   const tNav = useTranslations("nav")
+  const { user } = useAuth()
   const [viewings, setViewings] = useState<PropertyViewingDto[]>([])
   const [events, setEvents] = useState<CalendarViewingEvent[]>([])
   const [loading, setLoading] = useState(true)
@@ -38,6 +41,7 @@ export default function ViewingsSchedulePage() {
   const [monthDate, setMonthDate] = useState<Date>(new Date())
   const [selectedEvent, setSelectedEvent] = useState<CalendarViewingEvent | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
+  const permissionDenied = !canListViewingsFromApi(user)
 
   const fetchList = useCallback(async () => {
     setLoading(true)
@@ -49,6 +53,7 @@ export default function ViewingsSchedulePage() {
       const message =
         err instanceof ApiClientError ? err.message : "Failed to load schedule"
       setError(message)
+      setViewings([])
     } finally {
       setLoading(false)
     }
@@ -58,12 +63,14 @@ export default function ViewingsSchedulePage() {
     try {
       const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1)
       const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0)
-      const result = await viewingService.getCalendar(isoDate(monthStart), isoDate(monthEnd))
+      const from = fromDate || isoDate(monthStart)
+      const to = toDate || isoDate(monthEnd)
+      const result = await viewingService.getCalendar(from, to)
       setEvents(result)
     } catch {
       setEvents([])
     }
-  }, [monthDate])
+  }, [monthDate, fromDate, toDate])
 
   useEffect(() => {
     if (view !== "list") return
@@ -130,6 +137,17 @@ export default function ViewingsSchedulePage() {
             </div>
           </CardHeader>
         </Card>
+
+        {permissionDenied && (
+          <Card className="border-amber-500/30 bg-amber-500/5">
+            <CardContent className="p-4 text-sm text-muted-foreground">
+              Schedule calendar needs <code className="text-xs">viewings.list</code> (OpenAPI{" "}
+              <code className="text-xs">GET /api/dashboard/viewings/calendar</code>). Your role
+              gets 403 without it — showing local bookings only. Ask an admin to grant that
+              permission.
+            </CardContent>
+          </Card>
+        )}
 
         {view === "calendar" && (
           <Card>

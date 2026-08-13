@@ -11,19 +11,22 @@ export const cityService = {
     const params = new URLSearchParams()
     if (filters.search) params.append("search", filters.search)
     if (filters.page) params.append("page", String(filters.page))
-    if (filters.per_page) params.append("per_page", String(filters.per_page))
+    // OpenAPI uses `perPage`; keep `per_page` as a fallback alias.
+    const perPage = filters.perPage ?? filters.per_page
+    if (perPage) params.append("perPage", String(perPage))
 
     const response = await apiClient.get<ApiResponse<CityDto[]>>(`/location/cities?${params.toString()}`)
     const pagination = getApiPagination(response)
+    const data = getApiData(response) ?? []
     return {
-      data: getApiData(response),
+      data,
       pagination: pagination ?? {
-        total: 0,
-        per_page: 0,
-        current_page: 1,
+        total: data.length,
+        per_page: perPage ?? data.length,
+        current_page: filters.page ?? 1,
         last_page: 1,
-        from: null,
-        to: null,
+        from: data.length ? 1 : null,
+        to: data.length || null,
       },
     }
   },

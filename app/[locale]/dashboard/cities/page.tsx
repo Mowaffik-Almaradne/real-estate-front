@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react"
 
@@ -22,10 +22,7 @@ export default function CitiesPage() {
     countries,
     selectedCountry,
     loading,
-    loadingMore,
     error,
-    page,
-    hasMore,
     loadCountries,
     selectCountry,
     addCountry,
@@ -40,32 +37,26 @@ export default function CitiesPage() {
     addCity,
     updateCity,
     removeCity,
+    resetCities,
   } = useCities()
-
-  const countryListRef = useRef<HTMLDivElement>(null)
 
   const [countryDialogOpen, setCountryDialogOpen] = useState(false)
   const [cityDialogOpen, setCityDialogOpen] = useState(false)
   const [editingCountry, setEditingCountry] = useState<Country | null>(null)
   const [editingCity, setEditingCity] = useState<City | null>(null)
 
-  const handleCountryScroll = useCallback(() => {
-    if (
-      countryListRef.current &&
-      !loading &&
-      !loadingMore &&
-      hasMore
-    ) {
-      const { scrollTop, scrollHeight, clientHeight } = countryListRef.current
-      if (scrollTop + clientHeight >= scrollHeight - 50) {
-        void loadCountries(page + 1)
-      }
+  const selectedCountryId = selectedCountry?.id ?? null
+
+  useEffect(() => {
+    if (selectedCountryId == null) {
+      resetCities()
+      return
     }
-  }, [loading, loadingMore, page, hasMore, loadCountries])
+    void loadCities(selectedCountryId)
+  }, [selectedCountryId, loadCities, resetCities])
 
   const handleCountryClick = (country: Country) => {
     selectCountry(country)
-    void loadCities(country.id)
   }
 
   const handleEditCountry = (country: Country) => {
@@ -81,9 +72,6 @@ export default function CitiesPage() {
 
   const handleDeleteCountry = (id: number) => {
     removeCountry(id)
-    if (selectedCountry?.id === id) {
-      removeCity(id)
-    }
   }
 
   const handleAddCountry = () => {
@@ -139,7 +127,7 @@ export default function CitiesPage() {
               <p className="text-sm text-muted-foreground">{error}</p>
             </div>
             <Button
-              onClick={() => void loadCountries(1)}
+              onClick={() => void loadCountries()}
               variant="outline"
               size="sm"
             >
@@ -158,15 +146,9 @@ export default function CitiesPage() {
         <CountryPanel
           countries={countries}
           selected={selectedCountry}
-          loading={loading}
-          loadingMore={loadingMore}
-          hasMore={hasMore}
-          listScrollRef={countryListRef}
-          onScroll={handleCountryScroll}
           onSelect={handleCountryClick}
           onEdit={handleEditCountry}
           onDelete={handleDeleteCountry}
-          onLoadMore={() => void loadCountries(page + 1)}
           dialogOpen={countryDialogOpen}
           editing={editingCountry}
           onDialogOpenChange={(open: boolean) => {

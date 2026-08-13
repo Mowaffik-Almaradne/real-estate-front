@@ -25,7 +25,7 @@ function ChatContent() {
   const t = useTranslations("chat")
   const tCommon = useTranslations("common")
   const roomIdParam = searchParams.get("room")
-  const { rooms, isLoading, error, moveRoomToTop } = useChatRoomsReact()
+  const { rooms, isLoading, error, moveRoomToTop, refreshRooms } = useChatRoomsReact()
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(
     roomIdParam ? Number(roomIdParam) : null
   )
@@ -42,6 +42,32 @@ function ChatContent() {
     sendMessage: sendMessageRequest,
     loadMore: handleLoadMoreMessages,
   } = useMessages(selectedRoomId)
+
+  useEffect(() => {
+    if (!roomIdParam) return
+    const id = Number(roomIdParam)
+    if (Number.isFinite(id) && id > 0) {
+      setSelectedRoomId(id)
+    }
+  }, [roomIdParam])
+
+  // Deep-link: ensure the selected room exists in the sidebar list
+  useEffect(() => {
+    if (!selectedRoomId || isLoading) return
+    if (rooms.some((r) => r.id === selectedRoomId)) return
+
+    let cancelled = false
+    void chatService
+      .getRoom(selectedRoomId)
+      .then(() => {
+        if (!cancelled) void refreshRooms()
+      })
+      .catch(() => undefined)
+
+    return () => {
+      cancelled = true
+    }
+  }, [selectedRoomId, rooms, isLoading, refreshRooms])
 
   useEffect(() => {
     if (!selectedRoomId) return
@@ -61,7 +87,10 @@ function ChatContent() {
     }) => {
       if (!selectedRoomId) return
       try {
-        const sent = await sendMessageRequest(params.body, params.type)
+        const sent = await sendMessageRequest(params.body, params.type, {
+          attachment_url: params.attachmentUrl,
+          reply_to_id: params.replyTo?.id,
+        })
         moveRoomToTop(selectedRoomId, sent)
         setReplyTo(null)
       } catch {
@@ -131,7 +160,11 @@ function ChatContent() {
                   <MessageSquare className="size-10 text-primary/50" />
                 </div>
                 <h2 className="mb-2 text-xl font-bold text-foreground">{t("title")}</h2>
-                <p>{t("selectRoom")}</p>
+                <p>
+                  {selectedRoomId && !selectedRoom && !isLoading
+                    ? tCommon("loading")
+                    : t("selectRoom")}
+                </p>
               </div>
             </div>
           )}

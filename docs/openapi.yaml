@@ -346,7 +346,7 @@ paths:
           required: true
           schema:
             type: string
-            enum: [properties, offices, ads, categories]
+            enum: [properties, offices, ads, categories, countries, cities, users]
         - name: search
           in: query
           schema:
@@ -465,8 +465,10 @@ paths:
   /api/location/countries:
     get:
       tags: [Location]
-      summary: List all countries (public)
-      security: []
+      summary: List all countries (admin / authenticated)
+      description: >
+        Requires authentication on the current backend (returns 403 when logged out).
+        For public dropdowns use `GET /api/search/countries` instead.
       parameters:
         - name: search
           in: query
@@ -1265,6 +1267,11 @@ paths:
     post:
       tags: [Dashboard Properties]
       summary: Toggle favorite/love status for a property
+      description: |
+        Documented in backend OpenAPI. On the current local backend this route
+        requires elevated permissions (403 for normal users).
+        The consumer route `/api/properties/{id}/favorite` is not implemented (404).
+        Frontend persists favorites locally and loads cards via `/api/properties/{id}/details`.
       parameters:
         - name: id
           in: path
@@ -1273,6 +1280,8 @@ paths:
       responses:
         '200':
           description: Favorite toggled
+        '403':
+          description: User lacks dashboard/publisher permissions
 
   /api/dashboard/my-properties:
     get:
@@ -1307,6 +1316,8 @@ paths:
       responses:
         '200':
           description: Viewings list
+        '403':
+          description: Missing permission `viewings.list` (see permissions-reference)
     post:
       tags: [Viewings]
       summary: Book a property viewing
@@ -1319,6 +1330,8 @@ paths:
       responses:
         '201':
           description: Viewing booked
+        '403':
+          description: Missing permission `viewings.create`
 
   /api/dashboard/viewings/my:
     get:
@@ -1327,6 +1340,8 @@ paths:
       responses:
         '200':
           description: My viewings
+        '403':
+          description: Missing permission `viewings.list`
 
   /api/dashboard/viewings/calendar:
     get:
@@ -1972,7 +1987,10 @@ paths:
                   description: For property inquiry chat
                 type:
                   type: string
-                  enum: [private, group]
+                  enum: [private, property]
+                  description: >
+                    Backend accepts `private` (requires recipient_id) or `property`
+                    (requires property_id). `group` is rejected.
       responses:
         '201':
           description: Room created

@@ -9,10 +9,28 @@ vi.mock("@/lib/apiClient", () => ({
     get: (...args: unknown[]) => mockGet(...args),
   },
   getApiData: <T,>(response: { data: unknown }) => {
-    const payload = response.data as { data?: T }
-    return (payload?.data ?? (response.data as T)) as T
+    const payload = response.data as { data?: T } | T
+    if (payload && typeof payload === "object" && "data" in (payload as object)) {
+      return (payload as { data: T }).data
+    }
+    return payload as T
   },
-  ApiClientError: class extends Error {},
+  ApiClientError: class extends Error {
+    status: number
+    constructor(status: number, message: string) {
+      super(message)
+      this.status = status
+    }
+    isNotFound() {
+      return this.status === 404
+    }
+    isForbidden() {
+      return this.status === 403
+    }
+    isUnauthorized() {
+      return this.status === 401
+    }
+  },
 }))
 
 function makeSummary(): AnalyticsSummary {
@@ -52,6 +70,7 @@ function makeSummary(): AnalyticsSummary {
         status: "approved",
       },
     ],
+    source: "advanced",
   }
 }
 
@@ -60,42 +79,57 @@ describe("analyticsService", () => {
     mockGet.mockReset()
   })
 
-  it("GETs /analytics/owner/summary with range param", async () => {
+  it("uses /publisher/analytics only when advanced_analytics is enabled", async () => {
     const summary = makeSummary()
-    mockGet.mockResolvedValueOnce({ data: { data: summary } })
+    mockGet
+      .mockResolvedValueOnce({ data: { data: { enabled: true } } })
+      .mockResolvedValueOnce({ data: { data: summary } })
+
     const result = await analyticsService.getOwnerSummary("7d")
-    expect(mockGet).toHaveBeenCalledWith("/analytics/owner/summary", {
+    expect(mockGet).toHaveBeenNthCalledWith(1, "/subscription/features/advanced_analytics", {
+      params: undefined,
+      silent: true,
+    })
+    expect(mockGet).toHaveBeenNthCalledWith(2, "/publisher/analytics", {
       params: { range: "7d" },
+      silent: true,
     })
-    expect(result).toEqual(summary)
-  })
-
-  it("includes property_id when provided", async () => {
-    mockGet.mockResolvedValueOnce({ data: makeSummary() })
-    await analyticsService.getOwnerSummary("30d", 42)
-    expect(mockGet).toHaveBeenCalledWith("/analytics/owner/summary", {
-      params: { range: "30d", property_id: 42 },
-    })
-  })
-
-  it("returns null when payload missing", async () => {
-    mockGet.mockResolvedValueOnce({ data: null })
-    const result = await analyticsService.getOwnerSummary()
-    expect(result).toBeNull()
-  })
-
-  it("accepts bare-object response", async () => {
-    const summary = makeSummary()
-    mockGet.mockResolvedValueOnce({ data: summary })
-    const result = await analyticsService.getOwnerSummary()
     expect(result?.total_views).toBe(1200)
+    expect(result?.source).toBe("advanced")
   })
 
-  it("defaults range to 30d", async () => {
-    mockGet.mockResolvedValueOnce({ data: makeSummary() })
+  it("skips analytics + trader routes and uses basic publisher statistics", async () => {
+    mockGet
+      .mockResolvedValueOnce({ data: { data: { enabled: false } } })
+      .mockResolvedValueOnce({
+        data: { data: { views: 10, favorites: 4, contacts: 2 } },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          data: [{ id: 9, name: "Loft", views: 10, favorites: 4, status: "approved" }],
+        },
+      })
+
+    const result = await analyticsService.getOwnerSummary("30d")
+    const urls = mockGet.mock.calls.map((call) => call[0])
+    expect(urls).toEqual([
+      "/subscription/features/advanced_analytics",
+      "/publisher/statistics",
+      "/dashboard/my-properties",
+    ])
+    expect(result?.source).toBe("basic")
+    expect(result?.total_views).toBe(10)
+    expect(result?.top_properties[0]?.id).toBe(9)
+  })
+
+  it("defaults range to 30d for advanced analytics", async () => {
+    mockGet
+      .mockResolvedValueOnce({ data: { data: { enabled: true } } })
+      .mockResolvedValueOnce({ data: makeSummary() })
     await analyticsService.getOwnerSummary()
-    expect(mockGet).toHaveBeenCalledWith("/analytics/owner/summary", {
+    expect(mockGet).toHaveBeenCalledWith("/publisher/analytics", {
       params: { range: "30d" },
+      silent: true,
     })
   })
 })

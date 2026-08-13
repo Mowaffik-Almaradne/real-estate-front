@@ -793,6 +793,7 @@
     "topProperties": "Top performing properties",
     "noData": "No data yet",
     "empty": "No analytics data available yet.",
+    "basicNotice": "Detailed analytics need the advanced_analytics plan feature. Showing basic publisher statistics instead.",
     "retry": "Retry"
   },
   "pwa": {

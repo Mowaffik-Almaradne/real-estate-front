@@ -50,6 +50,8 @@ export interface AnalyticsSummary {
   readonly viewings_change: number
   readonly series: readonly MetricSeries[]
   readonly top_properties: readonly PropertyAnalytics[]
+  /** advanced = /publisher/analytics; basic = /publisher/statistics (+ my-properties) */
+  readonly source?: "advanced" | "basic"
 }
 
 export interface AnalyticsSummaryResponse {

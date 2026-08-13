@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useState, use } from "react"
 import dynamic from "next/dynamic"
-import { useParams, useRouter } from "next/navigation"
-import Image from "next/image"
+import { useParams } from "next/navigation"
 import {
   ArrowLeft,
   Pencil,
@@ -68,6 +67,7 @@ const ReviewsSection = dynamic(
 import { VerifiedBadge } from "src/modules/auth"
 import { FavoriteButton } from "src/modules/properties/components/FavoriteButton"
 import { PropertyStatusBanner } from "src/modules/properties/components/PropertyStatusBanner"
+import { useRouter } from "@/i18n/navigation"
 
 interface User {
   id: number
@@ -101,6 +101,8 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
       setProperty(data)
     } catch (error) {
       console.error("Failed to fetch property:", error)
+      setProperty(null)
+      toast.error("Failed to load property details")
     } finally {
       setLoading(false)
     }
@@ -141,8 +143,9 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
     try {
       setCreatingChat(true)
       const chatRoom = await chatService.createRoom({
-        type: "group",
+        type: "property",
         property_id: property.id,
+        recipient_id: property.publisher?.id,
       })
       toast.success("Chat created successfully")
       router.push(`/chat?room=${chatRoom.id}`)
@@ -179,11 +182,26 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
 
   const canEdit = currentUser?.id === property.publisher?.id
   const images: { url: string; thumb: string }[] = [
-    ...(property.main_image ? [{ url: property.main_image, thumb: property.main_image_thumb ?? property.main_image }] : []),
-    ...(property.gallery || []).map((img) => ({ url: img.url, thumb: img.url_thumb ?? img.url })),
+    ...(property.main_image
+      ? [
+          {
+            url: property.main_image,
+            thumb: property.main_image_thumb || property.main_image,
+          },
+        ]
+      : []),
+    ...(property.gallery || [])
+      .filter((img) => Boolean(img?.url))
+      .map((img) => ({ url: img.url, thumb: img.url_thumb || img.url })),
   ]
 
   const priceValue = Number(property.price) || 0
+  const mapLat = Number(property.latitude)
+  const mapLng = Number(property.longitude)
+  const hasMap =
+    Number.isFinite(mapLat) &&
+    Number.isFinite(mapLng) &&
+    !(mapLat === 0 && mapLng === 0)
   const shareUrl =
     typeof window !== "undefined"
       ? `${window.location.origin}/${locale}/properties/${property.id}`
@@ -232,11 +250,10 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                 {images.length > 0 ? (
                   <div className="space-y-3">
                     <div className="relative aspect-video bg-muted overflow-hidden">
-                      <Image
-                        src={images[selectedImageIndex || 0]?.url ?? images[0]?.url ?? ""}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={images[selectedImageIndex || 0]?.url ?? images[0]?.url}
                         alt={property.name}
-                        width={1280}
-                        height={720}
                         className="object-cover w-full h-full"
                       />
                     </div>
@@ -252,7 +269,12 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                 : "border-transparent opacity-70 hover:opacity-100"
                             }`}
                           >
-                            <Image src={img.thumb ?? img.url} alt="" width={160} height={120} className="object-cover w-full h-full" />
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={img.thumb || img.url}
+                              alt=""
+                              className="object-cover w-full h-full"
+                            />
                           </button>
                         ))}
                       </div>
@@ -399,16 +421,16 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
           </Card>
         )}
 
-        {typeof property.latitude === "number" && typeof property.longitude === "number" && (
+        {hasMap && (
           <Card className="bg-card border-border/50">
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-bold">Location</CardTitle>
             </CardHeader>
             <CardContent>
               <PropertyMap
-                latitude={property.latitude}
-                longitude={property.longitude}
-                label={`${property.city.name}, ${property.country.name}`}
+                latitude={mapLat}
+                longitude={mapLng}
+                label={`${property.city?.name ?? ""}, ${property.country?.name ?? ""}`}
                 height={320}
               />
             </CardContent>
@@ -424,6 +446,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
 
         <ReviewsSection
           propertyId={property.id}
+          officeId={property.publisher?.id}
           initialAverage={property.publisher?.average_rating}
           initialCount={property.publisher?.reviews_count}
         />
@@ -475,7 +498,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
         </DialogContent>
       </Dialog>
 
-      {selectedImageIndex !== null && (
+      {selectedImageIndex !== null && images[selectedImageIndex] && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
           onClick={() => setSelectedImageIndex(null)}
@@ -486,11 +509,10 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
           >
             <X className="size-8" />
           </button>
-          <Image
-            src={images[selectedImageIndex ?? 0]?.url ?? ""}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={images[selectedImageIndex]?.url}
             alt={property.name}
-            width={1280}
-            height={720}
             className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg"
             onClick={(e) => e.stopPropagation()}
           />

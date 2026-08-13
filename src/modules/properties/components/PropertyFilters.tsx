@@ -75,12 +75,12 @@ export function PropertyFilters({
 }: PropertyFiltersProps) {
   const t = useTranslations("property.filters")
   const tCommon = useTranslations("common")
+  const isControlled = value !== undefined
   const [internal, setInternal] = useState<PropertyFilterValues>({
     ...EMPTY_FILTERS,
     ...initial,
   })
-  const values = value ?? internal
-  const setValues = setInternal
+  const values = isControlled ? value : internal
   const [countries, setCountries] = useState<Country[]>([])
   const [cities, setCities] = useState<City[]>([])
   const [loadingCountries, setLoadingCountries] = useState(false)
@@ -135,26 +135,24 @@ export function PropertyFilters({
     }
   }, [values.country_id])
 
-  useEffect(() => {
-    const handle = window.setTimeout(() => {
-      onChange(values)
-    }, 300)
-    return () => window.clearTimeout(handle)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values])
+  const commit = (next: PropertyFilterValues) => {
+    if (!isControlled) setInternal(next)
+    onChange(next)
+  }
 
-  const update = <K extends keyof PropertyFilterValues>(key: K, value: PropertyFilterValues[K]) => {
-    setValues((current) => {
-      const next = { ...current, [key]: value }
-      if (key === "country_id" && value !== current.country_id) {
-        next.city_id = null
-      }
-      return next
-    })
+  const update = <K extends keyof PropertyFilterValues>(
+    key: K,
+    nextValue: PropertyFilterValues[K]
+  ) => {
+    const next = { ...values, [key]: nextValue }
+    if (key === "country_id" && nextValue !== values.country_id) {
+      next.city_id = null
+    }
+    commit(next)
   }
 
   const clear = () => {
-    setValues({ ...EMPTY_FILTERS })
+    commit({ ...EMPTY_FILTERS })
   }
 
   return (

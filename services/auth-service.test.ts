@@ -131,17 +131,31 @@ describe("authService HTTP contracts", () => {
   })
 
   describe("me", () => {
-    it("GETs /user and unwraps the data envelope", async () => {
+    it("GETs proxied /user and unwraps the data envelope", async () => {
       mockGet.mockResolvedValueOnce({ data: { data: user } })
       const result = await authService.me()
-      expect(mockGet).toHaveBeenCalledWith("/user")
+      expect(mockGet).toHaveBeenCalledWith(
+        expect.stringMatching(/\/api\/sanctum-proxy\/user$/)
+      )
+      expect(result).toEqual(user)
+    })
+
+    it("accepts a flat user payload from Sanctum", async () => {
+      mockGet.mockResolvedValueOnce({ data: user })
+      const result = await authService.me()
       expect(result).toEqual(user)
     })
   })
 
   describe("register", () => {
     it("POSTs the new user payload to /auth/register and returns the session", async () => {
-      mockPost.mockResolvedValueOnce({ data: { data: session } })
+      mockPost.mockResolvedValueOnce({
+        data: {
+          success: true,
+          message: "Registered Successfully",
+          data: { user, token: "tok" },
+        },
+      })
       const result = await authService.register({
         name: "Jane",
         email: "jane@example.com",
@@ -154,11 +168,11 @@ describe("authService HTTP contracts", () => {
         password: "secret123",
         password_confirmation: "secret123",
       })
-      expect(result).toEqual(session.data)
+      expect(result).toEqual({ user, token: "tok" })
     })
 
     it("forwards the optional phone field when provided", async () => {
-      mockPost.mockResolvedValueOnce({ data: { data: session } })
+      mockPost.mockResolvedValueOnce({ data: { data: { user, token: "tok" } } })
       await authService.register({
         name: "Jane",
         email: "jane@example.com",
@@ -168,6 +182,17 @@ describe("authService HTTP contracts", () => {
       })
       const [, payload] = mockPost.mock.calls[0]
       expect(payload).toMatchObject({ phone: "+212600000001" })
+    })
+
+    it("also accepts a double-wrapped session payload", async () => {
+      mockPost.mockResolvedValueOnce({ data: { data: session } })
+      const result = await authService.register({
+        name: "Jane",
+        email: "jane@example.com",
+        password: "secret123",
+        password_confirmation: "secret123",
+      })
+      expect(result).toEqual(session.data)
     })
   })
 

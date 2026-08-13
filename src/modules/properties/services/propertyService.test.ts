@@ -162,7 +162,11 @@ describe("propertyService HTTP contracts", () => {
     mockGet.mockResolvedValueOnce({ data: { data } })
     const result = await propertyService.getRandomProperties()
     expect(mockGet).toHaveBeenCalledWith("/properties/random")
-    expect(result).toEqual(data)
+    expect(result).toHaveLength(1)
+    expect(result[0]).toMatchObject({
+      id: 1,
+      main_image: expect.stringContaining("images.unsplash.com"),
+    })
   })
 
   it("calls the my-properties endpoint with perPage", async () => {
@@ -174,35 +178,49 @@ describe("propertyService HTTP contracts", () => {
     })
   })
 
-  it("getFavorites sends filters to the dashboard/favorites endpoint", async () => {
-    await propertyService.getFavorites({
-      search: "villa",
-      property_type: PropertyType.villa,
-      page: 1,
-      perPage: 12,
-    })
-    const [url, config] = mockGet.mock.calls[0]
-    expect(url).toBe("/dashboard/favorites")
-    expect(config).toMatchObject({
-      params: expect.objectContaining({
-        search: "villa",
-        property_type: "villa",
-        perPage: "12",
-        page: "1",
-      }),
+  it("getFavorites loads property details for local favorite ids", async () => {
+    mockGet
+      .mockResolvedValueOnce({
+        data: {
+          data: {
+            id: 14,
+            name: "Villa",
+            property_type: "villa",
+            main_image: null,
+          },
+        },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          data: {
+            id: 9,
+            name: "Apt",
+            property_type: "apartment",
+            main_image: null,
+          },
+        },
+      })
+    const result = await propertyService.getFavorites({ ids: [14, 9], page: 1, perPage: 12 })
+    expect(mockGet).toHaveBeenCalledWith("/properties/14/details")
+    expect(mockGet).toHaveBeenCalledWith("/properties/9/details")
+    expect(result.data).toHaveLength(2)
+    expect(result.data[0]).toMatchObject({
+      id: 14,
+      is_favorited: true,
+      main_image: expect.stringContaining("images.unsplash.com"),
     })
   })
 
-  it("getFavorites unwraps the data envelope", async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: [{ id: 1, name: "Villa" }] } })
-    const result = await propertyService.getFavorites()
-    expect(result.data).toEqual([{ id: 1, name: "Villa" }])
-  })
-
-  it("getFavorites falls back to empty pagination when missing", async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: [] } })
-    const result = await propertyService.getFavorites()
+  it("getFavorites returns empty when no local ids", async () => {
+    const result = await propertyService.getFavorites({ page: 1, perPage: 12 })
+    expect(mockGet).not.toHaveBeenCalled()
     expect(result.data).toEqual([])
     expect(result.pagination.total).toBe(0)
+  })
+
+  it("toggleFavorite works locally without calling missing API routes", async () => {
+    const result = await propertyService.toggleFavorite(14, false)
+    expect(mockPost).not.toHaveBeenCalled()
+    expect(result).toEqual({ favorited: true, favorites_count: 0 })
   })
 })

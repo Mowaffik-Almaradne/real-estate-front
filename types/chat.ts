@@ -1,4 +1,4 @@
-export type ChatRoomType = "private" | "group"
+export type ChatRoomType = "private" | "group" | "property"
 
 export type MessageType = "text" | "image" | "file"
 
@@ -144,6 +144,7 @@ export interface PaginatedMessages {
     readonly current_page: number
     readonly total: number
     readonly per_page: number
+    readonly last_page?: number
   }
 }
 

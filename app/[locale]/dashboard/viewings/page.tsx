@@ -38,6 +38,8 @@ export default function MyViewingsPage() {
   const [monthDate, setMonthDate] = useState<Date>(new Date())
   const [selectedEvent, setSelectedEvent] = useState<CalendarViewingEvent | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
+  const [perspective, setPerspective] = useState<"buyer" | "publisher">("buyer")
+  const [permissionNotice, setPermissionNotice] = useState(false)
 
   const fetchList = useCallback(async () => {
     setLoading(true)
@@ -45,10 +47,14 @@ export default function MyViewingsPage() {
     try {
       const response = await viewingService.listMine({ status })
       setViewings(response.data)
+      setPerspective(response.source === "viewings" ? "publisher" : "buyer")
+      setPermissionNotice(response.denied)
     } catch (err) {
       const message =
         err instanceof ApiClientError ? err.message : "Failed to load viewings"
       setError(message)
+      setViewings([])
+      setPermissionNotice(false)
     } finally {
       setLoading(false)
     }
@@ -128,6 +134,16 @@ export default function MyViewingsPage() {
   return (
     <DashboardLayout title={tNav("viewings")} actions={headerActions}>
       <div className="space-y-6">
+        {permissionNotice && (
+          <Card className="border-amber-500/30 bg-amber-500/5">
+            <CardContent className="p-4 text-sm text-muted-foreground">
+              Your account is missing the <code className="text-xs">viewings.list</code> permission,
+              so the API returns 403 for <code className="text-xs">/api/dashboard/viewings</code>.
+              Showing locally saved bookings instead. Ask an admin to grant{" "}
+              <code className="text-xs">viewings.list</code> (see OpenAPI / permissions reference).
+            </CardContent>
+          </Card>
+        )}
         {view === "calendar" && (
           <Card>
             <CardHeader>
@@ -166,7 +182,7 @@ export default function MyViewingsPage() {
             viewings={viewings}
             loading={loading}
             error={error}
-            perspective="buyer"
+            perspective={perspective}
             onFilterChange={(filters) => setStatus(filters.status)}
             onUpdated={(updated) =>
               setViewings((current) =>

@@ -87,8 +87,8 @@ export interface PropertyPublisher {
   email?: string
   avatar_url?: string | null
   is_verified?: boolean
-  average_rating?: number | null
-  reviews_count?: number
+  average_rating?: number | string | null
+  reviews_count?: number | string
   publisher_type?: "individual" | "office" | null
 }
 
@@ -110,8 +110,8 @@ export interface PropertyDto extends Timestamps {
   city: { id: number; name: string }
   state_province?: string | null
   postal_code?: string | null
-  latitude?: number | null
-  longitude?: number | null
+  latitude?: number | string | null
+  longitude?: number | string | null
   main_image: string | null
   main_image_thumb?: string | null
   gallery: PropertyGalleryItem[]

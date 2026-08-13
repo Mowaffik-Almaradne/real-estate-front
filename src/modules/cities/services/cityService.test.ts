@@ -49,7 +49,7 @@ describe("cityService HTTP contracts", () => {
       expect(mockGet).toHaveBeenCalledWith("/location/cities?")
     })
 
-    it("appends search, page, and per_page query params", async () => {
+    it("appends search, page, and perPage query params", async () => {
       mockGet.mockResolvedValueOnce({ data: { data: [] } })
       await cityService.getCities({ search: "Casablanca", page: 2, per_page: 25 })
       const url = mockGet.mock.calls[0][0] as string
@@ -57,7 +57,8 @@ describe("cityService HTTP contracts", () => {
       const params = new URLSearchParams(url.split("?")[1])
       expect(params.get("search")).toBe("Casablanca")
       expect(params.get("page")).toBe("2")
-      expect(params.get("per_page")).toBe("25")
+      expect(params.get("perPage")).toBe("25")
+      expect(params.get("per_page")).toBeNull()
     })
 
     it("omits params that are not provided", async () => {
@@ -67,7 +68,7 @@ describe("cityService HTTP contracts", () => {
       const params = new URLSearchParams(url.split("?")[1])
       expect(params.get("search")).toBe("Fez")
       expect(params.get("page")).toBeNull()
-      expect(params.get("per_page")).toBeNull()
+      expect(params.get("perPage")).toBeNull()
     })
 
     it("returns the unwrapped data array alongside the pagination envelope", async () => {

@@ -36,7 +36,8 @@ export function useChatChannel({
       return
     }
 
-    const channelName = `private-chat.${roomId}`
+    // Echo.private() already prefixes `private-` → channel is `private-chat.{id}`
+    const channelName = `chat.${roomId}`
     const privateChannel = echo.private(channelName)
 
     privateChannel

@@ -53,6 +53,14 @@ describe("useFilterUrlState", () => {
     )
   })
 
+  it("does not replace when the URL is unchanged", () => {
+    const { result } = renderHook(() => useFilterUrlState())
+    act(() => {
+      result.current.setFilters({ ...EMPTY_FILTERS })
+    })
+    expect(mockRouterReplace).not.toHaveBeenCalled()
+  })
+
   it("omits default sort from URL", () => {
     const { result } = renderHook(() => useFilterUrlState())
     act(() => {

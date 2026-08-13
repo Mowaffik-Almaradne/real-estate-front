@@ -59,25 +59,36 @@ function FavoritesPageInner() {
   const debouncedSort = useDebounce(filters.sort, 250)
 
   const buildApiFilters = useCallback(
-    (page: number): PropertyFiltersApi => {
+    (page: number): PropertyFiltersApi & { ids: number[] } => {
       const [sortBy, sortOrder] = debouncedSort.split(":") as [string, "asc" | "desc"]
-      return filterToParams({
-        search: debouncedFilters.search || undefined,
-        property_type: debouncedFilters.property_type || undefined,
-        type_of_contract: debouncedFilters.type_of_contract || undefined,
-        country_id: debouncedFilters.country_id ?? undefined,
-        city_id: debouncedFilters.city_id ?? undefined,
-        rooms_min: debouncedFilters.rooms ? Number(debouncedFilters.rooms) : undefined,
-        bathrooms_min: debouncedFilters.bathrooms ? Number(debouncedFilters.bathrooms) : undefined,
-        price_min: debouncedFilters.min_price ? Number(debouncedFilters.min_price) : undefined,
-        price_max: debouncedFilters.max_price ? Number(debouncedFilters.max_price) : undefined,
+      return {
+        ...filterToParams({
+          search: debouncedFilters.search || undefined,
+          property_type: debouncedFilters.property_type || undefined,
+          type_of_contract: debouncedFilters.type_of_contract || undefined,
+          country_id: debouncedFilters.country_id ?? undefined,
+          city_id: debouncedFilters.city_id ?? undefined,
+          rooms_min: debouncedFilters.rooms ? Number(debouncedFilters.rooms) : undefined,
+          bathrooms_min: debouncedFilters.bathrooms
+            ? Number(debouncedFilters.bathrooms)
+            : undefined,
+          price_min: debouncedFilters.min_price
+            ? Number(debouncedFilters.min_price)
+            : undefined,
+          price_max: debouncedFilters.max_price
+            ? Number(debouncedFilters.max_price)
+            : undefined,
+          page,
+          perPage: PER_PAGE,
+          sort_by: sortBy,
+          sort_order: sortOrder,
+        }),
+        ids: Array.from(favorites.ids),
         page,
         perPage: PER_PAGE,
-        sort_by: sortBy,
-        sort_order: sortOrder,
-      })
+      }
     },
-    [debouncedFilters, debouncedSort]
+    [debouncedFilters, debouncedSort, favorites.ids]
   )
 
   const fetchFavorites = useCallback(
@@ -86,10 +97,7 @@ function FavoritesPageInner() {
       else setLoading(true)
       try {
         const response = await propertyService.getFavorites(buildApiFilters(page))
-        const filtered = append
-          ? response.data.filter((p) => favorites.isFavorite(p.id))
-          : response.data
-        setData((current) => (append ? [...current, ...filtered] : filtered))
+        setData((current) => (append ? [...current, ...response.data] : response.data))
         setPagination(response.pagination)
       } catch (error) {
         console.error("Failed to fetch favorites:", error)
@@ -99,7 +107,6 @@ function FavoritesPageInner() {
         setLoadingMore(false)
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [buildApiFilters, tFav]
   )
 

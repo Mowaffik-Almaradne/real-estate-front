@@ -1,18 +1,47 @@
-import { renderHook, act } from "@testing-library/react"
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { renderHook, act, waitFor } from "@testing-library/react"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { FavoritesProvider, useFavorites } from "src/modules/favorites/FavoritesProvider"
 
 function wrapper({ children }: { children: React.ReactNode }) {
   return <FavoritesProvider>{children}</FavoritesProvider>
 }
 
+function createMemoryStorage(): Storage {
+  const store = new Map<string, string>()
+  return {
+    get length() {
+      return store.size
+    },
+    clear() {
+      store.clear()
+    },
+    getItem(key: string) {
+      return store.has(key) ? store.get(key)! : null
+    },
+    key(index: number) {
+      return Array.from(store.keys())[index] ?? null
+    },
+    removeItem(key: string) {
+      store.delete(key)
+    },
+    setItem(key: string, value: string) {
+      store.set(key, String(value))
+    },
+  }
+}
+
 describe("FavoritesProvider", () => {
   beforeEach(() => {
-    window.localStorage.clear()
+    const memoryStorage = createMemoryStorage()
+    vi.stubGlobal("localStorage", memoryStorage)
+    Object.defineProperty(window, "localStorage", {
+      configurable: true,
+      value: memoryStorage,
+    })
   })
 
   afterEach(() => {
-    window.localStorage.clear()
+    vi.unstubAllGlobals()
   })
 
   it("returns empty state initially", () => {
@@ -84,8 +113,11 @@ describe("FavoritesProvider", () => {
     expect(result.current.count).toBe(0)
   })
 
-  it("persists to localStorage after hydration", () => {
+  it("persists to localStorage after hydration", async () => {
     const { result } = renderHook(() => useFavorites(), { wrapper })
+    await waitFor(() => {
+      expect(result.current.isHydrated).toBe(true)
+    })
     act(() => {
       result.current.add(42)
     })
@@ -95,9 +127,12 @@ describe("FavoritesProvider", () => {
     expect(parsed).toContain(42)
   })
 
-  it("rehydrates from localStorage on mount", () => {
+  it("rehydrates from localStorage after mount", async () => {
     window.localStorage.setItem("favorites:ids:v1", JSON.stringify([7, 8]))
     const { result } = renderHook(() => useFavorites(), { wrapper })
+    await waitFor(() => {
+      expect(result.current.isHydrated).toBe(true)
+    })
     expect(result.current.count).toBe(2)
     expect(result.current.isFavorite(7)).toBe(true)
     expect(result.current.isFavorite(8)).toBe(true)

@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { ChatRoomDto } from "@/types/chat"
 import { getCurrentUserId } from "@/lib/auth-utils"
 
@@ -38,8 +39,9 @@ function getInitials(name: string): string {
 function getRoomDisplayName(room: ChatRoomDto, currentUserId: number): string {
   if (room.name) return room.name
 
-  if (room.type === "private") {
-    const otherParticipant = room.participants.find((p) => p.id !== currentUserId)
+  const participants = room.participants ?? []
+  if (room.type === "private" || room.type === "property") {
+    const otherParticipant = participants.find((p) => p.id !== currentUserId)
     return otherParticipant?.name || "Unknown"
   }
 
@@ -50,8 +52,9 @@ function getRoomAvatar(room: ChatRoomDto, currentUserId: number): {
   imageUrl?: string
   initials?: string
 } {
-  if (room.type === "private") {
-    const otherParticipant = room.participants.find((p) => p.id !== currentUserId)
+  const participants = room.participants ?? []
+  if (room.type === "private" || room.type === "property") {
+    const otherParticipant = participants.find((p) => p.id !== currentUserId)
     if (otherParticipant?.avatar_url) {
       return { imageUrl: otherParticipant.avatar_url }
     }
@@ -102,10 +105,11 @@ export function ChatRoomList({
               >
                 <div className="relative flex-shrink-0">
                   {avatar.imageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                       src={avatar.imageUrl}
                       alt={displayName}
+                      width={40}
+                      height={40}
                       className="size-10 rounded-full object-cover"
                     />
                   ) : (
@@ -120,7 +124,7 @@ export function ChatRoomList({
                     <span
                       className={`
                         truncate font-medium
-                        ${room.unread_count > 0 ? "font-semibold" : ""}
+                        ${(room.unread_count ?? 0) > 0 ? "font-semibold" : ""}
                       `}
                     >
                       {displayName}
@@ -136,9 +140,9 @@ export function ChatRoomList({
                     <span className="truncate text-sm text-muted-foreground">
                       {getLastMessagePreview(room)}
                     </span>
-                    {room.unread_count > 0 && (
+                    {(room.unread_count ?? 0) > 0 && (
                       <span className="flex-shrink-0 flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-xs font-medium">
-                        {room.unread_count > 99 ? "99+" : room.unread_count}
+                        {(room.unread_count ?? 0) > 99 ? "99+" : room.unread_count}
                       </span>
                     )}
                   </div>

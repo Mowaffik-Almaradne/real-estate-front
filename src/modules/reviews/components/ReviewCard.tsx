@@ -101,13 +101,13 @@ export function ReviewCard({ review, onChanged, className }: ReviewCardProps) {
       {review.title && (
         <p className="text-sm font-semibold">{review.title}</p>
       )}
-      {review.body && (
+      {(review.body || review.comment) && (
         <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-          {review.body}
+          {review.body || review.comment}
         </p>
       )}
 
-      {!review.title && !review.body && (
+      {!review.title && !review.body && !review.comment && (
         <p className="inline-flex items-center gap-1 text-xs text-muted-foreground">
           <MessageSquare className="size-3" />
           {t("noContent")}

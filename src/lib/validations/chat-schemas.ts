@@ -2,7 +2,7 @@ import { z } from "zod"
 
 export const messageTypeEnum = z.enum(["text", "image", "file"])
 
-export const chatRoomTypeEnum = z.enum(["private", "group"])
+export const chatRoomTypeEnum = z.enum(["private", "group", "property"])
 
 export const sendMessageSchema = z
   .object({

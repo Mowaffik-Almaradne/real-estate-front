@@ -79,8 +79,17 @@ export default function PropertiesPage() {
 
   const fetchStatistics = useCallback(async () => {
     try {
-      const res = await apiClient.get("/dashboard/properties/statistics")
-      setStatistics(res.data.data)
+      const { propertyService } = await import("src/modules/properties/services/propertyService")
+      const stats = await propertyService.getStatistics()
+      setStatistics({
+        pending: stats.pending ?? 0,
+        approved: stats.approved ?? 0,
+        rejected: stats.rejected ?? 0,
+        suspended: stats.suspended ?? 0,
+        sold: stats.sold ?? 0,
+        archived: stats.archived ?? 0,
+        all: stats.all ?? 0,
+      })
     } catch (error) {
       console.error("Failed to fetch statistics:", error)
     }

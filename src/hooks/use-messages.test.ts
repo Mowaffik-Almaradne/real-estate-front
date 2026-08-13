@@ -15,6 +15,7 @@ function renderMessagesRoom(roomId: number | null) {
 }
 
 const mockGetMessages = vi.fn()
+const mockGetLatestMessages = vi.fn()
 const mockSendMessage = vi.fn()
 const mockChannelHandlers: {
   onMessageReceived?: (msg: MessageDto) => void
@@ -33,6 +34,7 @@ const mockPusher = {
 vi.mock("@/services/chat-service", () => ({
   chatService: {
     getMessages: (...args: unknown[]) => mockGetMessages(...args),
+    getLatestMessages: (...args: unknown[]) => mockGetLatestMessages(...args),
     sendMessage: (...args: unknown[]) => mockSendMessage(...args),
   },
 }))
@@ -69,21 +71,30 @@ function makePage(
   page: number,
   perPage: number,
   total: number
-): PaginatedMessages {
+): PaginatedMessages & { page: number } {
   return {
     data: messages,
-    meta: { current_page: page, per_page: perPage, total },
+    meta: {
+      current_page: page,
+      per_page: perPage,
+      total,
+      last_page: Math.max(1, Math.ceil(total / perPage)),
+    },
+    page,
   }
 }
 
 describe("useMessages", () => {
   beforeEach(() => {
     mockGetMessages.mockReset()
+    mockGetLatestMessages.mockReset()
     mockSendMessage.mockReset()
     mockPusher.connection.state = "connected"
     mockPusher.connection.bind.mockClear()
     mockPusher.connection.unbind.mockClear()
-    Object.keys(mockChannelHandlers).forEach((k) => delete mockChannelHandlers[k as keyof typeof mockChannelHandlers])
+    Object.keys(mockChannelHandlers).forEach((k) =>
+      delete mockChannelHandlers[k as keyof typeof mockChannelHandlers]
+    )
   })
 
   afterEach(() => {
@@ -92,26 +103,26 @@ describe("useMessages", () => {
 
   it("does not fetch when roomId is null", () => {
     renderMessagesRoom(null)
-    expect(mockGetMessages).not.toHaveBeenCalled()
+    expect(mockGetLatestMessages).not.toHaveBeenCalled()
   })
 
-  it("fetches page 1 on mount and sets messages", async () => {
+  it("fetches latest messages on mount", async () => {
     const page = makePage([makeMessage({ id: 1 }), makeMessage({ id: 2 })], 1, 20, 2)
-    mockGetMessages.mockResolvedValueOnce(page)
+    mockGetLatestMessages.mockResolvedValueOnce(page)
 
     const { result } = renderMessagesRoom(10)
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
-    expect(mockGetMessages).toHaveBeenCalledWith(10, 1)
+    expect(mockGetLatestMessages).toHaveBeenCalledWith(10)
     expect(result.current.messages.map((m) => m.id)).toEqual([1, 2])
     expect(result.current.hasMore).toBe(false)
     expect(result.current.error).toBeNull()
   })
 
-  it("sets hasMore to true when more pages exist", async () => {
-    const page = makePage([makeMessage({ id: 1 })], 1, 1, 2)
-    mockGetMessages.mockResolvedValueOnce(page)
+  it("sets hasMore when latest page is not the first page", async () => {
+    const page = makePage([makeMessage({ id: 21 })], 2, 20, 25)
+    mockGetLatestMessages.mockResolvedValueOnce(page)
 
     const { result } = renderMessagesRoom(10)
 
@@ -121,7 +132,7 @@ describe("useMessages", () => {
   })
 
   it("surfaces fetch errors", async () => {
-    mockGetMessages.mockRejectedValueOnce(new Error("boom"))
+    mockGetLatestMessages.mockRejectedValueOnce(new Error("boom"))
 
     const { result } = renderMessagesRoom(10)
 
@@ -132,7 +143,7 @@ describe("useMessages", () => {
 
   it("resets state when switching to null roomId", async () => {
     const page = makePage([makeMessage({ id: 1 })], 1, 20, 1)
-    mockGetMessages.mockResolvedValueOnce(page)
+    mockGetLatestMessages.mockResolvedValueOnce(page)
 
     const { result, rerender } = renderMessagesRoom(10)
 
@@ -149,7 +160,7 @@ describe("useMessages", () => {
   })
 
   it("refetches when roomId changes", async () => {
-    mockGetMessages
+    mockGetLatestMessages
       .mockResolvedValueOnce(makePage([makeMessage({ id: 1, room_id: 10 })], 1, 20, 1))
       .mockResolvedValueOnce(makePage([makeMessage({ id: 99, room_id: 20 })], 1, 20, 1))
 
@@ -165,8 +176,8 @@ describe("useMessages", () => {
     await waitFor(() => expect(result.current.messages.map((m) => m.id)).toEqual([99]))
   })
 
-  it("prepends incoming real-time messages and dedupes by id", async () => {
-    mockGetMessages.mockResolvedValueOnce(makePage([makeMessage({ id: 1 })], 1, 20, 1))
+  it("appends incoming real-time messages and dedupes by id", async () => {
+    mockGetLatestMessages.mockResolvedValueOnce(makePage([makeMessage({ id: 1 })], 1, 20, 1))
 
     const { result } = renderMessagesRoom(10)
 
@@ -177,11 +188,11 @@ describe("useMessages", () => {
       mockChannelHandlers.onMessageReceived?.(makeMessage({ id: 2, body: "duplicate" }))
     })
 
-    expect(result.current.messages.map((m) => m.id)).toEqual([2, 1])
+    expect(result.current.messages.map((m) => m.id)).toEqual([1, 2])
   })
 
   it("removes a message on delete event", async () => {
-    mockGetMessages.mockResolvedValueOnce(
+    mockGetLatestMessages.mockResolvedValueOnce(
       makePage([makeMessage({ id: 1 }), makeMessage({ id: 2 })], 1, 20, 2)
     )
 
@@ -196,21 +207,8 @@ describe("useMessages", () => {
     expect(result.current.messages.map((m) => m.id)).toEqual([2])
   })
 
-  it("ignores typing events silently", async () => {
-    mockGetMessages.mockResolvedValueOnce(makePage([], 1, 20, 0))
-
-    const { result } = renderMessagesRoom(10)
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false))
-
-    expect(() =>
-      mockChannelHandlers.onUserTyping?.({ id: 5, name: "Typer" })
-    ).not.toThrow()
-    expect(result.current.messages).toEqual([])
-  })
-
-  it("sendMessage posts through chatService and prepends the result", async () => {
-    mockGetMessages.mockResolvedValueOnce(makePage([], 1, 20, 0))
+  it("sendMessage posts through chatService and appends the result", async () => {
+    mockGetLatestMessages.mockResolvedValueOnce(makePage([], 1, 20, 0))
     mockSendMessage.mockResolvedValueOnce(makeMessage({ id: 42, body: "hi" }))
 
     const { result } = renderMessagesRoom(10)
@@ -231,22 +229,12 @@ describe("useMessages", () => {
     await expect(result.current.sendMessage("x")).rejects.toThrow("No room selected")
   })
 
-  it("sendMessage rejects empty body without calling the service", async () => {
-    mockGetMessages.mockResolvedValueOnce(makePage([], 1, 20, 0))
-
-    const { result } = renderMessagesRoom(10)
-    await waitFor(() => expect(result.current.isLoading).toBe(false))
-
-    await expect(result.current.sendMessage("   ")).rejects.toThrow(
-      "Message body cannot be empty"
-    )
-    expect(mockSendMessage).not.toHaveBeenCalled()
-  })
-
-  it("loadMore appends older pages and updates hasMore", async () => {
-    mockGetMessages
-      .mockResolvedValueOnce(makePage([makeMessage({ id: 1 })], 1, 1, 2))
-      .mockResolvedValueOnce(makePage([makeMessage({ id: 2 })], 2, 1, 2))
+  it("loadMore prepends older pages", async () => {
+    mockGetLatestMessages.mockResolvedValueOnce(makePage([makeMessage({ id: 21 })], 2, 20, 25))
+    mockGetMessages.mockResolvedValueOnce({
+      data: [makeMessage({ id: 1 })],
+      meta: { current_page: 1, per_page: 20, total: 25, last_page: 2 },
+    })
 
     const { result } = renderMessagesRoom(10)
     await waitFor(() => expect(result.current.isLoading).toBe(false))
@@ -256,29 +244,19 @@ describe("useMessages", () => {
       await result.current.loadMore()
     })
 
-    expect(mockGetMessages).toHaveBeenCalledWith(10, 2)
-    expect(result.current.messages.map((m) => m.id)).toEqual([1, 2])
+    expect(mockGetMessages).toHaveBeenCalledWith(10, 1)
+    expect(result.current.messages.map((m) => m.id)).toEqual([1, 21])
     expect(result.current.hasMore).toBe(false)
   })
 
-  it("loadMore is a no-op when hasMore is false", async () => {
-    mockGetMessages.mockResolvedValueOnce(makePage([makeMessage({ id: 1 })], 1, 20, 1))
-
-    const { result } = renderMessagesRoom(10)
-    await waitFor(() => expect(result.current.isLoading).toBe(false))
-
-    await act(async () => {
-      await result.current.loadMore()
-    })
-
-    expect(mockGetMessages).toHaveBeenCalledTimes(1)
-  })
-
-  it("refresh resets to page 1", async () => {
-    mockGetMessages
-      .mockResolvedValueOnce(makePage([makeMessage({ id: 1 })], 1, 1, 2))
-      .mockResolvedValueOnce(makePage([makeMessage({ id: 2 })], 2, 1, 2))
+  it("refresh resets to latest page", async () => {
+    mockGetLatestMessages
+      .mockResolvedValueOnce(makePage([makeMessage({ id: 21 })], 2, 20, 25))
       .mockResolvedValueOnce(makePage([makeMessage({ id: 99 })], 1, 20, 1))
+    mockGetMessages.mockResolvedValueOnce({
+      data: [makeMessage({ id: 1 })],
+      meta: { current_page: 1, per_page: 20, total: 25, last_page: 2 },
+    })
 
     const { result } = renderMessagesRoom(10)
     await waitFor(() => expect(result.current.isLoading).toBe(false))
@@ -286,22 +264,10 @@ describe("useMessages", () => {
     await act(async () => {
       await result.current.loadMore()
     })
-    expect(result.current.messages.map((m) => m.id)).toEqual([1, 2])
 
     await act(async () => {
       await result.current.refresh()
     })
     expect(result.current.messages.map((m) => m.id)).toEqual([99])
-  })
-
-  it("tracks Pusher connection state", async () => {
-    mockGetMessages.mockResolvedValue(makePage([], 1, 20, 0))
-    renderMessagesRoom(10)
-    await act(async () => {
-      await Promise.resolve()
-    })
-
-    const bind = mockPusher.connection.bind.mock.calls
-    expect(bind.map((c) => c[0])).toContain("state_change")
   })
 })

@@ -32,41 +32,39 @@ export function FavoriteButton({
   const [count, setCount] = useState(initialCount)
   const [busy, setBusy] = useState(false)
 
-  const toggle = useCallback(async () => {
-    if (busy) return
-    const previous = isFavorited
-    if (previous) {
-      favorites.remove(propertyId)
-    } else {
-      favorites.add(propertyId)
-    }
-    setBusy(true)
-    try {
-      const result = await propertyService.toggleFavorite(propertyId)
-      if (typeof result.favorites_count === "number") {
-        setCount(result.favorites_count)
+  const toggle = useCallback(
+    async (event?: React.MouseEvent) => {
+      event?.stopPropagation()
+      event?.preventDefault()
+      if (busy) return
+
+      const previous = isFavorited
+      const next = !previous
+      if (next) favorites.add(propertyId)
+      else favorites.remove(propertyId)
+
+      setBusy(true)
+      try {
+        const result = await propertyService.toggleFavorite(propertyId, previous)
+        if (typeof result.favorites_count === "number") {
+          setCount(result.favorites_count)
+        }
+        if (result.favorited) favorites.add(propertyId)
+        else favorites.remove(propertyId)
+        onChange?.(result.favorited, result.favorites_count)
+      } catch (error) {
+        // Local state already updated; only roll back on unexpected failures.
+        if (previous) favorites.add(propertyId)
+        else favorites.remove(propertyId)
+        const message =
+          error instanceof ApiClientError ? error.message : "Could not update favorite"
+        toast.error(message)
+      } finally {
+        setBusy(false)
       }
-      if (result.favorited) {
-        favorites.add(propertyId)
-      } else {
-        favorites.remove(propertyId)
-      }
-      onChange?.(result.favorited, result.favorites_count)
-    } catch (error) {
-      if (previous) {
-        favorites.add(propertyId)
-      } else {
-        favorites.remove(propertyId)
-      }
-      const message =
-        error instanceof ApiClientError
-          ? error.message
-          : "Could not update favorite"
-      toast.error(message)
-    } finally {
-      setBusy(false)
-    }
-  }, [busy, favorites, isFavorited, onChange, propertyId])
+    },
+    [busy, favorites, isFavorited, onChange, propertyId, count]
+  )
 
   if (variant === "full") {
     return (
@@ -74,13 +72,19 @@ export function FavoriteButton({
         type="button"
         variant={isFavorited ? "default" : "outline"}
         size="sm"
-        onClick={toggle}
+        onClick={(e) => void toggle(e)}
         disabled={busy}
         className={cn("gap-1.5", className)}
       >
-        {busy ? <Loader2 className="size-4 animate-spin" /> : <Heart className={cn("size-4", isFavorited && "fill-current")} />}
+        {busy ? (
+          <Loader2 className="size-4 animate-spin" />
+        ) : (
+          <Heart className={cn("size-4", isFavorited && "fill-current")} />
+        )}
         {isFavorited ? "Saved" : "Save"}
-        {typeof count === "number" && <span className="text-xs text-muted-foreground">({count})</span>}
+        {typeof count === "number" && (
+          <span className="text-xs text-muted-foreground">({count})</span>
+        )}
       </Button>
     )
   }
@@ -88,7 +92,7 @@ export function FavoriteButton({
   return (
     <button
       type="button"
-      onClick={toggle}
+      onClick={(e) => void toggle(e)}
       disabled={busy}
       aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
       aria-pressed={isFavorited}

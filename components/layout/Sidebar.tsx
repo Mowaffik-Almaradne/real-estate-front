@@ -59,7 +59,7 @@ const navItems: NavItem[] = [
 export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname()
   const { user } = useAuth()
-  const { count: favoritesCount } = useFavorites()
+  const { count: favoritesCount, isHydrated: favoritesHydrated } = useFavorites()
   const { unreadCount } = useNotificationsReact()
   const tNav = useTranslations("nav")
   const tBrand = useTranslations("brand")
@@ -113,7 +113,9 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             const isActive = pathname === target || (item.href !== "/" && pathname.startsWith(target + "/"))
             const badgeCount =
               item.showBadge === "favorites"
-                ? favoritesCount
+                ? favoritesHydrated
+                  ? favoritesCount
+                  : 0
                 : item.showBadge === "notifications"
                 ? unreadCount
                 : 0

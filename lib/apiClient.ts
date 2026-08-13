@@ -23,6 +23,12 @@ export type ApiRequestOptions = {
   signal?: AbortSignal
 }
 
+declare module "axios" {
+  export interface AxiosRequestConfig {
+    silent?: boolean
+  }
+}
+
 export class ApiClientError extends Error {
   readonly status: number
   readonly errors: Record<string, string[]>
@@ -100,8 +106,12 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     const apiError = toApiClientError(error)
+    const config = (error as AxiosError).config as
+      | (AxiosRequestConfig & { silent?: boolean })
+      | undefined
 
-    if (apiError.isUnauthorized()) {
+    // Optional/probe calls must not wipe the session or bounce to login.
+    if (apiError.isUnauthorized() && !config?.silent) {
       clearAuthSession()
       if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
         const callbackUrl = encodeURIComponent(window.location.pathname + window.location.search)
@@ -109,7 +119,6 @@ apiClient.interceptors.response.use(
       }
     }
 
-    const config = (error as AxiosError).config as (AxiosRequestConfig & { silent?: boolean }) | undefined
     if (!config?.silent) {
       emitError(apiError)
     }

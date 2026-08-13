@@ -1,13 +1,14 @@
 "use client"
 
 import { memo, useState, useCallback } from "react"
-import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { MapPin, Bed, Bath, Square, Eye } from "lucide-react"
 import { motion, type Variants } from "framer-motion"
 import { useIntersectionObserver, useReducedMotion } from "@/hooks"
 import { VerifiedBadge } from "src/modules/auth"
 import { FavoriteButton } from "src/modules/properties/components/FavoriteButton"
+import { resolvePropertyImage } from "@/lib/property-images"
+import { useRouter } from "@/i18n/navigation"
 
 interface Property {
   id: number
@@ -129,6 +130,18 @@ export const PropertyCard = memo(function PropertyCard({
       }
 
   const shouldAnimate = hasIntersected || priority
+  const imageSrc = resolvePropertyImage(property, { forceFallback: true })
+  const thumbSrc = resolvePropertyImage(property, {
+    preferThumb: true,
+    width: 640,
+    forceFallback: true,
+  })
+  const fullSrc = resolvePropertyImage(property, {
+    preferThumb: false,
+    width: 1200,
+    forceFallback: true,
+  })
+  const hasBackendImage = Boolean(property.main_image || property.main_image_thumb)
 
   return (
     <motion.article
@@ -156,14 +169,10 @@ export const PropertyCard = memo(function PropertyCard({
           />
         )}
 
-        {property.main_image_thumb && (
-          // The imperative preload-swap pattern (thumb shown first, full image
-          // preloaded via `new Image()` then swapped in via opacity) is
-          // intentional for the LCP path. next/image's loader doesn't expose
-          // the same control, so we keep <img> here intentionally.
+        {hasBackendImage && property.main_image_thumb ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={property.main_image_thumb}
+            src={thumbSrc}
             alt=""
             className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
               showFullImage ? "opacity-0" : "opacity-100"
@@ -180,12 +189,12 @@ export const PropertyCard = memo(function PropertyCard({
               }
             }}
           />
-        )}
+        ) : null}
 
-        {property.main_image && !property.main_image_thumb && (
+        {hasBackendImage && property.main_image && !property.main_image_thumb ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={property.main_image}
+            src={fullSrc}
             alt=""
             className={`h-full w-full object-cover transition-transform duration-700 ${
               isHovered ? "scale-105" : "scale-100"
@@ -194,16 +203,21 @@ export const PropertyCard = memo(function PropertyCard({
             decoding="async"
             onLoad={() => setIsLoaded(true)}
           />
-        )}
+        ) : null}
 
-        {!property.main_image_thumb && !property.main_image && (
-          <div
-            className="flex h-full w-full items-center justify-center bg-muted"
-            aria-hidden="true"
-          >
-            <div className="h-12 w-12 rounded-full bg-muted-foreground/20" />
-          </div>
-        )}
+        {!hasBackendImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imageSrc}
+            alt=""
+            className={`h-full w-full object-cover transition-transform duration-700 ${
+              isHovered ? "scale-105" : "scale-100"
+            } ${isLoaded ? "opacity-100" : "opacity-0"}`}
+            loading={priority ? "eager" : "lazy"}
+            decoding="async"
+            onLoad={() => setIsLoaded(true)}
+          />
+        ) : null}
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-60" />
 

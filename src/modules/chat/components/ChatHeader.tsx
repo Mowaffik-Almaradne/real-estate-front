@@ -25,10 +25,10 @@ export function ChatHeader({
 }: ChatHeaderProps) {
   const t = useTranslations("chat")
   const tCommon = useTranslations("common")
-  const otherParticipants = room.participants.filter((p) => p.id !== currentUserId)
+  const otherParticipants = (room.participants ?? []).filter((p) => p.id !== currentUserId)
   const displayName =
     room.name ||
-    (room.type === "private"
+    (room.type === "private" || room.type === "property"
       ? otherParticipants[0]?.name ?? tCommon("chat")
       : otherParticipants.map((p) => p.name).join(", "))
 
@@ -59,7 +59,7 @@ export function ChatHeader({
             {room.type === "group" ? (
               <>
                 <Users className="size-3" aria-hidden />
-                {t("participants", { count: room.participants.length })}
+                {t("participants", { count: (room.participants ?? []).length })}
               </>
             ) : (
               <ConnectionStatus isConnected={isConnected} />

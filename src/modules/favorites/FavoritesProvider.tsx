@@ -55,11 +55,9 @@ export function FavoritesProvider({
   children: ReactNode
   initialIds?: number[]
 }) {
-  const [ids, setIds] = useState<Set<number>>(() => {
-    if (typeof window === "undefined") return new Set(initialIds)
-    const stored = readStorage()
-    return stored.length > 0 ? new Set(stored) : new Set(initialIds)
-  })
+  // Start with the same seed on server + first client paint to avoid hydration mismatches.
+  const [ids, setIds] = useState<Set<number>>(() => new Set(initialIds))
+  const [isHydrated, setIsHydrated] = useState(false)
   const idsRef = useRef<Set<number>>(ids)
 
   useEffect(() => {
@@ -67,8 +65,17 @@ export function FavoritesProvider({
   }, [ids])
 
   useEffect(() => {
+    const stored = readStorage()
+    if (stored.length > 0) {
+      setIds(new Set(stored))
+    }
+    setIsHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isHydrated) return
     writeStorage(ids)
-  }, [ids])
+  }, [ids, isHydrated])
 
   const add = useCallback((id: number) => {
     setIds((prev) => {
@@ -116,7 +123,7 @@ export function FavoritesProvider({
     () => ({
       ids,
       count: ids.size,
-      isHydrated: true,
+      isHydrated,
       isFavorite,
       add,
       remove,
@@ -124,7 +131,7 @@ export function FavoritesProvider({
       hydrate,
       reset,
     }),
-    [ids, isFavorite, add, remove, toggle, hydrate, reset]
+    [ids, isHydrated, isFavorite, add, remove, toggle, hydrate, reset]
   )
 
   return <FavoritesContext.Provider value={value}>{children}</FavoritesContext.Provider>

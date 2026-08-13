@@ -1,13 +1,14 @@
 "use client"
 
-import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { Bath, Bed, Building, MapPin, Square } from "lucide-react"
+import { Bath, Bed, MapPin, Square } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { VerifiedBadge } from "src/modules/auth"
 import { FavoriteButton } from "src/modules/properties/components/FavoriteButton"
 import { statusLabel, statusTone } from "@/lib/format"
+import { resolvePropertyImage } from "@/lib/property-images"
+import { useRouter } from "@/i18n/navigation"
 
 export interface PropertyListItem {
   id: number
@@ -43,6 +44,7 @@ export function PropertyListRow({ property, onOpen }: PropertyListRowProps) {
   const t = useTranslations("property.card")
   const tStatus = useTranslations("status")
   const open = () => onOpen?.(property.id) ?? router.push(`/properties/${property.id}`)
+  const imageSrc = resolvePropertyImage(property, { forceFallback: true })
 
   return (
     <div
@@ -58,18 +60,12 @@ export function PropertyListRow({ property, onOpen }: PropertyListRowProps) {
       className="group flex flex-col gap-3 rounded-lg border bg-card p-3 transition hover:border-primary/30 hover:shadow-sm sm:flex-row sm:items-center"
     >
       <div className="relative h-32 w-full shrink-0 overflow-hidden rounded-md bg-muted sm:h-24 sm:w-36">
-        {property.main_image_thumb || property.main_image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={property.main_image_thumb || property.main_image!}
-            alt={property.name}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-            <Building className="size-6" />
-          </div>
-        )}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={imageSrc}
+          alt={property.name}
+          className="h-full w-full object-cover"
+        />
         <div className="absolute right-1 top-1">
           <FavoriteButton
             propertyId={property.id}

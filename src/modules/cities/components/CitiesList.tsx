@@ -134,6 +134,7 @@ export function CitiesList({ initialData }: CitiesListProps) {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search)
+      setPage(1)
     }, 300)
     return () => clearTimeout(timer)
   }, [search])
@@ -241,26 +242,33 @@ export function CitiesList({ initialData }: CitiesListProps) {
           </Table>
         </div>
 
-        <div className="flex items-center justify-end space-x-2 py-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-          >
-            Previous
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            Page {pagination.current_page} of {pagination.last_page}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage((p) => Math.min(pagination.last_page, p + 1))}
-            disabled={page >= pagination.last_page}
-          >
-            Next
-          </Button>
+        <div className="flex items-center justify-between gap-3 py-4">
+          <p className="text-sm text-muted-foreground">
+            {pagination.total > 0
+              ? `Showing ${pagination.from ?? 0}–${pagination.to ?? 0} of ${pagination.total}`
+              : "No results"}
+          </p>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1 || loading}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-muted-foreground tabular-nums">
+              Page {pagination.current_page} of {Math.max(1, pagination.last_page)}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.min(pagination.last_page, p + 1))}
+              disabled={page >= pagination.last_page || loading || pagination.last_page <= 1}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       </CardContent>
 
