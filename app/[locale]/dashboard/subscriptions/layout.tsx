@@ -24,14 +24,17 @@ export default function SubscriptionsLayout({ children }: SubscriptionsLayoutPro
   const isPlans = rest.includes("plans")
   const isFeatures = rest.includes("features")
   const isPlanFeatures = rest.includes("plan-features")
+  const isCoupons = rest.includes("coupons")
 
-  const pageTitle = isPlanFeatures
-    ? t("plans.detail.featuresTitle")
-    : isFeatures
-      ? t("features.title")
-      : isPlans
-        ? t("plans.title")
-        : t("plans.title")
+  const pageTitle = isCoupons
+    ? t("coupons.title")
+    : isPlanFeatures
+      ? t("plans.detail.featuresTitle")
+      : isFeatures
+        ? t("features.title")
+        : isPlans
+          ? t("plans.title")
+          : t("plans.title")
 
   const tabs = [
     {
@@ -43,6 +46,11 @@ export default function SubscriptionsLayout({ children }: SubscriptionsLayoutPro
       href: `/${locale}/dashboard/subscriptions/features`,
       label: t("features.title"),
       active: isFeatures,
+    },
+    {
+      href: `/${locale}/dashboard/subscriptions/coupons`,
+      label: t("coupons.title"),
+      active: isCoupons,
     },
   ]
 
