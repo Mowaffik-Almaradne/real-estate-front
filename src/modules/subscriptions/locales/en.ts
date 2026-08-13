@@ -177,6 +177,41 @@ export const subscriptionsEn = {
       remove: "Remove coupon",
     },
   },
+  checkout: {
+    title: "Checkout",
+    subtitle: "Confirm your subscription plan and complete checkout.",
+    missingPlan: "No plan selected for checkout.",
+    planNotFound: "We couldn't find that plan.",
+    backToPlans: "Browse plans",
+    review: {
+      title: "Plan review",
+      days: "days",
+      features: "Included features",
+    },
+    summary: {
+      title: "Order summary",
+      subtotal: "Subtotal",
+      discount: "Discount",
+      total: "Total",
+    },
+    paymentMethod: {
+      label: "Payment method",
+      stripe: "Credit card (Stripe)",
+      stripeHint: "Pay securely via Stripe — you will be redirected to the Stripe checkout page.",
+      balance: "Account balance",
+      balanceHint: "Charge your existing wallet balance. The subscription activates immediately.",
+    },
+    submit: "Pay {amount}",
+    completed: {
+      title: "Subscription activated",
+      detail: "Your subscription (id: {id}) is now active.",
+      viewDashboard: "Status: active",
+      goToSubscription: "View current subscription",
+    },
+    error: {
+      generic: "Could not start checkout. Please try again.",
+    },
+  },
 }
 
 export type SubscriptionsMessages = typeof subscriptionsEn

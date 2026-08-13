@@ -179,4 +179,39 @@ export const subscriptionsAr: SubscriptionsMessages = {
       remove: "إزالة الكوبون",
     },
   },
+  checkout: {
+    title: "إتمام الشراء",
+    subtitle: "أكّد باقة الاشتراك وأكمل عملية الدفع.",
+    missingPlan: "لم يتم اختيار باقة لإتمام الشراء.",
+    planNotFound: "تعذّر العثور على هذه الباقة.",
+    backToPlans: "استعراض الباقات",
+    review: {
+      title: "مراجعة الباقة",
+      days: "يوم",
+      features: "الميزات المشمولة",
+    },
+    summary: {
+      title: "ملخص الطلب",
+      subtotal: "المجموع الفرعي",
+      discount: "الخصم",
+      total: "الإجمالي",
+    },
+    paymentMethod: {
+      label: "طريقة الدفع",
+      stripe: "بطاقة ائتمان (Stripe)",
+      stripeHint: "ادفع بأمان عبر Stripe — ستُحوَّل إلى صفحة الدفع.",
+      balance: "رصيد الحساب",
+      balanceHint: "يتم الخصم من رصيدك الحالي وتفعيل الاشتراك فوراً.",
+    },
+    submit: "ادفع {amount}",
+    completed: {
+      title: "تم تفعيل الاشتراك",
+      detail: "اشتراكك (رقم: {id}) نشط الآن.",
+      viewDashboard: "الحالة: نشط",
+      goToSubscription: "عرض الاشتراك الحالي",
+    },
+    error: {
+      generic: "تعذّر بدء عملية الدفع. حاول مرة أخرى.",
+    },
+  },
 }
