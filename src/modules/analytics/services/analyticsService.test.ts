@@ -132,4 +132,28 @@ describe("analyticsService", () => {
       silent: true,
     })
   })
+
+  it("uses documented OpenAPI analytics endpoints only", async () => {
+    /**
+     * Contract: docs/backend/new-api-documentation/openapi.yaml
+     *   /api/subscription/features/{slug}
+     *   /api/publisher/analytics
+     *   /api/publisher/statistics
+     * /dashboard/my-properties is a legacy publisher fallback and not part
+     * of the new analytics contract; it is preserved as a defensive source.
+     */
+    mockGet
+      .mockResolvedValueOnce({ data: { data: { enabled: true } } })
+      .mockResolvedValueOnce({ data: makeSummary() })
+    await analyticsService.getOwnerSummary("12m", 42)
+    const urls = mockGet.mock.calls.map((call) => call[0])
+    expect(urls).toEqual([
+      "/subscription/features/advanced_analytics",
+      "/publisher/analytics",
+    ])
+    expect(mockGet).toHaveBeenLastCalledWith("/publisher/analytics", {
+      params: { range: "12m", property_id: 42 },
+      silent: true,
+    })
+  })
 })
