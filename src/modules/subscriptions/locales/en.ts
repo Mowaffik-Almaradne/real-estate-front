@@ -212,6 +212,61 @@ export const subscriptionsEn = {
       generic: "Could not start checkout. Please try again.",
     },
   },
+  lifecycle: {
+    title: "My subscription",
+    subtitle: "View your active plan, history, and feature access.",
+    current: {
+      title: "Current subscription",
+      noSubscription: "You don't have an active subscription yet.",
+      planLabel: "Plan",
+      statusLabel: "Status",
+      startsAtLabel: "Started",
+      endsAtLabel: "Renews / ends",
+      remainingLabel: "{days} days remaining",
+      remainingExpired: "Expired",
+      browsePlans: "Browse plans",
+      cancel: "Cancel auto-renew",
+    },
+    features: {
+      title: "Included features",
+      empty: "No features are linked to this subscription yet.",
+      enabled: "Enabled",
+      disabled: "Disabled",
+      limitValue: "Limit: {value}",
+      limitUnset: "No limit",
+    },
+    history: {
+      title: "Subscription history",
+      empty: "You have not subscribed to any plan yet.",
+      columns: {
+        plan: "Plan",
+        status: "Status",
+        startsAt: "Started",
+        endsAt: "Ended",
+        createdAt: "Created",
+      },
+    },
+    cancel: {
+      title: "Cancel auto-renewal",
+      description:
+        "Your subscription will remain active until the end of the current billing period. You can re-subscribe at any time.",
+      confirm: "Cancel subscription",
+      keep: "Keep subscription",
+      success: "Subscription will not renew.",
+    },
+    statusLogs: {
+      title: "Status history",
+      empty: "No status changes recorded.",
+      columns: {
+        from: "From",
+        to: "To",
+        notes: "Notes",
+        when: "When",
+      },
+    },
+    loading: "Loading subscription...",
+    notFound: "No subscription found for this account.",
+  },
 }
 
 export type SubscriptionsMessages = typeof subscriptionsEn
