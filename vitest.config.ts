@@ -19,6 +19,7 @@ export default defineConfig({
       "lib/**/*.test.{ts,tsx}",
       "types/**/*.test.{ts,tsx}",
       "services/**/*.test.{ts,tsx}",
+      "components/**/*.test.{ts,tsx}",
     ],
   },
 })
