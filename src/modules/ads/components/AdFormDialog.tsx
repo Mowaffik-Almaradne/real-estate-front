@@ -35,6 +35,11 @@ import {
   type CreateAdRequest,
   type UpdateAdRequest,
 } from "../types"
+import { AdMediaUpload, type AdMediaValue } from "./AdMediaUpload"
+import {
+  buildAdMediaPayload,
+  mediaValueFromAd,
+} from "../utils/adMediaPayload"
 
 interface AdFormDialogProps {
   open: boolean
@@ -54,6 +59,7 @@ interface FormState {
   external_url: string
   start_date: string
   end_date: string
+  media: AdMediaValue | null
 }
 
 const NONE_GROUP_VALUE = "__none__"
@@ -83,6 +89,7 @@ function buildInitial(ad?: AdDto | null): FormState {
     external_url: ad?.external_url ?? "",
     start_date: toDateTimeLocal(ad?.start_date),
     end_date: toDateTimeLocal(ad?.end_date),
+    media: mediaValueFromAd(ad),
   }
 }
 
@@ -164,6 +171,8 @@ export function AdFormDialog({
       } else {
         payload.ad_group_id = Number(state.ad_group_id)
       }
+      const mediaPayload = buildAdMediaPayload(state.media)
+      if (mediaPayload) payload.media = mediaPayload
       await onSubmit(payload as CreateAdRequest | UpdateAdRequest)
       onOpenChange(false)
     } catch (err: unknown) {
@@ -270,6 +279,15 @@ export function AdFormDialog({
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="grid gap-2">
+            <Label>{t("ads.form.mediaLabel")}</Label>
+            <AdMediaUpload
+              value={state.media}
+              onChange={(next) => set("media", next)}
+              disabled={submitting}
+            />
           </div>
 
           <div className="grid gap-2">
