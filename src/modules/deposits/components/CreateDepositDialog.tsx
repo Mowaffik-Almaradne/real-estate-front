@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useLocale } from "next-intl"
 import {
@@ -14,6 +14,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
+import { AsyncSelect } from "@/components/ui/async-select"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -35,12 +36,14 @@ import {
 } from "@/components/ui/dialog"
 
 import { ApiClientError } from "@/lib/apiClient"
+import type { PropertyDto } from "@/types/property"
 
 import {
   createDepositSchema,
   type CreateDepositValues,
 } from "../schemas"
 import { depositService } from "../services/depositService"
+import { propertyService } from "src/modules/properties/services/propertyService"
 import { getDepositLabel } from "../labels"
 import { DEPOSIT_CURRENCIES, DepositCurrency } from "../types/enums"
 import type { CreateDepositInput, DepositDto } from "../types/dto"
@@ -74,10 +77,12 @@ export function CreateDepositDialog({
   const label = (key: string, vars: Record<string, string | number> = {}) =>
     getDepositLabel(locale, key, vars)
   const [serverError, setServerError] = useState<string | null>(null)
-  const currencyDefault = toDepositCurrency(defaultCurrency)
+  const [selectedProperty, setSelectedProperty] = useState<PropertyDto | null>(null)
+  const [lockedProperty, setLockedProperty] = useState<PropertyDto | null>(null)
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     setValue,
@@ -94,6 +99,27 @@ export function CreateDepositDialog({
       notes: "",
     },
   })
+
+  useEffect(() => {
+    if (!propertyId) {
+      setLockedProperty(null)
+      return
+    }
+    let cancelled = false
+    propertyService
+      .getPropertyById(propertyId)
+      .then((property) => {
+        if (!cancelled) setLockedProperty(property)
+      })
+      .catch(() => {
+        if (!cancelled) setLockedProperty(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [propertyId])
+
+  const propertyValue = lockedProperty ?? selectedProperty
 
   // eslint-disable-next-line react-hooks/incompatible-library -- react-hook-form v7's watch() is not yet React Compiler-compatible
   const selectedCurrency = watch("currency")
@@ -148,6 +174,7 @@ export function CreateDepositDialog({
         terms: "",
         notes: "",
       })
+      setSelectedProperty(null)
       setServerError(null)
     }
     onOpenChange(next)
@@ -182,13 +209,40 @@ export function CreateDepositDialog({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="property_id">{label("deposits.fields.property")} ID</Label>
-              <Input
-                id="property_id"
-                type="number"
-                min={1}
-                disabled={Boolean(propertyId)}
-                {...register("property_id", { valueAsNumber: true })}
+              <Label htmlFor="property_id">{label("deposits.fields.property")}</Label>
+              <Controller
+                control={control}
+                name="property_id"
+                render={({ field }) => (
+                  <AsyncSelect<PropertyDto>
+                    id="property_id"
+                    value={propertyValue}
+                    disabled={Boolean(propertyId)}
+                    onChange={(option) => {
+                      setSelectedProperty(option)
+                      field.onChange(option ? option.id : 0)
+                    }}
+                    fetcher={async ({ search, page }) => {
+                      const result = await propertyService.getMyProperties({
+                        search: search || undefined,
+                        page,
+                        perPage: 20,
+                      })
+                      return {
+                        items: result.data,
+                        hasMore:
+                          result.pagination.current_page < result.pagination.last_page,
+                        total: result.pagination.total,
+                      }
+                    }}
+                    getOptionLabel={(option) => option.name}
+                    getOptionValue={(option) => option.id}
+                    placeholder={label("deposits.fields.property")}
+                    searchPlaceholder={label("deposits.fields.propertySearchPlaceholder")}
+                    emptyMessage={label("deposits.errors.noPropertiesFound")}
+                    errorMessage={label("deposits.errors.propertyLoadFailed")}
+                  />
+                )}
               />
               {errors.property_id && (
                 <p className="text-xs text-destructive">
