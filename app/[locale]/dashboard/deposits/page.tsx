@@ -4,8 +4,10 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { useLocale } from "next-intl"
 
 import { DashboardLayout } from "components/layout/DashboardLayout"
+import { Pagination } from "components/ui/pagination"
 
 import { ApiClientError } from "@/lib/apiClient"
+import type { ApiPagination } from "@/types/common"
 
 import {
   depositService,
@@ -32,8 +34,16 @@ export default function DepositsPage() {
     getDepositLabel(locale, key, vars)
 
   const [tab, setTab] = useState<Tab>("buyer")
-  const [filters, setFilters] = useState<DepositFilters>({})
+  const [filters, setFilters] = useState<DepositFilters>({ page: 1, perPage: 15 })
   const [deposits, setDeposits] = useState<DepositDto[]>([])
+  const [pagination, setPagination] = useState<ApiPagination>({
+    total: 0,
+    per_page: 15,
+    current_page: 1,
+    last_page: 1,
+    from: null,
+    to: null,
+  })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [permissionDenied, setPermissionDenied] = useState<{
@@ -53,11 +63,20 @@ export default function DepositsPage() {
             ? await depositService.listMine(activeFilters)
             : await depositService.listSales(activeFilters)
         setDeposits(response.data)
+        setPagination(response.pagination)
         setPermissionDenied(null)
       } catch (err) {
         if (isDepositAccessError(err)) {
           setPermissionDenied({ permission: "deposits.list" })
           setDeposits([])
+          setPagination({
+            total: 0,
+            per_page: 15,
+            current_page: 1,
+            last_page: 1,
+            from: null,
+            to: null,
+          })
         } else if (err instanceof ApiClientError) {
           setError(err.message)
           setDeposits([])
@@ -104,7 +123,10 @@ export default function DepositsPage() {
                 ? "bg-secondary text-secondary-foreground"
                 : "hover:bg-accent")
             }
-            onClick={() => setTab("buyer")}
+            onClick={() => {
+              setTab("buyer")
+              setFilters((prev) => ({ ...prev, page: 1, perPage: 15 }))
+            }}
           >
             {label("deposits.tab.buyer")}
           </button>
@@ -116,7 +138,10 @@ export default function DepositsPage() {
                 ? "bg-secondary text-secondary-foreground"
                 : "hover:bg-accent")
             }
-            onClick={() => setTab("seller")}
+            onClick={() => {
+              setTab("seller")
+              setFilters((prev) => ({ ...prev, page: 1, perPage: 15 }))
+            }}
           >
             {label("deposits.tab.seller")}
           </button>
@@ -133,7 +158,7 @@ export default function DepositsPage() {
         <DepositFiltersBar
           initial={filters}
           loading={loading}
-          onApply={(next) => setFilters(next)}
+          onApply={(next) => setFilters({ ...next, page: 1, perPage: 15 })}
         />
 
         <DepositList
@@ -149,6 +174,16 @@ export default function DepositsPage() {
           onDeleted={(id) => {
             setDeposits((current) => current.filter((d) => d.id !== id))
           }}
+        />
+        <Pagination
+          currentPage={pagination.current_page}
+          totalPages={pagination.last_page}
+          total={pagination.total}
+          perPage={pagination.per_page || 15}
+          disabled={loading}
+          onPageChange={(page) =>
+            setFilters((prev) => ({ ...prev, page, perPage: 15 }))
+          }
         />
       </div>
     </DashboardLayout>

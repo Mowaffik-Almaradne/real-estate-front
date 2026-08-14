@@ -67,6 +67,7 @@ const ReviewsSection = dynamic(
 import { VerifiedBadge } from "src/modules/auth"
 import { FavoriteButton } from "src/modules/properties/components/FavoriteButton"
 import { PropertyStatusBanner } from "src/modules/properties/components/PropertyStatusBanner"
+import { CreateDepositDialog } from "src/modules/deposits/components/CreateDepositDialog"
 import { useRouter } from "@/i18n/navigation"
 
 interface User {
@@ -93,6 +94,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
     }
   })
   const [creatingChat, setCreatingChat] = useState(false)
+  const [depositOpen, setDepositOpen] = useState(false)
 
   const fetchProperty = useCallback(async () => {
     try {
@@ -181,6 +183,10 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
   }
 
   const canEdit = currentUser?.id === property.publisher?.id
+  const canCreateDeposit =
+    Boolean(currentUser?.id) &&
+    currentUser?.id === property.publisher?.id &&
+    property.status !== "sold"
   const images: { url: string; thumb: string }[] = [
     ...(property.main_image
       ? [
@@ -231,6 +237,16 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
           </Button>
           {canEdit && (
             <div className="flex gap-2">
+              {canCreateDeposit && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setDepositOpen(true)}
+                  className="rounded-lg"
+                >
+                  Create Deposit
+                </Button>
+              )}
               <Button onClick={() => router.push(`/properties/${id}/edit`)} className="rounded-lg">
                 <Pencil className="mr-2 h-4 w-4" />
                 Edit Property
@@ -497,6 +513,17 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {canCreateDeposit && property.publisher?.id && (
+        <CreateDepositDialog
+          open={depositOpen}
+          onOpenChange={setDepositOpen}
+          propertyId={property.id}
+          propertyName={property.name}
+          sellerId={property.publisher.id}
+          defaultCurrency={property.currency}
+        />
+      )}
 
       {selectedImageIndex !== null && images[selectedImageIndex] && (
         <div

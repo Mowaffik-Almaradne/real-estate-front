@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslations } from "next-intl"
 import { Archive, FileDown, Users } from "lucide-react"
 import { toast } from "sonner"
@@ -8,6 +8,7 @@ import { toast } from "sonner"
 import { DashboardLayout } from "components/layout/DashboardLayout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Pagination } from "components/ui/pagination"
 import { ApiClientError } from "@/lib/apiClient"
 
 import {
@@ -27,7 +28,10 @@ export default function CrmLeadsPage() {
   const [detailOpen, setDetailOpen] = useState(false)
   const [exporting, setExporting] = useState(false)
 
-  const { leads, loading, error, filters, setFilters, refresh } = useLeads()
+  const { leads, loading, error, filters, pagination, setFilters, refresh } = useLeads({
+    page: 1,
+    perPage: 15,
+  })
 
   const handleSelect = (lead: Lead) => {
     setSelectedLead(lead)
@@ -130,17 +134,31 @@ export default function CrmLeadsPage() {
         {showArchived ? (
           <ArchivedLeadsSection onSelect={handleSelect} />
         ) : (
-          <LeadList
-            leads={leads}
-            loading={loading}
-            error={error}
-            filters={filters}
-            onFiltersChange={(updater) => {
-              setFilters(updater)
-            }}
-            onSelect={handleSelect}
-            onArchiveToggle={handleArchiveToggle}
-          />
+          <>
+            <LeadList
+              leads={leads}
+              loading={loading}
+              error={error}
+              filters={filters}
+              onFiltersChange={(updater) => {
+                setFilters((prev) => ({ ...updater(prev), page: 1, perPage: 15 }))
+              }}
+              onSelect={handleSelect}
+              onArchiveToggle={handleArchiveToggle}
+            />
+            <div className="px-0 pt-4">
+              <Pagination
+                currentPage={pagination.current_page}
+                totalPages={pagination.last_page}
+                total={pagination.total}
+                perPage={pagination.per_page || 15}
+                disabled={loading}
+                onPageChange={(page) =>
+                  setFilters((prev) => ({ ...prev, page, perPage: 15 }))
+                }
+              />
+            </div>
+          </>
         )}
       </div>
 
@@ -163,15 +181,24 @@ function ArchivedLeadsSection({
 }) {
   const t = useTranslations()
   const [leads, setLeads] = useState<Lead[]>([])
+  const [page, setPage] = useState(1)
+  const [lastPage, setLastPage] = useState(1)
+  const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const pageRef = useRef(1)
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (nextPage?: number) => {
+    const target = nextPage ?? pageRef.current
     setLoading(true)
     setError(null)
     try {
-      const result = await leadService.listArchived()
+      const result = await leadService.listArchived({ page: target, perPage: 15 })
       setLeads(result.data)
+      pageRef.current = result.pagination.current_page || target
+      setPage(pageRef.current)
+      setLastPage(result.pagination.last_page || 1)
+      setTotal(result.pagination.total || 0)
     } catch (err) {
       const message = err instanceof ApiClientError ? err.message : "Failed to load"
       setError(message)
@@ -207,6 +234,14 @@ function ArchivedLeadsSection({
           await leadService.restore(lead.id)
           void refresh()
         }}
+      />
+      <Pagination
+        currentPage={page}
+        totalPages={lastPage}
+        total={total}
+        perPage={15}
+        disabled={loading}
+        onPageChange={(next) => void refresh(next)}
       />
     </div>
   )

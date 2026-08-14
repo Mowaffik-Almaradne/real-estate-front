@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 
@@ -9,8 +9,10 @@ import { Card, CardContent } from "components/ui/card"
 import { Input } from "components/ui/input"
 import { Label } from "components/ui/label"
 import { Switch } from "components/ui/switch"
+import { Pagination } from "components/ui/pagination"
 
 import { ApiClientError } from "@/lib/apiClient"
+import type { ApiPagination } from "@/types/common"
 
 import {
   adminSubscriptionPlanFeatureService,
@@ -36,29 +38,51 @@ export default function SubscriptionPlanFeaturesPage() {
   const [newFeatureId, setNewFeatureId] = useState<string>("")
   const [newLimit, setNewLimit] = useState<string>("")
   const [newEnabled, setNewEnabled] = useState(true)
+  const [page, setPage] = useState(1)
+  const pageRef = useRef(1)
+  const [pagination, setPagination] = useState<ApiPagination>({
+    total: 0,
+    per_page: 15,
+    current_page: 1,
+    last_page: 1,
+    from: null,
+    to: null,
+  })
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (nextPage?: number) => {
+    const targetPage = nextPage ?? pageRef.current
     setLoading(true)
     try {
       const [planList, featureList, linkList] = await Promise.all([
         adminSubscriptionPlanService.list({ perPage: 100 }),
         adminSubscriptionFeatureService.list({ perPage: 100 }),
-        adminSubscriptionPlanFeatureService.list({ perPage: 100 }),
+        adminSubscriptionPlanFeatureService.list({ page: targetPage, perPage: 15 }),
       ])
-      setPlans(planList.data)
-      setFeatures(featureList.data)
-      setLinks(linkList.data)
+      await Promise.resolve().then(() => {
+        setPlans(planList.data)
+        setFeatures(featureList.data)
+        setLinks(linkList.data)
+        setPagination(linkList.pagination)
+        pageRef.current = targetPage
+        setPage(targetPage)
+      })
     } catch (err) {
       const message =
         err instanceof ApiClientError ? err.message : t("errors.loadFailed")
       toast.error(message)
     } finally {
-      setLoading(false)
+      await Promise.resolve().then(() => {
+        setLoading(false)
+      })
     }
-  }, [t])
+    // `t` from useSubscriptionsTranslations is a new function every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
-    Promise.resolve().then(() => void refresh())
+    void Promise.resolve().then(() => {
+      void refresh()
+    })
   }, [refresh])
 
   const handleCreate = async () => {
@@ -80,7 +104,7 @@ export default function SubscriptionPlanFeaturesPage() {
       setNewFeatureId("")
       setNewLimit("")
       setNewEnabled(true)
-      await refresh()
+      await refresh(1)
     } catch (err) {
       const message =
         err instanceof ApiClientError ? err.message : t("errors.saveFailed")
@@ -94,6 +118,20 @@ export default function SubscriptionPlanFeaturesPage() {
     link: SubscriptionPlanFeatureLink,
     patch: UpdateSubscriptionPlanFeatureRequest
   ) => {
+    if (
+      patch.is_enabled !== undefined &&
+      patch.is_enabled === (link.is_enabled !== false) &&
+      patch.limit_value === undefined
+    ) {
+      return
+    }
+    if (
+      patch.limit_value !== undefined &&
+      patch.is_enabled === undefined &&
+      (patch.limit_value ?? null) === (link.limit_value ?? null)
+    ) {
+      return
+    }
     try {
       await adminSubscriptionPlanFeatureService.update(link.id, patch)
       await refresh()
@@ -256,6 +294,14 @@ export default function SubscriptionPlanFeaturesPage() {
               </table>
             </div>
           )}
+          <Pagination
+            currentPage={pagination.current_page || page}
+            totalPages={pagination.last_page}
+            total={pagination.total}
+            perPage={pagination.per_page || 15}
+            disabled={loading}
+            onPageChange={(next) => void refresh(next)}
+          />
         </CardContent>
       </Card>
     </div>

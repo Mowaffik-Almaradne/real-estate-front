@@ -2,6 +2,7 @@ import {
   apiClient,
   ApiClientError,
   getApiData,
+  getApiPagination,
   type ApiResponse,
   type ApiPagination,
 } from "@/lib/apiClient"
@@ -111,7 +112,7 @@ export const adminSubscriptionPlanService = {
     const items = resolveArray<SubscriptionPlan>(data)
     return {
       data: items,
-      pagination: paginationFor(items),
+      pagination: getApiPagination(response) ?? paginationFor(items),
     }
   },
 
@@ -172,7 +173,7 @@ export const adminSubscriptionFeatureService = {
     const items = resolveArray<SubscriptionFeature>(data)
     return {
       data: items,
-      pagination: paginationFor(items),
+      pagination: getApiPagination(response) ?? paginationFor(items),
     }
   },
 
@@ -230,7 +231,7 @@ export const adminSubscriptionPlanFeatureService = {
     const items = resolveArray<SubscriptionPlanFeatureLink>(data)
     return {
       data: items,
-      pagination: paginationFor(items),
+      pagination: getApiPagination(response) ?? paginationFor(items),
     }
   },
 

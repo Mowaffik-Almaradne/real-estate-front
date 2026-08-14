@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { adService } from "../services/adService"
 import { ApiClientError } from "@/lib/apiClient"
+import type { ApiPagination } from "@/types/common"
 import type {
   AdDto,
   AdFilters,
@@ -12,8 +13,18 @@ import type {
   UpdateAdRequest,
 } from "../types"
 
+const EMPTY_PAGINATION: ApiPagination = {
+  total: 0,
+  per_page: 15,
+  current_page: 1,
+  last_page: 1,
+  from: null,
+  to: null,
+}
+
 interface UseAdsResult {
   ads: AdDto[]
+  pagination: ApiPagination
   loading: boolean
   error: string | null
   filters: AdFilters
@@ -35,6 +46,7 @@ export function useAds(initial: AdFilters = {}): UseAdsResult {
   const [filters, setFiltersState] = useState<AdFilters>(initial)
   const [page, setPageState] = useState<number>(initial.page ?? 1)
   const [ads, setAds] = useState<AdDto[]>([])
+  const [pagination, setPagination] = useState<ApiPagination>(EMPTY_PAGINATION)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -51,8 +63,9 @@ export function useAds(initial: AdFilters = {}): UseAdsResult {
     setLoading(true)
     setError(null)
     try {
-      const response = await adService.list({ ...filters, page })
+      const response = await adService.list({ ...filters, page, perPage: 15 })
       setAds(response.data)
+      setPagination(response.pagination)
     } catch (err) {
       const message =
         err instanceof ApiClientError ? err.message : "Failed to load ads"
@@ -131,6 +144,7 @@ export function useAds(initial: AdFilters = {}): UseAdsResult {
 
   return {
     ads,
+    pagination,
     loading,
     error,
     filters,

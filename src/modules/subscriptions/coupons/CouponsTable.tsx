@@ -12,6 +12,7 @@ import {
 import { Skeleton } from "components/ui/skeleton"
 import { Input } from "components/ui/input"
 import { Label } from "components/ui/label"
+import { Switch } from "components/ui/switch"
 import type {
   SubscriptionDiscount,
   SubscriptionDiscountFilters,
@@ -21,16 +22,20 @@ import { useSubscriptionsTranslations } from "../locales/useSubscriptionsTransla
 interface CouponsTableProps {
   coupons: SubscriptionDiscount[]
   loading: boolean
+  togglingId?: number | null
   emptyMessage: string
   onEdit: (coupon: SubscriptionDiscount) => void
+  onToggle?: (coupon: SubscriptionDiscount) => void
   onDelete: (coupon: SubscriptionDiscount) => void
 }
 
 export function CouponsTable({
   coupons,
   loading,
+  togglingId = null,
   emptyMessage,
   onEdit,
+  onToggle,
   onDelete,
 }: CouponsTableProps) {
   const { t } = useSubscriptionsTranslations()
@@ -94,9 +99,22 @@ export function CouponsTable({
                   : "—"}
               </TableCell>
               <TableCell className="text-sm">
-                {coupon.is_active
-                  ? t("coupons.status.active")
-                  : t("coupons.status.inactive")}
+                {onToggle ? (
+                  <Switch
+                    checked={coupon.is_active}
+                    disabled={togglingId === coupon.id || loading}
+                    onCheckedChange={() => onToggle(coupon)}
+                    aria-label={
+                      coupon.is_active
+                        ? t("coupons.status.active")
+                        : t("coupons.status.inactive")
+                    }
+                  />
+                ) : coupon.is_active ? (
+                  t("coupons.status.active")
+                ) : (
+                  t("coupons.status.inactive")
+                )}
               </TableCell>
               <TableCell className="text-end">
                 <div className="flex justify-end gap-2">

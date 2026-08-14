@@ -4,8 +4,10 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { useLocale } from "next-intl"
 
 import { DashboardLayout } from "components/layout/DashboardLayout"
+import { Pagination } from "components/ui/pagination"
 
 import { ApiClientError } from "@/lib/apiClient"
+import type { ApiPagination } from "@/types/common"
 
 import { rentalCardService, isRentalCardAccessError } from "src/modules/rental-cards/services/rentalCardService"
 import {
@@ -28,8 +30,16 @@ export default function RentalCardsPage() {
   const label = (key: string, vars: Record<string, string | number> = {}) =>
     getRentalCardLabel(locale, key, vars)
 
-  const [filters, setFilters] = useState<RentalCardFilters>({})
+  const [filters, setFilters] = useState<RentalCardFilters>({ page: 1, perPage: 15 })
   const [cards, setCards] = useState<RentalCardDto[]>([])
+  const [pagination, setPagination] = useState<ApiPagination>({
+    total: 0,
+    per_page: 15,
+    current_page: 1,
+    last_page: 1,
+    from: null,
+    to: null,
+  })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [permissionDenied, setPermissionDenied] = useState(false)
@@ -41,6 +51,7 @@ export default function RentalCardsPage() {
       try {
         const response = await rentalCardService.list(activeFilters)
         setCards(response.data)
+        setPagination(response.pagination)
         setPermissionDenied(false)
       } catch (err) {
         if (isRentalCardAccessError(err)) {
@@ -92,7 +103,7 @@ export default function RentalCardsPage() {
         <RentalCardFiltersBar
           initial={filters}
           loading={loading}
-          onApply={(next) => setFilters(next)}
+          onApply={(next) => setFilters({ ...next, page: 1, perPage: 15 })}
         />
 
         <RentalCardList
@@ -107,6 +118,16 @@ export default function RentalCardsPage() {
           onDeleted={(id) => {
             setCards((current) => current.filter((c) => c.id !== id))
           }}
+        />
+        <Pagination
+          currentPage={pagination.current_page}
+          totalPages={pagination.last_page}
+          total={pagination.total}
+          perPage={pagination.per_page || 15}
+          disabled={loading}
+          onPageChange={(page) =>
+            setFilters((prev) => ({ ...prev, page, perPage: 15 }))
+          }
         />
       </div>
     </DashboardLayout>
