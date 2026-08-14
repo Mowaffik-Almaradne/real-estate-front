@@ -824,5 +824,215 @@
     "notFoundDescription": "الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
     "goHome": "العودة إلى الرئيسية",
     "browseProperties": "تصفح العقارات"
+  },
+  "ads": {
+    "title": "الإعلانات",
+    "subtitle": "إدارة إعلانات البانر وتعيينها إلى مجموعات الإعلانات.",
+    "newAd": "إعلان جديد",
+    "editAd": "تعديل الإعلان",
+    "newGroup": "مجموعة جديدة",
+    "editGroup": "تعديل المجموعة",
+    "empty": "لا توجد إعلانات بعد. أنشئ إعلانك الأول للبدء.",
+    "noGroupSelected": "اختر مجموعة إعلانات لعرض إعلاناتها.",
+    "noGroup": "بدون مجموعة",
+    "searchPlaceholder": "ابحث في الإعلانات...",
+    "searchGroupPlaceholder": "ابحث في المجموعات...",
+    "statusAll": "كل الحالات",
+    "groupAll": "كل المجموعات",
+    "backToList": "العودة إلى الإعلانات",
+    "backToGroups": "العودة إلى المجموعات",
+    "columns": {
+      "title": "العنوان",
+      "status": "الحالة",
+      "group": "المجموعة",
+      "media": "الوسائط",
+      "property": "العقار",
+      "schedule": "الجدولة",
+      "created": "تاريخ الإنشاء"
+    },
+    "status": {
+      "draft": "مسودة",
+      "active": "نشط",
+      "paused": "متوقف",
+      "archived": "مؤرشف"
+    },
+    "actions": {
+      "view": "عرض",
+      "edit": "تعديل",
+      "delete": "أرشفة",
+      "restore": "استعادة",
+      "pause": "إيقاف",
+      "resume": "استئناف",
+      "markDraft": "تحويل إلى مسودة",
+      "linkProperty": "ربط عقار",
+      "unlinkProperty": "إلغاء ربط العقار",
+      "setDefault": "تعيين كافتراضي",
+      "removeDefault": "إزالة الافتراضي"
+    },
+    "delete": {
+      "title": "أرشفة الإعلان",
+      "description": "الإعلانات المؤرشفة مخفية من العرض العام لكن يمكن استعادتها لاحقاً.",
+      "confirm": "أرشفة",
+      "success": "تمت أرشفة الإعلان."
+    },
+    "restore": {
+      "success": "تمت استعادة الإعلان."
+    },
+    "statusChange": {
+      "success": "تم تحديث حالة الإعلان."
+    },
+    "linkProperty": {
+      "title": "ربط الإعلان بعقار",
+      "description": "اختر أحد عقاراتك لربطه بهذا الإعلان.",
+      "placeholder": "ابحث في العقارات...",
+      "noneFound": "لا توجد عقارات مطابقة.",
+      "save": "ربط العقار",
+      "success": "تم ربط العقار.",
+      "noneSelected": "اختر عقاراً أولاً."
+    },
+    "unlinkProperty": {
+      "success": "تم إلغاء ربط العقار.",
+      "confirm": "إلغاء الربط"
+    },
+    "setDefault": {
+      "title": "تعيين الإعلان الافتراضي",
+      "description": "يُعرض الإعلان الافتراضي عندما لا يوجد إعلان قيد التدوير. اختر إعلاناً من هذه المجموعة.",
+      "save": "تعيين افتراضي",
+      "success": "تم تحديث الإعلان الافتراضي.",
+      "alreadyDefault": "هو بالفعل الإعلان الافتراضي."
+    },
+    "removeDefault": {
+      "success": "تمت إزالة الإعلان الافتراضي."
+    },
+    "form": {
+      "titleLabel": "العنوان",
+      "titlePlaceholder": "مثال: بانر تخفيضات الصيف",
+      "descriptionLabel": "الوصف",
+      "descriptionPlaceholder": "حتى 2000 حرف.",
+      "mediaTypeLabel": "نوع الوسائط",
+      "mediaTypeImage": "صورة",
+      "mediaTypeVideo": "فيديو",
+      "groupLabel": "مجموعة الإعلان",
+      "groupPlaceholder": "اختر مجموعة",
+      "groupNone": "بدون مجموعة (مستقل)",
+      "externalUrlLabel": "رابط خارجي (اختياري)",
+      "externalUrlPlaceholder": "https://...",
+      "propertyLabel": "العقار المرتبط (اختياري)",
+      "propertyNone": "لا يوجد عقار مرتبط",
+      "propertyClear": "إلغاء ربط العقار",
+      "statusLabel": "الحالة",
+      "startDateLabel": "تاريخ البدء",
+      "endDateLabel": "تاريخ الانتهاء",
+      "mediaLabel": "الوسائط (اختياري)",
+      "mediaHelp": "JPG/PNG/WebP للصور، MP4/MOV/WebM للفيديو. حتى 20 ميجابايت لكل ملف.",
+      "mediaEmpty": "لم يتم اختيار وسائط بعد.",
+      "mediaUploading": "جاري رفع الوسائط...",
+      "mediaUploaded": "الوسائط المرفوعة",
+      "mediaRemove": "إزالة الوسائط",
+      "addMedia": "إضافة وسائط",
+      "saveCreate": "إنشاء الإعلان",
+      "saveUpdate": "حفظ التغييرات",
+      "validation": {
+        "titleRequired": "العنوان مطلوب.",
+        "titleTooLong": "العنوان طويل جداً.",
+        "mediaTypeRequired": "اختر نوع الوسائط.",
+        "descriptionTooLong": "الوصف طويل جداً.",
+        "invalidUrl": "استخدم رابطاً صالحاً.",
+        "endBeforeStart": "يجب أن يكون تاريخ الانتهاء بعد تاريخ البدء."
+      }
+    },
+    "detail": {
+      "notFound": "الإعلان غير موجود",
+      "createdAt": "تاريخ الإنشاء",
+      "updatedAt": "تاريخ التحديث",
+      "schedule": "الجدولة",
+      "startsAt": "يبدأ",
+      "endsAt": "ينتهي",
+      "notScheduled": "دائم",
+      "groupLabel": "مجموعة الإعلان",
+      "propertyLabel": "العقار المرتبط",
+      "noProperty": "غير مرتبط بعقار.",
+      "media": "الوسائط",
+      "noMedia": "لم يتم رفع وسائط.",
+      "externalLink": "رابط الزيارة",
+      "defaultBadge": "افتراضي"
+    },
+    "create": {
+      "success": "تم إنشاء الإعلان."
+    },
+    "update": {
+      "success": "تم تحديث الإعلان."
+    },
+    "notFoundTitle": "الإعلان غير موجود",
+    "loading": "جاري تحميل الإعلانات...",
+    "errorLoading": "فشل تحميل الإعلانات.",
+    "groups": {
+      "title": "مجموعات الإعلانات",
+      "subtitle": "نظّم الإعلانات في مجموعات واختر إعلاناً افتراضياً لكل مجموعة.",
+      "newGroup": "مجموعة جديدة",
+      "editGroup": "تعديل المجموعة",
+      "empty": "لا توجد مجموعات بعد. أنشئ مجموعتك الأولى لبدء تنظيم الإعلانات.",
+      "searchPlaceholder": "ابحث في المجموعات...",
+      "statusAll": "كل الحالات",
+      "statusActive": "نشطة",
+      "statusInactive": "غير نشطة",
+      "statusArchived": "مؤرشفة",
+      "columns": {
+        "name": "الاسم",
+        "status": "الحالة",
+        "adsCount": "الإعلانات",
+        "defaultAd": "الإعلان الافتراضي",
+        "created": "تاريخ الإنشاء"
+      },
+      "actions": {
+        "view": "عرض الإعلانات",
+        "edit": "تعديل",
+        "archive": "أرشفة",
+        "restore": "استعادة",
+        "setDefault": "تعيين افتراضي",
+        "removeDefault": "إزالة الافتراضي"
+      },
+      "form": {
+        "nameLabel": "اسم المجموعة",
+        "namePlaceholder": "مثال: بانرات الصفحة الرئيسية",
+        "descriptionLabel": "الوصف",
+        "descriptionPlaceholder": "ما الغرض من هذه المجموعة؟",
+        "statusLabel": "الحالة",
+        "statusActive": "نشطة",
+        "statusInactive": "غير نشطة",
+        "saveCreate": "إنشاء المجموعة",
+        "saveUpdate": "حفظ التغييرات",
+        "validation": {
+          "nameRequired": "الاسم مطلوب.",
+          "nameTooLong": "الاسم طويل جداً.",
+          "descriptionTooLong": "الوصف طويل جداً."
+        }
+      },
+      "create": {
+        "success": "تم إنشاء مجموعة الإعلانات."
+      },
+      "update": {
+        "success": "تم تحديث مجموعة الإعلانات."
+      },
+      "archive": {
+        "title": "أرشفة المجموعة",
+        "description": "المجموعات المؤرشفة مخفية من العرض العام لكن يمكن استعادتها لاحقاً.",
+        "confirm": "أرشفة",
+        "success": "تمت أرشفة المجموعة."
+      },
+      "restore": {
+        "success": "تمت استعادة المجموعة."
+      },
+      "detail": {
+        "notFound": "المجموعة غير موجودة",
+        "descriptionLabel": "الوصف",
+        "noDescription": "لا يوجد وصف.",
+        "adsSectionTitle": "إعلانات هذه المجموعة",
+        "adsEmpty": "لا توجد إعلانات في هذه المجموعة بعد. استخدم زر \"إعلان جديد\" لإضافة إعلان.",
+        "defaultAdLabel": "الإعلان الافتراضي",
+        "noDefaultAd": "لا يوجد إعلان افتراضي.",
+        "backToGroups": "العودة إلى المجموعات"
+      }
+    }
   }
 }

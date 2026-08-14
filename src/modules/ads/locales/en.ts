@@ -99,6 +99,10 @@ export const adsEn = {
       endDateLabel: "End date",
       mediaLabel: "Media (optional)",
       mediaHelp: "JPG/PNG/WebP for images, MP4/MOV/WebM for videos. Max 20MB each.",
+      mediaEmpty: "No media selected yet.",
+      mediaUploading: "Uploading media...",
+      mediaUploaded: "Uploaded media",
+      mediaRemove: "Remove media",
       addMedia: "Add media",
       saveCreate: "Create ad",
       saveUpdate: "Save changes",
@@ -136,8 +140,7 @@ export const adsEn = {
     notFoundTitle: "Ad not found",
     loading: "Loading ads...",
     errorLoading: "Failed to load ads.",
-  },
-  groups: {
+    groups: {
     title: "Ad groups",
     subtitle: "Organize ads into groups and pick a default ad for each.",
     newGroup: "New group",
@@ -203,6 +206,7 @@ export const adsEn = {
       defaultAdLabel: "Default ad",
       noDefaultAd: "No default ad set.",
       backToGroups: "Back to groups",
+    },
     },
   },
   common: {

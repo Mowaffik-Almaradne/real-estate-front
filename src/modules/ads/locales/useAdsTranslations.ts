@@ -5,9 +5,10 @@ import { adsEn, type AdsMessages } from "./en"
 import { adsAr } from "./ar"
 
 /**
- * Resolve the module-local translations for the current locale.
- * Translations live inside the ads module to keep them isolated from the
- * shared `messages/*.json` files.
+ * Resolve ads copy for the current locale.
+ * Module files stay in sync with `messages/*.json` under the `ads` namespace
+ * (including `ads.groups.*`). `common.*` paths used by ads dialogs live on
+ * the module catalog so they do not collide with global common keys.
  */
 export function getAdsMessages(locale: string | undefined): AdsMessages {
   if (locale && locale.toLowerCase().startsWith("ar")) return adsAr
@@ -15,10 +16,9 @@ export function getAdsMessages(locale: string | undefined): AdsMessages {
 }
 
 /**
- * Lightweight path-based translator for module-local copy.
- * `useTranslations` from next-intl only sees the shared `messages/*.json`
- * namespace, so this hook returns a function that walks the module messages
- * by dot path.
+ * Path-based translator for ads copy (`ads.*`, `ads.groups.*`, `common.*`).
+ * Walks the module catalog by dot path so keys such as `ads.groups.newGroup`
+ * resolve instead of leaking into the UI.
  *
  * Supports interpolation with `{key}` placeholders.
  */

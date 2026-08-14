@@ -101,6 +101,10 @@ export const adsAr: AdsMessages = {
       endDateLabel: "تاريخ الانتهاء",
       mediaLabel: "الوسائط (اختياري)",
       mediaHelp: "JPG/PNG/WebP للصور، MP4/MOV/WebM للفيديو. حتى 20 ميجابايت لكل ملف.",
+      mediaEmpty: "لم يتم اختيار وسائط بعد.",
+      mediaUploading: "جاري رفع الوسائط...",
+      mediaUploaded: "الوسائط المرفوعة",
+      mediaRemove: "إزالة الوسائط",
       addMedia: "إضافة وسائط",
       saveCreate: "إنشاء الإعلان",
       saveUpdate: "حفظ التغييرات",
@@ -138,8 +142,7 @@ export const adsAr: AdsMessages = {
     notFoundTitle: "الإعلان غير موجود",
     loading: "جاري تحميل الإعلانات...",
     errorLoading: "فشل تحميل الإعلانات.",
-  },
-  groups: {
+    groups: {
     title: "مجموعات الإعلانات",
     subtitle: "نظّم الإعلانات في مجموعات واختر إعلاناً افتراضياً لكل مجموعة.",
     newGroup: "مجموعة جديدة",
@@ -205,6 +208,7 @@ export const adsAr: AdsMessages = {
       defaultAdLabel: "الإعلان الافتراضي",
       noDefaultAd: "لا يوجد إعلان افتراضي.",
       backToGroups: "العودة إلى المجموعات",
+    },
     },
   },
   common: {

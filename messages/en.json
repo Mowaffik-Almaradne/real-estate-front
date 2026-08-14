@@ -824,5 +824,215 @@
     "notFoundDescription": "The page you are looking for does not exist or has been moved.",
     "goHome": "Go home",
     "browseProperties": "Browse properties"
+  },
+  "ads": {
+    "title": "Ads",
+    "subtitle": "Manage banner ads and assign them to ad groups.",
+    "newAd": "New ad",
+    "editAd": "Edit ad",
+    "newGroup": "New group",
+    "editGroup": "Edit group",
+    "empty": "No ads yet. Create your first ad to get started.",
+    "noGroupSelected": "Select an ad group to view its ads.",
+    "noGroup": "No ad group",
+    "searchPlaceholder": "Search ads...",
+    "searchGroupPlaceholder": "Search groups...",
+    "statusAll": "All statuses",
+    "groupAll": "All groups",
+    "backToList": "Back to ads",
+    "backToGroups": "Back to groups",
+    "columns": {
+      "title": "Title",
+      "status": "Status",
+      "group": "Group",
+      "media": "Media",
+      "property": "Property",
+      "schedule": "Schedule",
+      "created": "Created"
+    },
+    "status": {
+      "draft": "Draft",
+      "active": "Active",
+      "paused": "Paused",
+      "archived": "Archived"
+    },
+    "actions": {
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Archive",
+      "restore": "Restore",
+      "pause": "Pause",
+      "resume": "Resume",
+      "markDraft": "Mark as draft",
+      "linkProperty": "Link property",
+      "unlinkProperty": "Unlink property",
+      "setDefault": "Set as default",
+      "removeDefault": "Remove default"
+    },
+    "delete": {
+      "title": "Archive ad",
+      "description": "Archived ads are hidden from public display but can be restored later.",
+      "confirm": "Archive",
+      "success": "Ad archived."
+    },
+    "restore": {
+      "success": "Ad restored."
+    },
+    "statusChange": {
+      "success": "Ad status updated."
+    },
+    "linkProperty": {
+      "title": "Link ad to property",
+      "description": "Pick one of your properties to link to this ad. The ad's click-through will open the property page.",
+      "placeholder": "Search properties...",
+      "noneFound": "No matching properties.",
+      "save": "Link property",
+      "success": "Property linked.",
+      "noneSelected": "Pick a property first."
+    },
+    "unlinkProperty": {
+      "success": "Property unlinked.",
+      "confirm": "Unlink"
+    },
+    "setDefault": {
+      "title": "Set default ad",
+      "description": "The default ad is shown when no ad is currently being rotated. Pick one ad from this group.",
+      "save": "Set default",
+      "success": "Default ad updated.",
+      "alreadyDefault": "Already the default ad."
+    },
+    "removeDefault": {
+      "success": "Default ad removed."
+    },
+    "form": {
+      "titleLabel": "Title",
+      "titlePlaceholder": "e.g. Summer Sale Banner",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Up to 2000 characters.",
+      "mediaTypeLabel": "Media type",
+      "mediaTypeImage": "Image",
+      "mediaTypeVideo": "Video",
+      "groupLabel": "Ad group",
+      "groupPlaceholder": "Select a group",
+      "groupNone": "No group (standalone)",
+      "externalUrlLabel": "External URL (optional)",
+      "externalUrlPlaceholder": "https://...",
+      "propertyLabel": "Linked property (optional)",
+      "propertyNone": "No property linked",
+      "propertyClear": "Unlink property",
+      "statusLabel": "Status",
+      "startDateLabel": "Start date",
+      "endDateLabel": "End date",
+      "mediaLabel": "Media (optional)",
+      "mediaHelp": "JPG/PNG/WebP for images, MP4/MOV/WebM for videos. Max 20MB each.",
+      "mediaEmpty": "No media selected yet.",
+      "mediaUploading": "Uploading media...",
+      "mediaUploaded": "Uploaded media",
+      "mediaRemove": "Remove media",
+      "addMedia": "Add media",
+      "saveCreate": "Create ad",
+      "saveUpdate": "Save changes",
+      "validation": {
+        "titleRequired": "Title is required.",
+        "titleTooLong": "Title is too long.",
+        "mediaTypeRequired": "Pick a media type.",
+        "descriptionTooLong": "Description is too long.",
+        "invalidUrl": "Use a valid URL.",
+        "endBeforeStart": "End date must be after start date."
+      }
+    },
+    "detail": {
+      "notFound": "Ad not found",
+      "createdAt": "Created",
+      "updatedAt": "Updated",
+      "schedule": "Schedule",
+      "startsAt": "Starts",
+      "endsAt": "Ends",
+      "notScheduled": "Always on",
+      "groupLabel": "Ad group",
+      "propertyLabel": "Linked property",
+      "noProperty": "Not linked to a property.",
+      "media": "Media",
+      "noMedia": "No media uploaded.",
+      "externalLink": "Visit link",
+      "defaultBadge": "Default"
+    },
+    "create": {
+      "success": "Ad created."
+    },
+    "update": {
+      "success": "Ad updated."
+    },
+    "notFoundTitle": "Ad not found",
+    "loading": "Loading ads...",
+    "errorLoading": "Failed to load ads.",
+    "groups": {
+      "title": "Ad groups",
+      "subtitle": "Organize ads into groups and pick a default ad for each.",
+      "newGroup": "New group",
+      "editGroup": "Edit group",
+      "empty": "No ad groups yet. Create your first group to start organizing ads.",
+      "searchPlaceholder": "Search groups...",
+      "statusAll": "All statuses",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "statusArchived": "Archived",
+      "columns": {
+        "name": "Name",
+        "status": "Status",
+        "adsCount": "Ads",
+        "defaultAd": "Default ad",
+        "created": "Created"
+      },
+      "actions": {
+        "view": "View ads",
+        "edit": "Edit",
+        "archive": "Archive",
+        "restore": "Restore",
+        "setDefault": "Set default",
+        "removeDefault": "Remove default"
+      },
+      "form": {
+        "nameLabel": "Group name",
+        "namePlaceholder": "e.g. Hero banners",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "What is this group for?",
+        "statusLabel": "Status",
+        "statusActive": "Active",
+        "statusInactive": "Inactive",
+        "saveCreate": "Create group",
+        "saveUpdate": "Save changes",
+        "validation": {
+          "nameRequired": "Name is required.",
+          "nameTooLong": "Name is too long.",
+          "descriptionTooLong": "Description is too long."
+        }
+      },
+      "create": {
+        "success": "Ad group created."
+      },
+      "update": {
+        "success": "Ad group updated."
+      },
+      "archive": {
+        "title": "Archive group",
+        "description": "Archived groups are hidden from public display but can be restored later.",
+        "confirm": "Archive",
+        "success": "Ad group archived."
+      },
+      "restore": {
+        "success": "Ad group restored."
+      },
+      "detail": {
+        "notFound": "Group not found",
+        "descriptionLabel": "Description",
+        "noDescription": "No description.",
+        "adsSectionTitle": "Ads in this group",
+        "adsEmpty": "This group has no ads yet. Use the “New ad” button to add one.",
+        "defaultAdLabel": "Default ad",
+        "noDefaultAd": "No default ad set.",
+        "backToGroups": "Back to groups"
+      }
+    }
   }
 }
