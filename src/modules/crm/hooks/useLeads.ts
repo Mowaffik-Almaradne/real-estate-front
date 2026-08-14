@@ -58,7 +58,7 @@ export function useLeads(initial: LeadFilters = {}): UseLeadsResult {
   }, [filters])
 
   useEffect(() => {
-    void refresh()
+    Promise.resolve().then(() => void refresh())
   }, [refresh])
 
   return {

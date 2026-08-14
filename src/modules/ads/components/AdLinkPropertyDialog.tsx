@@ -68,9 +68,11 @@ export function AdLinkPropertyDialog({
 
   useEffect(() => {
     if (!open) return
-    setSelectedId(currentPropertyId ?? null)
-    setSearch("")
-    setItems([])
+    Promise.resolve().then(() => {
+      setSelectedId(currentPropertyId ?? null)
+      setSearch("")
+      setItems([])
+    })
   }, [open, currentPropertyId])
 
   useEffect(() => {

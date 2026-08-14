@@ -40,7 +40,7 @@ export function useLeadNotes(leadId: number | null): UseLeadNotesResult {
   }, [leadId])
 
   useEffect(() => {
-    void refresh()
+    Promise.resolve().then(() => void refresh())
   }, [refresh])
 
   const create = useCallback(

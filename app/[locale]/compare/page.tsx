@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 
 import { Card } from "components/ui/card"
+import { DashboardLayout } from "components/layout/DashboardLayout"
 import { useCompare } from "src/modules/compare"
 import { ComparisonHeader } from "src/modules/compare/ComparisonHeader"
 import { ComparisonTable } from "src/modules/compare/ComparisonTable"
@@ -54,44 +55,46 @@ export default function ComparePage() {
   const showEmpty = isHydrated && ids.length === 0
 
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-8">
-      <header className="mb-6 flex flex-col gap-2">
-        <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
-        <p className="text-sm text-muted-foreground">
-          {t("subtitle", { count: ids.length })}
-        </p>
-      </header>
+    <DashboardLayout title={t("title")}>
+      <div className="container mx-auto max-w-6xl px-4 py-8">
+        <header className="mb-6 flex flex-col gap-2">
+          <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
+          <p className="text-sm text-muted-foreground">
+            {t("subtitle", { count: ids.length })}
+          </p>
+        </header>
 
-      {showEmpty ? (
-        <ComparisonEmpty locale={locale} />
-      ) : (
-        <div className="space-y-6">
-          <ComparisonHeader
-            properties={properties}
-            locale={locale}
-            loading={loading}
-          />
-          {!loading && properties.length > 0 && (
-            <Card className="overflow-hidden">
-              <ComparisonTable properties={properties} />
-            </Card>
-          )}
-          {properties.length > 0 && (
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={() => {
-                  clear()
-                  toast.success(t("cleared"))
-                }}
-                className="text-sm text-muted-foreground hover:text-destructive underline-offset-4 hover:underline"
-              >
-                {t("clearAll")}
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+        {showEmpty ? (
+          <ComparisonEmpty locale={locale} />
+        ) : (
+          <div className="space-y-6">
+            <ComparisonHeader
+              properties={properties}
+              locale={locale}
+              loading={loading}
+            />
+            {!loading && properties.length > 0 && (
+              <Card className="overflow-hidden">
+                <ComparisonTable properties={properties} />
+              </Card>
+            )}
+            {properties.length > 0 && (
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    clear()
+                    toast.success(t("cleared"))
+                  }}
+                  className="text-sm text-muted-foreground hover:text-destructive underline-offset-4 hover:underline"
+                >
+                  {t("clearAll")}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </DashboardLayout>
   )
 }

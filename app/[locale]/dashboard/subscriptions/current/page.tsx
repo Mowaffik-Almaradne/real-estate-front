@@ -4,7 +4,6 @@ import { useState } from "react"
 import Link from "next/link"
 import { useLocale } from "next-intl"
 import { CalendarClock, Loader2 } from "lucide-react"
-import { toast } from "sonner"
 
 import { Button } from "components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "components/ui/card"
@@ -18,7 +17,6 @@ import {
   useSubscriptionsTranslations,
 } from "src/modules/subscriptions"
 import { SubscriptionStatus } from "@/types/enums"
-import { ApiClientError } from "@/lib/apiClient"
 
 function formatDate(value?: string | null): string {
   if (!value) return "—"
@@ -30,7 +28,7 @@ function formatDate(value?: string | null): string {
 export default function CurrentSubscriptionPage() {
   const locale = useLocale()
   const { t } = useSubscriptionsTranslations()
-  const { subscription, loading, error, cancel, cancelling, refresh } =
+  const { subscription, loading, error, cancelling, refresh } =
     useCurrentSubscription()
   const featuresHook = useSubscriptionFeatureAccess()
   const [cancelOpen, setCancelOpen] = useState(false)
@@ -43,16 +41,6 @@ export default function CurrentSubscriptionPage() {
 
   const isActive = subscription?.status === SubscriptionStatus.active
   const isCancelled = subscription?.status === SubscriptionStatus.cancelled
-
-  const handleCancel = async () => {
-    try {
-      await cancel()
-    } catch (err) {
-      const message =
-        err instanceof ApiClientError ? err.message : t("errors.saveFailed")
-      toast.error(message)
-    }
-  }
 
   if (loading && !subscription) {
     return (

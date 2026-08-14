@@ -46,7 +46,7 @@ export default function AppointmentsPage() {
   )
 
   const onRemoved = useCallback(
-    (_id: number) => {
+    () => {
       void refresh()
       setRefreshKey((key) => key + 1)
     },

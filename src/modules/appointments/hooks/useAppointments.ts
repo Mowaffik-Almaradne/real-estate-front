@@ -70,7 +70,7 @@ export function useAppointments(
   }, [source, filters])
 
   useEffect(() => {
-    void refresh()
+    Promise.resolve().then(() => void refresh())
   }, [refresh])
 
   return {
@@ -106,7 +106,7 @@ export function useAppointmentCalendar(from?: string, to?: string) {
   }, [from, to])
 
   useEffect(() => {
-    void refresh()
+    Promise.resolve().then(() => void refresh())
   }, [refresh])
 
   return { events, loading, error, refresh }

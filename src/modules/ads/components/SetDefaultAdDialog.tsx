@@ -59,7 +59,7 @@ export function SetDefaultAdDialog({
 
   useEffect(() => {
     if (!open) {
-      setSelectedId(null)
+      Promise.resolve().then(() => setSelectedId(null))
     }
   }, [open])
 

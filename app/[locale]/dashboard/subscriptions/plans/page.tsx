@@ -35,7 +35,7 @@ export default function SubscriptionPlansPage() {
     setFormOpen(true)
   }
 
-  const handleSaved = (plan: SubscriptionPlan) => {
+  const handleSaved = () => {
     setEditing(null)
     router.refresh()
   }

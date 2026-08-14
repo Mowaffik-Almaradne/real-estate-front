@@ -23,8 +23,6 @@ import type {
 
 export { ApiClientError as CrmServiceError }
 
-type UnknownRecord = Record<string, unknown>
-
 const EMPTY_PAGINATION: ApiPagination = {
   total: 0,
   per_page: 0,
@@ -32,13 +30,6 @@ const EMPTY_PAGINATION: ApiPagination = {
   last_page: 1,
   from: null,
   to: null,
-}
-
-function emptyLeads(data: Lead[] = []): LeadsResponse {
-  return {
-    data,
-    pagination: { ...EMPTY_PAGINATION, total: data.length, to: data.length },
-  }
 }
 
 function buildParams(filters: LeadFilters = {}): Record<string, string | number> {

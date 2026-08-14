@@ -207,7 +207,7 @@ describe("propertyService HTTP contracts", () => {
     expect(result.data[0]).toMatchObject({
       id: 14,
       is_favorited: true,
-      main_image: expect.stringContaining("images.unsplash.com"),
+      main_image: expect.stringContaining("picsum.photos"),
     })
   })
 

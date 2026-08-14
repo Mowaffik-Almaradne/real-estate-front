@@ -363,7 +363,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                       <p className="text-xs text-muted-foreground">{property.publisher?.email}</p>
                     </div>
                   </div>
-                  {currentUser && currentUser.id !== property.publisher?.id && (
+                  {currentUser && currentUser.id !== property.publisher?.id && property.status !== "sold" && (
                     <div className="flex flex-col gap-2 sm:flex-row">
                       <Button onClick={handleContact} disabled={creatingChat} size="sm" className="rounded-lg">
                         {creatingChat ? (
@@ -379,7 +379,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                       />
                     </div>
                   )}
-                  {!currentUser && (
+                  {!currentUser && property.status !== "sold" && (
                     <div className="flex flex-col gap-2 sm:flex-row">
                       <Button onClick={() => router.push("/login")} size="sm" className="rounded-lg">
                         <MessageCircle className="mr-2 h-4 w-4" />

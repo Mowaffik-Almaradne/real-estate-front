@@ -70,8 +70,10 @@ export function AdGroupFormDialog({
 
   useEffect(() => {
     if (open) {
-      setState(buildInitial(editing))
-      setErrors({})
+      Promise.resolve().then(() => {
+        setState(buildInitial(editing))
+        setErrors({})
+      })
     }
   }, [open, editing])
 

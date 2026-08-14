@@ -15,10 +15,20 @@ import {
   Sparkles,
   CalendarDays,
   CalendarCheck,
+  CalendarClock,
   Heart,
   Bell,
   Bookmark,
   BarChart3,
+  Megaphone,
+  Layers,
+  Users,
+  Wallet,
+  KeyRound,
+  Tag,
+  FolderArchive,
+  CreditCard,
+  Brain,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { hasPermission, type PermissionName } from "@/lib/permissions"
@@ -34,7 +44,7 @@ interface SidebarProps {
 
 type NavItem = {
   href: string
-  labelKey: "home" | "publicProperties" | "properties" | "viewings" | "schedule" | "cities" | "chat" | "settings" | "dashboard" | "favorites" | "notifications" | "reviews" | "savedSearches" | "analytics"
+  labelKey: "home" | "publicProperties" | "properties" | "viewings" | "schedule" | "cities" | "chat" | "settings" | "dashboard" | "favorites" | "notifications" | "reviews" | "savedSearches" | "analytics" | "ads" | "adGroups" | "leads" | "appointments" | "deposits" | "rentalCards" | "categories" | "storage" | "plans" | "ai"
   icon: typeof Home
   permission?: PermissionName
   showBadge?: "favorites" | "notifications"
@@ -47,10 +57,20 @@ const navItems: NavItem[] = [
   { href: "/saved-searches", labelKey: "savedSearches", icon: Bookmark },
   { href: "/notifications", labelKey: "notifications", icon: Bell, showBadge: "notifications" },
   { href: "/reviews", labelKey: "reviews", icon: MessageCircle },
+  { href: "/ai", labelKey: "ai", icon: Brain },
   { href: "/dashboard/properties", labelKey: "properties", icon: Building2, permission: "properties.list" },
   { href: "/dashboard/analytics", labelKey: "analytics", icon: BarChart3, permission: "properties.list" },
+  { href: "/dashboard/crm", labelKey: "leads", icon: Users },
+  { href: "/dashboard/appointments", labelKey: "appointments", icon: CalendarClock },
   { href: "/dashboard/viewings", labelKey: "viewings", icon: CalendarCheck },
   { href: "/dashboard/schedule", labelKey: "schedule", icon: CalendarDays, permission: "properties.list" },
+  { href: "/dashboard/ads", labelKey: "ads", icon: Megaphone, permission: "ads.list" },
+  { href: "/dashboard/ad-groups", labelKey: "adGroups", icon: Layers, permission: "ads.list" },
+  { href: "/dashboard/subscriptions/plans", labelKey: "plans", icon: CreditCard },
+  { href: "/dashboard/deposits", labelKey: "deposits", icon: Wallet },
+  { href: "/dashboard/rental-cards", labelKey: "rentalCards", icon: KeyRound },
+  { href: "/dashboard/categories", labelKey: "categories", icon: Tag },
+  { href: "/dashboard/storage", labelKey: "storage", icon: FolderArchive },
   { href: "/dashboard/cities", labelKey: "cities", icon: MapPin, permission: "cities.list" },
   { href: "/chat", labelKey: "chat", icon: MessageCircle },
   { href: "/settings", labelKey: "settings", icon: Settings },

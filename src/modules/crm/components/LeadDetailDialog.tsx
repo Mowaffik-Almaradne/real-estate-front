@@ -218,8 +218,10 @@ export function LeadDetailDialog({ open, onOpenChange, lead, onUpdated }: LeadDe
 
   useEffect(() => {
     if (lead) {
-      setLostReason(lead.lost_reason ?? "")
-      setSelectedStatus(lead.status)
+      Promise.resolve().then(() => {
+        setLostReason(lead.lost_reason ?? "")
+        setSelectedStatus(lead.status)
+      })
     }
   }, [lead])
 

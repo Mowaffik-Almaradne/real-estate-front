@@ -24,7 +24,7 @@ interface UseSavedSearchesResult {
   ) => Promise<void>
 }
 
-export function useSavedSearches(): UseSavedSearchesResult {
+export function useSavedSearches(refreshKey: number = 0): UseSavedSearchesResult {
   const { user } = useAuth()
   const [searches, setSearches] = useState<SavedSearch[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -52,7 +52,7 @@ export function useSavedSearches(): UseSavedSearchesResult {
     void Promise.resolve().then(() => {
       void refresh()
     })
-  }, [refresh])
+  }, [refresh, refreshKey])
 
   const create = useCallback(
     async (request: CreateSavedSearchRequest): Promise<SavedSearch> => {

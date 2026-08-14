@@ -58,7 +58,7 @@ export default function SubscriptionPlanFeaturesPage() {
   }, [t])
 
   useEffect(() => {
-    void refresh()
+    Promise.resolve().then(() => void refresh())
   }, [refresh])
 
   const handleCreate = async () => {

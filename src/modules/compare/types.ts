@@ -26,14 +26,14 @@ export interface ComparisonFieldDef {
 }
 
 export const COMPARISON_FIELDS: readonly ComparisonFieldDef[] = [
-  { key: "price", labelKey: "compare.fields.price", emphasize: true },
-  { key: "area", labelKey: "compare.fields.area" },
-  { key: "rooms", labelKey: "compare.fields.rooms" },
-  { key: "bathrooms", labelKey: "compare.fields.bathrooms" },
-  { key: "type", labelKey: "compare.fields.type" },
-  { key: "contract", labelKey: "compare.fields.contract" },
-  { key: "city", labelKey: "compare.fields.city" },
-  { key: "country", labelKey: "compare.fields.country" },
-  { key: "status", labelKey: "compare.fields.status" },
-  { key: "publisher", labelKey: "compare.fields.publisher" },
+  { key: "price", labelKey: "fields.price", emphasize: true },
+  { key: "area", labelKey: "fields.area" },
+  { key: "rooms", labelKey: "fields.rooms" },
+  { key: "bathrooms", labelKey: "fields.bathrooms" },
+  { key: "type", labelKey: "fields.type" },
+  { key: "contract", labelKey: "fields.contract" },
+  { key: "city", labelKey: "fields.city" },
+  { key: "country", labelKey: "fields.country" },
+  { key: "status", labelKey: "fields.status" },
+  { key: "publisher", labelKey: "fields.publisher" },
 ] as const

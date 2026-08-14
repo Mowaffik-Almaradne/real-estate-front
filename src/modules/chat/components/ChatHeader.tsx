@@ -55,7 +55,7 @@ export function ChatHeader({
         </div>
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold">{displayName}</p>
-          <p className="flex items-center gap-1 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
             {room.type === "group" ? (
               <>
                 <Users className="size-3" aria-hidden />
@@ -64,7 +64,7 @@ export function ChatHeader({
             ) : (
               <ConnectionStatus isConnected={isConnected} />
             )}
-          </p>
+          </div>
         </div>
       </div>
     </header>

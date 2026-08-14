@@ -150,9 +150,14 @@ function isAnalyticsSummary(value: unknown): value is AnalyticsSummary {
 function normalizeSummary(raw: unknown, range: AnalyticsRange): AnalyticsSummary | null {
   if (!raw) return null
   const nested = asRecord(raw)
-  const payload =
-    nested && isAnalyticsSummary(nested.data) ? nested.data : isAnalyticsSummary(raw) ? raw : nested
-  if (!payload) return null
+  const candidate =
+    nested && isAnalyticsSummary(nested.data)
+      ? nested.data
+      : isAnalyticsSummary(raw)
+        ? raw
+        : nested
+  const payload: UnknownRecord = asRecord(candidate) ?? {}
+  if (!nested && !candidate) return null
 
   const keys = Object.keys(payload).filter((key) => key !== "data" || payload.data != null)
   if (keys.length === 0 || (keys.length === 1 && keys[0] === "data" && payload.data == null)) {
@@ -198,7 +203,7 @@ function normalizeSummary(raw: unknown, range: AnalyticsRange): AnalyticsSummary
 
   const seriesRaw = Array.isArray(payload.series) ? payload.series : []
   const mappedSeries: MetricSeries[] = seriesRaw
-    .map((item) => {
+    .map((item): MetricSeries | null => {
       const row = asRecord(item)
       if (!row) return null
       const metric = str(row.metric) as AnalyticsMetric
@@ -208,7 +213,7 @@ function normalizeSummary(raw: unknown, range: AnalyticsRange): AnalyticsSummary
         total: num(row.total, row.value),
         previous_total: num(row.previous_total, row.previous),
         points: extractPoints(row.points ?? row),
-      } satisfies MetricSeries
+      }
     })
     .filter((s): s is MetricSeries => s != null)
 

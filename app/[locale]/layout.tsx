@@ -129,6 +129,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning>
       <body
+        suppressHydrationWarning
         className={`${fontSans.variable} ${fontArabic.variable} ${geistMono.variable} min-h-screen antialiased ${isRtl ? "font-arabic" : ""}`}
       >
         <NextIntlClientProvider messages={messages} locale={locale}>

@@ -26,6 +26,7 @@ import {
   AdGroupDeleteDialog,
   AdGroupFormDialog,
   AdLinkPropertyDialog,
+  AdStatusBadge,
   SetDefaultAdDialog,
   adGroupService,
   useAdGroup,

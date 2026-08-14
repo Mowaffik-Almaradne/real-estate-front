@@ -16,6 +16,7 @@ import {
 function SavedSearchesPageInner() {
   const t = useTranslations("savedSearches")
   const [saveDialogOpen, setSaveDialogOpen] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0)
   const { filters } = useCurrentSearchCandidate()
 
   return (
@@ -39,13 +40,17 @@ function SavedSearchesPageInner() {
           <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
 
-        <SavedSearchesList onCreateClick={() => setSaveDialogOpen(true)} />
+        <SavedSearchesList
+          onCreateClick={() => setSaveDialogOpen(true)}
+          refreshKey={refreshKey}
+        />
       </div>
 
       <SaveSearchDialog
         open={saveDialogOpen}
         onOpenChange={setSaveDialogOpen}
         filters={filters}
+        onSaved={() => setRefreshKey((k) => k + 1)}
       />
     </DashboardLayout>
   )

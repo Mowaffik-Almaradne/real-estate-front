@@ -106,8 +106,10 @@ export function AdFormDialog({
       if (!isEdit && defaultGroupId != null) {
         next.ad_group_id = String(defaultGroupId)
       }
-      setState(next)
-      setErrors({})
+      Promise.resolve().then(() => {
+        setState(next)
+        setErrors({})
+      })
     }
   }, [open, editing, defaultGroupId, isEdit])
 

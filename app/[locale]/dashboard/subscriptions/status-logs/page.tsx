@@ -23,7 +23,6 @@ import {
   useSubscriptionStatusLogs,
   useSubscriptionsTranslations,
 } from "src/modules/subscriptions"
-import { ApiClientError } from "@/lib/apiClient"
 
 export default function CurrentSubscriptionStatusLogsPage() {
   const locale = useLocale()

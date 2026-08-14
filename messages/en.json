@@ -13,7 +13,17 @@
     "savedSearches": "Saved searches",
     "analytics": "Analytics",
     "notifications": "Notifications",
-    "reviews": "Reviews"
+    "reviews": "Reviews",
+    "ads": "Ads",
+    "adGroups": "Ad Groups",
+    "leads": "Leads",
+    "appointments": "Appointments",
+    "deposits": "Deposits",
+    "rentalCards": "Rental Cards",
+    "categories": "Categories",
+    "storage": "Storage",
+    "plans": "Subscription Plans",
+    "ai": "AI Assistant"
   },
   "common": {
     "loading": "Loading...",
@@ -224,6 +234,8 @@
       "pickCountryFirst": "Pick a country first",
       "beds": "Beds",
       "baths": "Baths",
+      "rooms": "Rooms",
+      "bathrooms": "Bathrooms",
       "minPrice": "Min price",
       "maxPrice": "Max price",
       "sortBy": "Sort by",

@@ -13,7 +13,17 @@
     "savedSearches": "عمليات البحث المحفوظة",
     "analytics": "التحليلات",
     "notifications": "الإشعارات",
-    "reviews": "التقييمات"
+    "reviews": "التقييمات",
+    "ads": "الإعلانات",
+    "adGroups": "مجموعات الإعلانات",
+    "leads": "العملاء المحتملون",
+    "appointments": "المواعيد",
+    "deposits": "الودائع",
+    "rentalCards": "بطاقات الإيجار",
+    "categories": "التصنيفات",
+    "storage": "التخزين",
+    "plans": "خطط الاشتراك",
+    "ai": "مساعد الذكاء الاصطناعي"
   },
   "common": {
     "loading": "جاري التحميل...",
@@ -224,6 +234,8 @@
       "pickCountryFirst": "اختر بلداً أولاً",
       "beds": "الغرف",
       "baths": "الحمامات",
+      "rooms": "الغرف",
+      "bathrooms": "الحمامات",
       "minPrice": "أقل سعر",
       "maxPrice": "أعلى سعر",
       "sortBy": "الترتيب حسب",

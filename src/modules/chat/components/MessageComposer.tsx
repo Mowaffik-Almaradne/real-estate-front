@@ -30,8 +30,6 @@ export interface MessageComposerProps {
   className?: string
 }
 
-let attachmentIdCounter = 0
-
 export function MessageComposer({
   roomId,
   onSend,
@@ -63,7 +61,7 @@ export function MessageComposer({
     }, 3000)
   }
 
-  function processFiles(_files: FileList | File[]) {
+  function processFiles() {
     // Backend has no `/chat/rooms/{id}/attachments` route yet.
     toast.error(t("uploadFailed"))
   }
@@ -72,7 +70,7 @@ export function MessageComposer({
     event.preventDefault()
     setDragOver(false)
     if (event.dataTransfer.files?.length) {
-      processFiles(event.dataTransfer.files)
+      processFiles()
     }
   }
 

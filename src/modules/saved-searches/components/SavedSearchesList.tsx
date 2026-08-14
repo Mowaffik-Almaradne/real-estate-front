@@ -14,6 +14,7 @@ import { filtersToQuery, type SavedSearch } from "../types"
 
 interface SavedSearchesListProps {
   onCreateClick?: () => void
+  refreshKey?: number
 }
 
 function CardSkeleton() {
@@ -29,7 +30,7 @@ function CardSkeleton() {
   )
 }
 
-export function SavedSearchesList({ onCreateClick }: SavedSearchesListProps) {
+export function SavedSearchesList({ onCreateClick, refreshKey = 0 }: SavedSearchesListProps) {
   const locale = useLocale()
   const router = useRouter()
   const t = useTranslations("savedSearches")
@@ -41,7 +42,7 @@ export function SavedSearchesList({ onCreateClick }: SavedSearchesListProps) {
     toggleAlert,
     setAlertFrequency,
     refresh,
-  } = useSavedSearches()
+  } = useSavedSearches(refreshKey)
 
   function handleApply(item: SavedSearch) {
     const qs = filtersToQuery(item.filters)

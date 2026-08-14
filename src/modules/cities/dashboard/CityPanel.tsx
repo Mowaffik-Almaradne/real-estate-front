@@ -41,8 +41,10 @@ export function CityPanel({
   const [page, setPage] = useState(1)
 
   useEffect(() => {
-    setSearch("")
-    setPage(1)
+    Promise.resolve().then(() => {
+      setSearch("")
+      setPage(1)
+    })
   }, [selectedCountry?.id])
 
   const filtered = useMemo(() => {
@@ -61,7 +63,7 @@ export function CityPanel({
   const to = Math.min(currentPage * PAGE_SIZE, filtered.length)
 
   useEffect(() => {
-    if (page > lastPage) setPage(lastPage)
+    if (page > lastPage) Promise.resolve().then(() => setPage(lastPage))
   }, [page, lastPage])
 
   return (

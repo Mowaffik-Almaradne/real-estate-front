@@ -73,7 +73,7 @@ export const authService = {
     const response = await apiClient.get<ApiResponse<CurrentUserResponse> | UserDto>(
       getOriginUrl("/user")
     )
-    const data = getApiData(response) as UserDto | CurrentUserResponse | null
+    const data = getApiData(response as never) as UserDto | CurrentUserResponse | null
     if (data && typeof data === "object" && "id" in data) {
       return data as UserDto
     }

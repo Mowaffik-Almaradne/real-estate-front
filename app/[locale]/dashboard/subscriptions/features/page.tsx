@@ -83,7 +83,7 @@ export default function SubscriptionFeaturesPage() {
         open={formOpen}
         onOpenChange={setFormOpen}
         editing={editing}
-        onSaved={(feature) => {
+        onSaved={() => {
           setEditing(null)
         }}
       />

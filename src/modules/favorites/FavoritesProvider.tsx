@@ -66,10 +66,12 @@ export function FavoritesProvider({
 
   useEffect(() => {
     const stored = readStorage()
-    if (stored.length > 0) {
-      setIds(new Set(stored))
-    }
-    setIsHydrated(true)
+    Promise.resolve().then(() => {
+      if (stored.length > 0) {
+        setIds(new Set(stored))
+      }
+      setIsHydrated(true)
+    })
   }, [])
 
   useEffect(() => {

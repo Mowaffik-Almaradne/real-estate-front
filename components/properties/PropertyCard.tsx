@@ -249,11 +249,9 @@ export const PropertyCard = memo(function PropertyCard({
           )}
         </div>
 
-        <motion.button
-          onClick={(e) => {
-            e.stopPropagation()
-            // Preserve existing animation behaviour for non-favorited taps
-          }}
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
           className="absolute right-3 top-3"
         >
           <FavoriteButton
@@ -262,7 +260,7 @@ export const PropertyCard = memo(function PropertyCard({
             initialCount={property.favorites_count}
             onChange={(fav) => setIsFavorite(fav)}
           />
-        </motion.button>
+        </motion.div>
 
         <motion.div
           initial={{ y: 20, opacity: 0 }}

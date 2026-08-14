@@ -47,7 +47,7 @@ function ChatContent() {
     if (!roomIdParam) return
     const id = Number(roomIdParam)
     if (Number.isFinite(id) && id > 0) {
-      setSelectedRoomId(id)
+      Promise.resolve().then(() => setSelectedRoomId(id))
     }
   }, [roomIdParam])
 

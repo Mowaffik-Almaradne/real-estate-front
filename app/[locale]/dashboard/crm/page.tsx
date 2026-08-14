@@ -18,7 +18,7 @@ import {
 } from "src/modules/crm"
 import { useLeads } from "src/modules/crm/hooks/useLeads"
 import { leadService } from "src/modules/crm/services/crmService"
-import type { Lead, LeadFilters } from "src/modules/crm"
+import type { Lead } from "src/modules/crm"
 
 export default function CrmLeadsPage() {
   const t = useTranslations()
@@ -182,7 +182,7 @@ function ArchivedLeadsSection({
   }, [])
 
   useEffect(() => {
-    void refresh()
+    Promise.resolve().then(() => void refresh())
   }, [refresh])
 
   return (

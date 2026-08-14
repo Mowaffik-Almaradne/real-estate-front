@@ -54,13 +54,15 @@ export default function CheckoutPage() {
   const [completedSubscriptionId, setCompletedSubscriptionId] = useState<
     number | null
   >(null)
-  const { result, loading: checkoutLoading, error: checkoutError, start } =
+  const { loading: checkoutLoading, error: checkoutError, start } =
     useCheckout()
 
   useEffect(() => {
     if (!planId) {
-      setPlan(null)
-      setPlanError("Missing plan id")
+      Promise.resolve().then(() => {
+        setPlan(null)
+        setPlanError("Missing plan id")
+      })
       return
     }
     let cancelled = false

@@ -164,8 +164,8 @@ export default function PropertyEditPage({ params }: { params: Promise<{ id: str
       setValue("detailed_info", property.detailed_info || "")
       setValue("price", Number(property.price))
       setValue("currency", property.currency || "USD")
-      setValue("latitude", property.latitude ?? null)
-      setValue("longitude", property.longitude ?? null)
+      setValue("latitude", property.latitude != null ? Number(property.latitude) : null)
+      setValue("longitude", property.longitude != null ? Number(property.longitude) : null)
 
       setSelectedCountryId(property.country.id)
       await loadCities(property.country.id)

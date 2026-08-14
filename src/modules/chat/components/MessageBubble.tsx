@@ -1,6 +1,6 @@
 "use client"
 
-import { Check, CheckCheck, Download, FileText, Loader2, X } from "lucide-react"
+import { Check, CheckCheck, Download, FileText, Loader2, Reply, X } from "lucide-react"
 import Image from "next/image"
 import { useTranslations } from "next-intl"
 
@@ -116,7 +116,7 @@ export function MessageBubble({
               onClick={() => onReply(message)}
               aria-label={t("reply")}
             >
-              <X className="size-3.5 rotate-90" aria-hidden />
+              <Reply className="size-3.5" aria-hidden />
             </Button>
           )}
           {isMine && onDelete && (

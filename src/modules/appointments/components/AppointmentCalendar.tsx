@@ -46,8 +46,10 @@ export function AppointmentCalendar({ onSelect, refreshKey = 0 }: AppointmentCal
     let cancelled = false
     const start = startOfMonth(monthDate)
     const end = endOfMonth(monthDate)
-    setLoading(true)
-    setError(null)
+    Promise.resolve().then(() => {
+      setLoading(true)
+      setError(null)
+    })
     void appointmentService
       .getCalendar(toIsoDate(start), toIsoDate(end))
       .then((list) => {

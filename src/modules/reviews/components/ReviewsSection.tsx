@@ -55,9 +55,11 @@ export function ReviewsSection({
 
   useEffect(() => {
     if (!loadList || !officeId) {
-      setLoading(false)
-      setReviews([])
-      setError(null)
+      Promise.resolve().then(() => {
+        setLoading(false)
+        setReviews([])
+        setError(null)
+      })
       return
     }
 
