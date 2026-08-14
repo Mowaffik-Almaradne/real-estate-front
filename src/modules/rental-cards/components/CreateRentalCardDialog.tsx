@@ -15,6 +15,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
+import { AsyncSelect } from "@/components/ui/async-select"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -37,11 +38,13 @@ import {
 } from "@/components/ui/dialog"
 
 import { ApiClientError } from "@/lib/apiClient"
+import type { PropertyDto } from "@/types/property"
 import {
   createRentalCardSchema,
   type CreateRentalCardValues,
 } from "../schemas"
 import { rentalCardService } from "../services/rentalCardService"
+import { propertyService } from "src/modules/properties/services/propertyService"
 import { getRentalCardLabel } from "../labels"
 import { RENTAL_CARD_PHOTOS_MAX } from "../types/enums"
 import type { CreateRentalCardInput, RentalCardDto } from "../types/dto"
@@ -89,6 +92,8 @@ export function CreateRentalCardDialog({
   const [serverError, setServerError] = useState<string | null>(null)
   const [fileError, setFileError] = useState<string | null>(null)
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([])
+  const [selectedProperty, setSelectedProperty] = useState<PropertyDto | null>(null)
+  const [lockedProperty, setLockedProperty] = useState<PropertyDto | null>(null)
 
   const {
     register,
@@ -121,6 +126,27 @@ export function CreateRentalCardDialog({
   const currentPhotos = useWatch({ control, name: "pre_rental_photos" }) ?? []
 
   useEffect(() => {
+    if (!propertyId) {
+      Promise.resolve().then(() => setLockedProperty(null))
+      return
+    }
+    let cancelled = false
+    propertyService
+      .getPropertyById(propertyId)
+      .then((property) => {
+        if (!cancelled) setLockedProperty(property)
+      })
+      .catch(() => {
+        if (!cancelled) setLockedProperty(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [propertyId])
+
+  const propertyValue = lockedProperty ?? selectedProperty
+
+  useEffect(() => {
     if (open) {
       reset({
         property_id: propertyId ?? 0,
@@ -137,6 +163,7 @@ export function CreateRentalCardDialog({
         is_renewable: false,
         pre_rental_photos: [],
       })
+      Promise.resolve().then(() => setSelectedProperty(null))
     }
   }, [open, propertyId, reset])
 
@@ -258,13 +285,42 @@ export function CreateRentalCardDialog({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="property_id">{label("rentalCards.fields.property")} ID</Label>
-              <Input
-                id="property_id"
-                type="number"
-                min={1}
-                disabled={Boolean(propertyId)}
-                {...register("property_id", { valueAsNumber: true })}
+              <Label htmlFor="property_id">{label("rentalCards.fields.property")}</Label>
+              <Controller
+                control={control}
+                name="property_id"
+                render={({ field }) => (
+                  <AsyncSelect<PropertyDto>
+                    id="property_id"
+                    value={propertyValue}
+                    disabled={Boolean(propertyId)}
+                    onChange={(option) => {
+                      setSelectedProperty(option)
+                      field.onChange(option ? option.id : 0)
+                    }}
+                    fetcher={async ({ search, page }) => {
+                      const result = await propertyService.getMyProperties({
+                        search: search || undefined,
+                        page,
+                        perPage: 20,
+                      })
+                      return {
+                        items: result.data,
+                        hasMore:
+                          result.pagination.current_page < result.pagination.last_page,
+                        total: result.pagination.total,
+                      }
+                    }}
+                    getOptionLabel={(option) => option.name}
+                    getOptionValue={(option) => option.id}
+                    placeholder={label("rentalCards.fields.property")}
+                    searchPlaceholder={label(
+                      "rentalCards.fields.propertySearchPlaceholder",
+                    )}
+                    emptyMessage={label("rentalCards.errors.noPropertiesFound")}
+                    errorMessage={label("rentalCards.errors.propertyLoadFailed")}
+                  />
+                )}
               />
               {errors.property_id && (
                 <p className="text-xs text-destructive">{errors.property_id.message}</p>
