@@ -90,6 +90,9 @@ const enLabels: LocaleLabels = {
   "deposits.errors.notesTooLong": "Notes are too long.",
   "deposits.errors.propertyRequired": "Property is required.",
   "deposits.errors.sellerRequired": "Seller is required.",
+  "deposits.errors.noPropertiesFound": "No properties found.",
+  "deposits.errors.propertyLoadFailed": "Could not load properties.",
+  "deposits.fields.propertySearchPlaceholder": "Search properties…",
   "deposits.errors.deleteNotAllowed":
     "Only pending, refunded, or cancelled deposits can be deleted.",
   "deposits.toast.created": "Deposit created.",
@@ -196,6 +199,9 @@ const arLabels: LocaleLabels = {
   "deposits.errors.notesTooLong": "الملاحظات طويلة جدًا.",
   "deposits.errors.propertyRequired": "العقار مطلوب.",
   "deposits.errors.sellerRequired": "البائع مطلوب.",
+  "deposits.errors.noPropertiesFound": "لا توجد عقارات.",
+  "deposits.errors.propertyLoadFailed": "تعذر تحميل العقارات.",
+  "deposits.fields.propertySearchPlaceholder": "ابحث عن عقار…",
   "deposits.errors.deleteNotAllowed":
     "يمكن فقط حذف العربونات قيد الانتظار أو المستردة أو الملغاة.",
   "deposits.toast.created": "تم إنشاء العربون.",
