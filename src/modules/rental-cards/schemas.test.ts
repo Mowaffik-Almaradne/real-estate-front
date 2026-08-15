@@ -24,7 +24,8 @@ const PAST_START = (() => {
 })()
 const TODAY = (() => {
   const now = new Date()
-  return now.toISOString().slice(0, 10)
+  const offsetMs = now.getTimezoneOffset() * 60_000
+  return new Date(now.getTime() - offsetMs).toISOString().slice(0, 10)
 })()
 
 describe("createRentalCardSchema", () => {

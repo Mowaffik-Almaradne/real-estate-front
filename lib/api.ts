@@ -47,10 +47,12 @@ function normalizeCity(item: SearchItem, countryId: number | null = null): City 
  * Use `/api/search/countries` (documented as public `GET /api/search/{type}`).
  */
 export async function getCountries(
-  _page: number = 1,
-  _perPage: number = 10
+  page: number = 1,
+  perPage: number = 10
 ): Promise<ApiResponse<Country[]>> {
-  const response = await apiClient.get<ApiResponse<SearchItem[]>>("/search/countries")
+  const response = await apiClient.get<ApiResponse<SearchItem[]>>("/search/countries", {
+    params: { page, perPage },
+  })
   const items = getApiData(response) ?? []
   return {
     ...response.data,

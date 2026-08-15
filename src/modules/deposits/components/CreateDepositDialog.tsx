@@ -79,6 +79,7 @@ export function CreateDepositDialog({
   const [serverError, setServerError] = useState<string | null>(null)
   const [selectedProperty, setSelectedProperty] = useState<PropertyDto | null>(null)
   const [lockedProperty, setLockedProperty] = useState<PropertyDto | null>(null)
+  const currencyDefault = toDepositCurrency(defaultCurrency)
 
   const {
     register,

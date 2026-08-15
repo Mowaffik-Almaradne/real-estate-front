@@ -63,7 +63,7 @@ export function FavoriteButton({
         setBusy(false)
       }
     },
-    [busy, favorites, isFavorited, onChange, propertyId, count]
+    [busy, favorites, isFavorited, onChange, propertyId]
   )
 
   if (variant === "full") {

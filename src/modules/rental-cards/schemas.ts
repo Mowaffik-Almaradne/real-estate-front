@@ -174,11 +174,8 @@ export const endRentalCardSchema = z
   })
   .superRefine((values, ctx) => {
     if (values.ended_at && values.ended_at.length > 0) {
-      const ended = new Date(values.ended_at)
-      const today = new Date(isoToday())
-      today.setHours(0, 0, 0, 0)
-      ended.setHours(0, 0, 0, 0)
-      if (ended > today) {
+      const ended = values.ended_at
+      if (ended > isoToday()) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["ended_at"],

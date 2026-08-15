@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
@@ -48,7 +48,7 @@ export function SubscriptionPlanFormDialog({
     handleSubmit,
     reset,
     setError,
-    watch,
+    control,
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<SubscriptionPlanFormValues>({
@@ -92,7 +92,7 @@ export function SubscriptionPlanFormDialog({
     }
   }, [open, editing, reset])
 
-  const isActive = watch("is_active")
+  const isActive = useWatch({ control, name: "is_active" })
 
   const onSubmit = handleSubmit(async (values) => {
     try {

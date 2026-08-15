@@ -186,7 +186,7 @@ export function PropertyCarousel({
   title,
   loading = false,
   skeletonCount = 4,
-  onRefresh: _onRefresh, // eslint-disable-line @typescript-eslint/no-unused-vars
+  onRefresh: _onRefresh,
   emptyTitle,
   emptyDescription,
   emptyActionLabel,

@@ -13,7 +13,7 @@ export interface PublisherStatsGridProps {
 
 export function PublisherStatsGrid({ publisher, className }: PublisherStatsGridProps) {
   const t = useTranslations("publisher.stats")
-  const memberSince = new Date(publisher.created_at).getFullYear().toString()
+  const memberSince = new Date(publisher.created_at).getUTCFullYear().toString()
 
   const stats = [
     {

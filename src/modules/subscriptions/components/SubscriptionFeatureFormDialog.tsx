@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
@@ -48,7 +48,7 @@ export function SubscriptionFeatureFormDialog({
     reset,
     setError,
     setValue,
-    watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<SubscriptionFeatureFormValues>({
     resolver: zodResolver(subscriptionFeatureFormSchema),
@@ -79,7 +79,7 @@ export function SubscriptionFeatureFormDialog({
     }
   }, [open, editing, reset])
 
-  const currentType = watch("type")
+  const currentType = useWatch({ control, name: "type" })
 
   const onSubmit = handleSubmit(async (values) => {
     try {

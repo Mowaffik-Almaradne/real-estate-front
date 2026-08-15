@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2 } from "lucide-react"
 
@@ -53,7 +53,7 @@ export function LeadForm({ onSuccess, onCancel }: LeadFormProps) {
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<CreateLeadValues>({
@@ -67,13 +67,13 @@ export function LeadForm({ onSuccess, onCancel }: LeadFormProps) {
     },
   })
 
-  const source = watch("source")
-  const status = watch("status")
+  const source = useWatch({ control, name: "source" })
+  const status = useWatch({ control, name: "status" })
+  const phone = useWatch({ control, name: "phone" })
+  const email = useWatch({ control, name: "email" })
 
   useEffect(() => {
     let cancelled = false
-    const phone = watch("phone")
-    const email = watch("email")
     const handle = window.setTimeout(() => {
       if (cancelled) return
       if (!phone && !email) return
@@ -104,7 +104,7 @@ export function LeadForm({ onSuccess, onCancel }: LeadFormProps) {
       cancelled = true
       window.clearTimeout(handle)
     }
-  }, [watch, t])
+  }, [phone, email, t])
 
   const onSubmit = handleSubmit(async (values) => {
     try {
