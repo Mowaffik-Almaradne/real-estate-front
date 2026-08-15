@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useLocale } from "next-intl"
@@ -49,21 +49,32 @@ interface CreateDepositDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   propertyId?: number
+  propertyName?: string
   sellerId?: number
+  defaultCurrency?: string
   onCreated?: (deposit: DepositDto) => void
+}
+
+function toDepositCurrency(value?: string | null): DepositCurrency {
+  if (value === DepositCurrency.USD) return DepositCurrency.USD
+  if (value === DepositCurrency.SAR) return DepositCurrency.SAR
+  return DepositCurrency.USD
 }
 
 export function CreateDepositDialog({
   open,
   onOpenChange,
   propertyId,
+  propertyName,
   sellerId,
+  defaultCurrency,
   onCreated,
 }: CreateDepositDialogProps) {
   const locale = useLocale()
   const label = (key: string, vars: Record<string, string | number> = {}) =>
     getDepositLabel(locale, key, vars)
   const [serverError, setServerError] = useState<string | null>(null)
+  const currencyDefault = toDepositCurrency(defaultCurrency)
 
   const {
     register,
@@ -78,7 +89,7 @@ export function CreateDepositDialog({
       property_id: propertyId ?? 0,
       seller_id: sellerId ?? 0,
       amount: 0,
-      currency: DepositCurrency.SAR,
+      currency: currencyDefault,
       terms: "",
       notes: "",
     },
@@ -87,6 +98,21 @@ export function CreateDepositDialog({
   // eslint-disable-next-line react-hooks/incompatible-library -- react-hook-form v7's watch() is not yet React Compiler-compatible
   const selectedCurrency = watch("currency")
 
+  useEffect(() => {
+    if (!open) return
+    void Promise.resolve().then(() => {
+      reset({
+        property_id: propertyId ?? 0,
+        seller_id: sellerId ?? 0,
+        amount: 0,
+        currency: toDepositCurrency(defaultCurrency),
+        terms: "",
+        notes: "",
+      })
+      setServerError(null)
+    })
+  }, [open, propertyId, sellerId, defaultCurrency, reset])
+
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null)
     try {
@@ -94,7 +120,7 @@ export function CreateDepositDialog({
         property_id: Number(values.property_id),
         seller_id: Number(values.seller_id),
         amount: Number(values.amount),
-        currency: (values.currency as DepositCurrency) || DepositCurrency.SAR,
+        currency: (values.currency as DepositCurrency) || currencyDefault,
         terms: values.terms ?? null,
         notes: values.notes ?? null,
       }
@@ -103,11 +129,12 @@ export function CreateDepositDialog({
       onCreated?.(created)
       handleOpenChange(false)
     } catch (error) {
-      if (error instanceof ApiClientError) {
-        setServerError(error.message || label("deposits.toast.createFailed"))
-      } else {
-        setServerError(label("deposits.toast.createFailed"))
-      }
+      const message =
+        error instanceof ApiClientError
+          ? error.message || label("deposits.toast.createFailed")
+          : label("deposits.toast.createFailed")
+      setServerError(message)
+      toast.error(message)
     }
   })
 
@@ -117,7 +144,7 @@ export function CreateDepositDialog({
         property_id: propertyId ?? 0,
         seller_id: sellerId ?? 0,
         amount: 0,
-        currency: DepositCurrency.SAR,
+        currency: currencyDefault,
         terms: "",
         notes: "",
       })
@@ -132,7 +159,9 @@ export function CreateDepositDialog({
         <DialogHeader>
           <DialogTitle>{label("deposits.createDialog.title")}</DialogTitle>
           <DialogDescription>
-            {label("deposits.createDialog.description")}
+            {propertyName
+              ? `${label("deposits.createDialog.description")} (${propertyName})`
+              : label("deposits.createDialog.description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -141,6 +170,13 @@ export function CreateDepositDialog({
             <div className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
               <AlertCircle className="size-4 mt-0.5 shrink-0" />
               <p className="font-medium">{serverError}</p>
+            </div>
+          )}
+
+          {propertyName && (
+            <div className="space-y-2">
+              <Label>{label("deposits.fields.property")}</Label>
+              <Input value={propertyName} disabled readOnly />
             </div>
           )}
 
@@ -263,13 +299,17 @@ export function CreateDepositDialog({
 
 interface CreateDepositButtonProps {
   propertyId?: number
+  propertyName?: string
   sellerId?: number
+  defaultCurrency?: string
   onCreated?: (deposit: DepositDto) => void
 }
 
 export function CreateDepositButton({
   propertyId,
+  propertyName,
   sellerId,
+  defaultCurrency,
   onCreated,
 }: CreateDepositButtonProps) {
   const locale = useLocale()
@@ -284,7 +324,9 @@ export function CreateDepositButton({
         open={open}
         onOpenChange={setOpen}
         propertyId={propertyId}
+        propertyName={propertyName}
         sellerId={sellerId}
+        defaultCurrency={defaultCurrency}
         onCreated={onCreated}
       />
     </>

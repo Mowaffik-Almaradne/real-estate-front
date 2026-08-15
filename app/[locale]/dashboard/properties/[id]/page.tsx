@@ -37,6 +37,8 @@ import {
 } from "components/ui/dialog"
 import { DashboardLayout } from "components/layout/DashboardLayout"
 
+import { getStoredUser } from "@/lib/auth"
+import { CreateDepositDialog } from "src/modules/deposits/components/CreateDepositDialog"
 import { propertyService } from "src/modules/properties/services/propertyService"
 import { StatusSelect } from "src/modules/properties/components/StatusSelect"
 import type { PropertyDto as Property } from "@/types/dto"
@@ -50,6 +52,14 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
   const [deleting, setDeleting] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null)
+  const [depositOpen, setDepositOpen] = useState(false)
+  const [currentUser] = useState(() => {
+    try {
+      return getStoredUser()
+    } catch {
+      return null
+    }
+  })
 
   const fetchProperty = useCallback(async () => {
     try {
@@ -127,6 +137,17 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
             Back to Properties
           </Button>
           <div className="flex gap-2">
+            {currentUser?.id === property.publisher?.id &&
+              property.status !== "sold" &&
+              property.publisher?.id && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setDepositOpen(true)}
+                >
+                  Create Deposit
+                </Button>
+              )}
             <Button onClick={() => router.push(`/dashboard/properties/${id}/edit`)}>
               <Pencil className="mr-2 h-4 w-4" />
               Edit Property
@@ -314,6 +335,19 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {currentUser?.id === property.publisher?.id &&
+        property.status !== "sold" &&
+        property.publisher?.id && (
+          <CreateDepositDialog
+            open={depositOpen}
+            onOpenChange={setDepositOpen}
+            propertyId={property.id}
+            propertyName={property.name}
+            sellerId={property.publisher.id}
+            defaultCurrency={property.currency}
+          />
+        )}
 
       {selectedImageIndex !== null && (
         <div
