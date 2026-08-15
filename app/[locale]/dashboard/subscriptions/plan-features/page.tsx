@@ -45,20 +45,30 @@ export default function SubscriptionPlanFeaturesPage() {
         adminSubscriptionFeatureService.list({ perPage: 100 }),
         adminSubscriptionPlanFeatureService.list({ perPage: 100 }),
       ])
-      setPlans(planList.data)
-      setFeatures(featureList.data)
-      setLinks(linkList.data)
+      await Promise.resolve().then(() => {
+        setPlans(planList.data)
+        setFeatures(featureList.data)
+        setLinks(linkList.data)
+      })
     } catch (err) {
       const message =
         err instanceof ApiClientError ? err.message : t("errors.loadFailed")
       toast.error(message)
     } finally {
-      setLoading(false)
+      await Promise.resolve().then(() => {
+        setLoading(false)
+      })
     }
-  }, [t])
+    // `t` from useSubscriptionsTranslations is a new function every render.
+    // Including it here retriggered this callback → useEffect → setState → infinite
+    // list requests and stacked API error toasts.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
-    Promise.resolve().then(() => void refresh())
+    void Promise.resolve().then(() => {
+      void refresh()
+    })
   }, [refresh])
 
   const handleCreate = async () => {
@@ -94,6 +104,20 @@ export default function SubscriptionPlanFeaturesPage() {
     link: SubscriptionPlanFeatureLink,
     patch: UpdateSubscriptionPlanFeatureRequest
   ) => {
+    if (
+      patch.is_enabled !== undefined &&
+      patch.is_enabled === (link.is_enabled !== false) &&
+      patch.limit_value === undefined
+    ) {
+      return
+    }
+    if (
+      patch.limit_value !== undefined &&
+      patch.is_enabled === undefined &&
+      (patch.limit_value ?? null) === (link.limit_value ?? null)
+    ) {
+      return
+    }
     try {
       await adminSubscriptionPlanFeatureService.update(link.id, patch)
       await refresh()
