@@ -65,27 +65,29 @@ export function SubscriptionCouponFormDialog({
 
   useEffect(() => {
     if (!open) return
-    if (editing) {
-      reset({
-        code: editing.code,
-        type: editing.type,
-        value: editing.value,
-        plan_id: editing.plan_id,
-        max_uses: editing.max_uses,
-        expires_at: editing.expires_at,
-        is_active: editing.is_active,
-      })
-    } else {
-      reset({
-        code: "",
-        type: "percentage",
-        value: 0,
-        plan_id: null,
-        max_uses: null,
-        expires_at: null,
-        is_active: true,
-      })
-    }
+    void Promise.resolve().then(() => {
+      if (editing) {
+        reset({
+          code: editing.code,
+          type: editing.type,
+          value: editing.value,
+          plan_id: editing.plan_id,
+          max_uses: editing.max_uses,
+          expires_at: editing.expires_at,
+          is_active: editing.is_active,
+        })
+      } else {
+        reset({
+          code: "",
+          type: "percentage",
+          value: 0,
+          plan_id: null,
+          max_uses: null,
+          expires_at: null,
+          is_active: true,
+        })
+      }
+    })
   }, [open, editing, reset])
 
   const currentType = watch("type")

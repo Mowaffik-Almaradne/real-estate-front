@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { toast } from "sonner"
-import { Plus } from "lucide-react"
+import { Plus, RefreshCw } from "lucide-react"
 
 import { Button } from "components/ui/button"
 import { Card, CardContent } from "components/ui/card"
@@ -27,10 +27,30 @@ export default function SubscriptionCouponsPage() {
   const [editing, setEditing] = useState<SubscriptionDiscount | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<SubscriptionDiscount | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [togglingId, setTogglingId] = useState<number | null>(null)
 
   const handleNew = () => {
     setEditing(null)
     setFormOpen(true)
+  }
+
+  const handleSaved = async () => {
+    setEditing(null)
+    await couponsHook.refresh()
+  }
+
+  const handleToggle = async (coupon: SubscriptionDiscount) => {
+    setTogglingId(coupon.id)
+    try {
+      await couponsHook.update(coupon.id, { is_active: !coupon.is_active })
+      await couponsHook.refresh()
+    } catch (err) {
+      const message =
+        err instanceof ApiClientError ? err.message : t("errors.saveFailed")
+      toast.error(message)
+    } finally {
+      setTogglingId(null)
+    }
   }
 
   const handleDelete = async () => {
@@ -40,6 +60,7 @@ export default function SubscriptionCouponsPage() {
       await couponsHook.remove(deleteTarget.id)
       toast.success(t("coupons.delete.success"))
       setDeleteTarget(null)
+      await couponsHook.refresh()
     } catch (err) {
       const message =
         err instanceof ApiClientError ? err.message : t("errors.deleteFailed")
@@ -53,10 +74,23 @@ export default function SubscriptionCouponsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-muted-foreground">{t("coupons.subtitle")}</p>
-        <Button onClick={handleNew}>
-          <Plus className="mr-1.5 size-4" />
-          {t("coupons.newCoupon")}
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void couponsHook.refresh()}
+            disabled={couponsHook.loading}
+          >
+            <RefreshCw
+              className={`mr-1.5 size-4 ${couponsHook.loading ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </Button>
+          <Button onClick={handleNew}>
+            <Plus className="mr-1.5 size-4" />
+            {t("coupons.newCoupon")}
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -69,11 +103,13 @@ export default function SubscriptionCouponsPage() {
           <CouponsTable
             coupons={couponsHook.coupons}
             loading={couponsHook.loading}
+            togglingId={togglingId}
             emptyMessage={t("coupons.empty")}
             onEdit={(coupon) => {
               setEditing(coupon)
               setFormOpen(true)
             }}
+            onToggle={(coupon) => void handleToggle(coupon)}
             onDelete={(coupon) => setDeleteTarget(coupon)}
           />
         </CardContent>
@@ -83,7 +119,9 @@ export default function SubscriptionCouponsPage() {
         open={formOpen}
         onOpenChange={setFormOpen}
         editing={editing}
-        onSaved={() => setEditing(null)}
+        onSaved={() => {
+          void handleSaved()
+        }}
       />
 
       <SubscriptionDeleteDialog
