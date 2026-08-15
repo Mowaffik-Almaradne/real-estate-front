@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { adGroupService } from "../services/adGroupService"
 import { ApiClientError } from "@/lib/apiClient"
+import type { ApiPagination } from "@/types/common"
 import type {
   AdGroupDto,
   AdGroupFilters,
@@ -11,12 +12,24 @@ import type {
   UpdateAdGroupRequest,
 } from "../types"
 
+const EMPTY_PAGINATION: ApiPagination = {
+  total: 0,
+  per_page: 15,
+  current_page: 1,
+  last_page: 1,
+  from: null,
+  to: null,
+}
+
 interface UseAdGroupsResult {
   groups: AdGroupDto[]
+  pagination: ApiPagination
   loading: boolean
   error: string | null
   filters: AdGroupFilters
+  page: number
   setFilters: (next: AdGroupFilters) => void
+  setPage: (page: number) => void
   refresh: () => Promise<void>
   create: (payload: CreateAdGroupRequest) => Promise<AdGroupDto>
   update: (id: number, payload: UpdateAdGroupRequest) => Promise<AdGroupDto>
@@ -29,20 +42,32 @@ interface UseAdGroupsResult {
 
 export function useAdGroups(initial: AdGroupFilters = {}): UseAdGroupsResult {
   const [filters, setFiltersState] = useState<AdGroupFilters>(initial)
+  const [page, setPageState] = useState<number>(initial.page ?? 1)
   const [groups, setGroups] = useState<AdGroupDto[]>([])
+  const [pagination, setPagination] = useState<ApiPagination>(EMPTY_PAGINATION)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const setFilters = useCallback((next: AdGroupFilters) => {
     setFiltersState(next)
+    setPageState(1)
+  }, [])
+
+  const setPage = useCallback((next: number) => {
+    setPageState(next)
   }, [])
 
   const refresh = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
-      const response = await adGroupService.list(filters)
+      const response = await adGroupService.list({
+        ...filters,
+        page,
+        perPage: filters.perPage ?? 15,
+      })
       setGroups(response.data)
+      setPagination(response.pagination)
     } catch (err) {
       const message =
         err instanceof ApiClientError
@@ -52,7 +77,7 @@ export function useAdGroups(initial: AdGroupFilters = {}): UseAdGroupsResult {
     } finally {
       setLoading(false)
     }
-  }, [filters])
+  }, [filters, page])
 
   useEffect(() => {
     void Promise.resolve().then(() => {
@@ -114,10 +139,13 @@ export function useAdGroups(initial: AdGroupFilters = {}): UseAdGroupsResult {
 
   return {
     groups,
+    pagination,
     loading,
     error,
     filters,
+    page,
     setFilters,
+    setPage,
     refresh,
     create,
     update,

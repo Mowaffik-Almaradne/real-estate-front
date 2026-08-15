@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Plus } from "lucide-react"
@@ -8,6 +8,7 @@ import { Plus } from "lucide-react"
 import { Button } from "components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "components/ui/card"
 import { DashboardLayout } from "components/layout/DashboardLayout"
+import { Pagination } from "components/ui/pagination"
 import { ApiClientError } from "@/lib/apiClient"
 
 import {
@@ -20,7 +21,6 @@ import {
   useAdGroups,
   useAdsTranslations,
   type AdDto,
-  type AdsPaginationInfo,
   type CreateAdRequest,
   type UpdateAdRequest,
 } from "src/modules/ads"
@@ -37,17 +37,6 @@ export default function AdsPage() {
   const [deleteId, setDeleteId] = useState<AdDto | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [linkTarget, setLinkTarget] = useState<AdDto | null>(null)
-
-  const pagination = useMemo<AdsPaginationInfo>(() => {
-    return {
-      total: adsHook.ads.length,
-      per_page: 15,
-      current_page: adsHook.page,
-      last_page: 1,
-      from: adsHook.ads.length ? (adsHook.page - 1) * 15 + 1 : 0,
-      to: adsHook.ads.length ? (adsHook.page - 1) * 15 + adsHook.ads.length : 0,
-    }
-  }, [adsHook.ads, adsHook.page])
 
   const handleNew = () => {
     setEditing(null)
@@ -163,7 +152,11 @@ export default function AdsPage() {
             <AdsGridView
               ads={adsHook.ads}
               loading={adsHook.loading}
-              pagination={pagination}
+              pagination={{
+                ...adsHook.pagination,
+                from: adsHook.pagination.from ?? 0,
+                to: adsHook.pagination.to ?? 0,
+              }}
               page={adsHook.page}
               emptyMessage={t("ads.empty")}
               onPageChange={adsHook.setPage}
@@ -176,6 +169,16 @@ export default function AdsPage() {
               onLinkProperty={(ad) => setLinkTarget(ad)}
               onUnlinkProperty={handleUnlinkProperty}
             />
+            <div className="mt-4">
+              <Pagination
+                currentPage={adsHook.pagination.current_page || adsHook.page}
+                totalPages={adsHook.pagination.last_page}
+                total={adsHook.pagination.total}
+                perPage={adsHook.pagination.per_page || 15}
+                disabled={adsHook.loading}
+                onPageChange={adsHook.setPage}
+              />
+            </div>
           </CardContent>
         </Card>
       </div>

@@ -1,12 +1,13 @@
 "use client"
 
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useState } from "react"
 import { toast } from "sonner"
 import { Plus } from "lucide-react"
 
 import { Button } from "components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "components/ui/card"
 import { DashboardLayout } from "components/layout/DashboardLayout"
+import { Pagination } from "components/ui/pagination"
 import { ApiClientError } from "@/lib/apiClient"
 
 import {
@@ -18,7 +19,6 @@ import {
   useAdGroups,
   useAdsTranslations,
   type AdGroupDto,
-  type AdGroupsPaginationInfo,
   type CreateAdGroupRequest,
   type UpdateAdGroupRequest,
 } from "src/modules/ads"
@@ -32,17 +32,6 @@ export default function AdGroupsPage() {
   const [deleteId, setDeleteId] = useState<AdGroupDto | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [defaultTarget, setDefaultTarget] = useState<AdGroupDto | null>(null)
-
-  const pagination = useMemo<AdGroupsPaginationInfo>(() => {
-    return {
-      total: groupsHook.groups.length,
-      per_page: 15,
-      current_page: 1,
-      last_page: 1,
-      from: groupsHook.groups.length ? 1 : 0,
-      to: groupsHook.groups.length,
-    }
-  }, [groupsHook.groups.length])
 
   const handleNew = () => {
     setEditing(null)
@@ -160,16 +149,30 @@ export default function AdGroupsPage() {
             <AdGroupsGrid
               groups={groupsHook.groups}
               loading={groupsHook.loading}
-              pagination={pagination}
-              page={1}
+              pagination={{
+                ...groupsHook.pagination,
+                from: groupsHook.pagination.from ?? 0,
+                to: groupsHook.pagination.to ?? 0,
+              }}
+              page={groupsHook.page}
               emptyMessage={t("ads.groups.empty")}
-              onPageChange={() => undefined}
+              onPageChange={groupsHook.setPage}
               onEdit={handleEdit}
               onArchive={handleArchive}
               onRestore={handleRestore}
               onSetDefault={handleSetDefault}
               onRemoveDefault={handleRemoveDefault}
             />
+            <div className="mt-4">
+              <Pagination
+                currentPage={groupsHook.pagination.current_page || groupsHook.page}
+                totalPages={groupsHook.pagination.last_page}
+                total={groupsHook.pagination.total}
+                perPage={groupsHook.pagination.per_page || 15}
+                disabled={groupsHook.loading}
+                onPageChange={groupsHook.setPage}
+              />
+            </div>
           </CardContent>
         </Card>
       </div>
