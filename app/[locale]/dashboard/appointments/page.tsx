@@ -7,6 +7,7 @@ import { CalendarCheck, CalendarDays, List } from "lucide-react"
 import { DashboardLayout } from "components/layout/DashboardLayout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Pagination } from "components/ui/pagination"
 
 import {
   AppointmentCalendar,
@@ -28,7 +29,8 @@ export default function AppointmentsPage() {
   }>({ open: false, mode: "cancel", appointment: null })
   const [refreshKey, setRefreshKey] = useState(0)
 
-  const { appointments, loading, error, filters, setFilters, refresh } = useAppointments("all")
+  const { appointments, loading, error, filters, pagination, setFilters, refresh } =
+    useAppointments("all", { page: 1, perPage: 15 })
 
   const onSelect = useCallback((appointment: Appointment) => {
     setStatusDialog({ open: false, mode: "cancel", appointment })
@@ -118,18 +120,32 @@ export default function AppointmentsPage() {
           </CardHeader>
           <CardContent>
             {view === "list" ? (
-              <AppointmentList
-                appointments={appointments}
-                loading={loading}
-                error={error}
-                filters={filters}
-                onFiltersChange={(updater) => {
-                  setFilters(updater)
-                }}
-                onSelect={onSelect}
-                onUpdated={onUpdated}
-                onRemoved={onRemoved}
-              />
+              <>
+                <AppointmentList
+                  appointments={appointments}
+                  loading={loading}
+                  error={error}
+                  filters={filters}
+                  onFiltersChange={(updater) => {
+                    setFilters((prev) => ({ ...updater(prev), page: 1, perPage: 15 }))
+                  }}
+                  onSelect={onSelect}
+                  onUpdated={onUpdated}
+                  onRemoved={onRemoved}
+                />
+                <div className="pt-4">
+                  <Pagination
+                    currentPage={pagination.current_page}
+                    totalPages={pagination.last_page}
+                    total={pagination.total}
+                    perPage={pagination.per_page || 15}
+                    disabled={loading}
+                    onPageChange={(page) =>
+                      setFilters((prev) => ({ ...prev, page, perPage: 15 }))
+                    }
+                  />
+                </div>
+              </>
             ) : (
               <AppointmentCalendar
                 onSelect={(event) => {
