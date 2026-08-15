@@ -140,8 +140,7 @@ export const adsEn = {
     notFoundTitle: "Ad not found",
     loading: "Loading ads...",
     errorLoading: "Failed to load ads.",
-  },
-  groups: {
+    groups: {
     title: "Ad groups",
     subtitle: "Organize ads into groups and pick a default ad for each.",
     newGroup: "New group",
@@ -207,6 +206,7 @@ export const adsEn = {
       defaultAdLabel: "Default ad",
       noDefaultAd: "No default ad set.",
       backToGroups: "Back to groups",
+    },
     },
   },
   common: {

@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils"
 import { AdStatus } from "@/types/enums"
+import { useAdsTranslations } from "../locales/useAdsTranslations"
 
 interface AdStatusBadgeProps {
   status: AdStatus
@@ -16,8 +17,9 @@ const STYLES: Record<AdStatus, string> = {
 }
 
 export function AdStatusBadge({ status, className }: AdStatusBadgeProps) {
+  const { t } = useAdsTranslations()
   const styles = STYLES[status] ?? STYLES[AdStatus.draft]
-  const label = status.charAt(0).toUpperCase() + status.slice(1)
+  const label = t(`ads.status.${status}`)
   return (
     <span
       className={cn(

@@ -47,7 +47,11 @@ export function AdGroupCard({
   }
 
   const isArchived = group.is_archived === true
-  const label = group.status.charAt(0).toUpperCase() + group.status.slice(1)
+  const statusLabel = isArchived
+    ? t("ads.groups.statusArchived")
+    : group.status === "active"
+      ? t("ads.groups.statusActive")
+      : t("ads.groups.statusInactive")
 
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-border/50 bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-md">
@@ -63,7 +67,7 @@ export function AdGroupCard({
         <span
           className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${statusClass(group.status)}`}
         >
-          {label}
+          {statusLabel}
         </span>
       </div>
 

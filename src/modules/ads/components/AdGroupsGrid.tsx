@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react"
 
 import { Button } from "components/ui/button"
 import { AdGroupCard } from "./AdGroupCard"
+import { useAdsTranslations } from "../locales/useAdsTranslations"
 import type { AdGroupDto } from "../types"
 
 export interface AdGroupsPaginationInfo {
@@ -42,6 +43,8 @@ export function AdGroupsGrid({
   onSetDefault,
   onRemoveDefault,
 }: AdGroupsGridProps) {
+  const { t } = useAdsTranslations()
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -76,7 +79,11 @@ export function AdGroupsGrid({
 
       <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
         <p className="text-sm text-muted-foreground">
-          Showing {pagination.from ?? 0}–{pagination.to ?? 0} of {pagination.total}
+          {t("common.showing", {
+            from: pagination.from ?? 0,
+            to: pagination.to ?? 0,
+            total: pagination.total,
+          })}
         </p>
         <div className="flex items-center gap-2">
           <Button
@@ -85,10 +92,13 @@ export function AdGroupsGrid({
             onClick={() => onPageChange(Math.max(1, page - 1))}
             disabled={page <= 1 || loading}
           >
-            Previous
+            {t("common.previous")}
           </Button>
           <span className="text-sm">
-            Page {pagination.current_page} of {pagination.last_page}
+            {t("common.page", {
+              current: pagination.current_page,
+              last: pagination.last_page,
+            })}
           </span>
           <Button
             variant="outline"
@@ -96,7 +106,7 @@ export function AdGroupsGrid({
             onClick={() => onPageChange(Math.min(pagination.last_page, page + 1))}
             disabled={page >= pagination.last_page || loading}
           >
-            Next
+            {t("common.next")}
           </Button>
         </div>
       </div>

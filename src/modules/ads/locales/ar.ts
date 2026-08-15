@@ -142,8 +142,7 @@ export const adsAr: AdsMessages = {
     notFoundTitle: "الإعلان غير موجود",
     loading: "جاري تحميل الإعلانات...",
     errorLoading: "فشل تحميل الإعلانات.",
-  },
-  groups: {
+    groups: {
     title: "مجموعات الإعلانات",
     subtitle: "نظّم الإعلانات في مجموعات واختر إعلاناً افتراضياً لكل مجموعة.",
     newGroup: "مجموعة جديدة",
@@ -209,6 +208,7 @@ export const adsAr: AdsMessages = {
       defaultAdLabel: "الإعلان الافتراضي",
       noDefaultAd: "لا يوجد إعلان افتراضي.",
       backToGroups: "العودة إلى المجموعات",
+    },
     },
   },
   common: {
