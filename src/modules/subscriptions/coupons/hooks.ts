@@ -29,7 +29,7 @@ export interface UseCouponsResult {
   remove: (id: number) => Promise<void>
 }
 
-export function useCoupons(initial: SubscriptionDiscountFilters = {}): UseCouponsResult {
+export function useCoupons(initial: SubscriptionDiscountFilters = { page: 1, perPage: 15 }): UseCouponsResult {
   const [filters, setFiltersState] = useState<SubscriptionDiscountFilters>(initial)
   const [coupons, setCoupons] = useState<SubscriptionDiscount[]>([])
   const [pagination, setPagination] = useState<ApiPagination>({
@@ -44,7 +44,11 @@ export function useCoupons(initial: SubscriptionDiscountFilters = {}): UseCoupon
   const [error, setError] = useState<string | null>(null)
 
   const setFilters = useCallback((next: SubscriptionDiscountFilters) => {
-    setFiltersState(next)
+    setFiltersState({
+      ...next,
+      page: next.page ?? 1,
+      perPage: next.perPage ?? 15,
+    })
   }, [])
 
   const refresh = useCallback(async () => {

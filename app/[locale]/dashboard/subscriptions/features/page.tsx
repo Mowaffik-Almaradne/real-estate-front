@@ -6,6 +6,7 @@ import { Plus } from "lucide-react"
 
 import { Button } from "components/ui/button"
 import { Card, CardContent } from "components/ui/card"
+import { Pagination } from "components/ui/pagination"
 
 import { ApiClientError } from "@/lib/apiClient"
 
@@ -63,7 +64,7 @@ export default function SubscriptionFeaturesPage() {
         <CardContent className="space-y-4 p-6">
           <SubscriptionFeaturesFiltersBar
             filters={featuresHook.filters}
-            onChange={featuresHook.setFilters}
+            onChange={(next) => featuresHook.setFilters({ ...next, page: 1 })}
             loading={featuresHook.loading}
           />
           <SubscriptionFeaturesTable
@@ -75,6 +76,16 @@ export default function SubscriptionFeaturesPage() {
               setFormOpen(true)
             }}
             onDelete={(feature) => setDeleteTarget(feature)}
+          />
+          <Pagination
+            currentPage={featuresHook.pagination.current_page}
+            totalPages={featuresHook.pagination.last_page}
+            total={featuresHook.pagination.total}
+            perPage={featuresHook.pagination.per_page || 15}
+            disabled={featuresHook.loading}
+            onPageChange={(page) =>
+              featuresHook.setFilters({ ...featuresHook.filters, page })
+            }
           />
         </CardContent>
       </Card>

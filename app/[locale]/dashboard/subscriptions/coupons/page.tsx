@@ -6,6 +6,7 @@ import { Plus, RefreshCw } from "lucide-react"
 
 import { Button } from "components/ui/button"
 import { Card, CardContent } from "components/ui/card"
+import { Pagination } from "components/ui/pagination"
 
 import { ApiClientError } from "@/lib/apiClient"
 
@@ -97,7 +98,7 @@ export default function SubscriptionCouponsPage() {
         <CardContent className="space-y-4 p-6">
           <CouponsFiltersBar
             filters={couponsHook.filters}
-            onChange={couponsHook.setFilters}
+            onChange={(next) => couponsHook.setFilters({ ...next, page: 1 })}
             loading={couponsHook.loading}
           />
           <CouponsTable
@@ -111,6 +112,16 @@ export default function SubscriptionCouponsPage() {
             }}
             onToggle={(coupon) => void handleToggle(coupon)}
             onDelete={(coupon) => setDeleteTarget(coupon)}
+          />
+          <Pagination
+            currentPage={couponsHook.pagination.current_page}
+            totalPages={couponsHook.pagination.last_page}
+            total={couponsHook.pagination.total}
+            perPage={couponsHook.pagination.per_page || 15}
+            disabled={couponsHook.loading}
+            onPageChange={(page) =>
+              couponsHook.setFilters({ ...couponsHook.filters, page })
+            }
           />
         </CardContent>
       </Card>

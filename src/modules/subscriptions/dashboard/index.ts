@@ -35,7 +35,7 @@ export interface UseSubscriptionPlansResult {
 }
 
 export function useSubscriptionPlans(
-  initial: SubscriptionPlanFilters = {}
+  initial: SubscriptionPlanFilters = { page: 1, perPage: 15 }
 ): UseSubscriptionPlansResult {
   const [filters, setFiltersState] = useState<SubscriptionPlanFilters>(initial)
   const [plans, setPlans] = useState<SubscriptionPlan[]>([])
@@ -51,7 +51,11 @@ export function useSubscriptionPlans(
   const [error, setError] = useState<string | null>(null)
 
   const setFilters = useCallback((next: SubscriptionPlanFilters) => {
-    setFiltersState(next)
+    setFiltersState({
+      ...next,
+      page: next.page ?? 1,
+      perPage: next.perPage ?? 15,
+    })
   }, [])
 
   const refresh = useCallback(async () => {
@@ -135,7 +139,7 @@ export interface UseSubscriptionFeaturesResult {
 }
 
 export function useSubscriptionFeatures(
-  initial: SubscriptionFeatureFilters = {}
+  initial: SubscriptionFeatureFilters = { page: 1, perPage: 15 }
 ): UseSubscriptionFeaturesResult {
   const [filters, setFiltersState] = useState<SubscriptionFeatureFilters>(initial)
   const [features, setFeatures] = useState<SubscriptionFeature[]>([])
@@ -151,7 +155,11 @@ export function useSubscriptionFeatures(
   const [error, setError] = useState<string | null>(null)
 
   const setFilters = useCallback((next: SubscriptionFeatureFilters) => {
-    setFiltersState(next)
+    setFiltersState({
+      ...next,
+      page: next.page ?? 1,
+      perPage: next.perPage ?? 15,
+    })
   }, [])
 
   const refresh = useCallback(async () => {

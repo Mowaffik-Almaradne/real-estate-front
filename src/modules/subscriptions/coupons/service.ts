@@ -2,6 +2,7 @@ import {
   apiClient,
   ApiClientError,
   getApiData,
+  getApiPagination,
   type ApiResponse,
   type ApiPagination,
 } from "@/lib/apiClient"
@@ -84,7 +85,7 @@ export const adminCouponService = {
     const items = resolveArray<SubscriptionDiscount>(data)
     return {
       data: items,
-      pagination: paginationFor(items),
+      pagination: getApiPagination(response) ?? paginationFor(items),
     }
   },
 

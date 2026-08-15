@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 
@@ -9,8 +9,10 @@ import { Card, CardContent } from "components/ui/card"
 import { Input } from "components/ui/input"
 import { Label } from "components/ui/label"
 import { Switch } from "components/ui/switch"
+import { Pagination } from "components/ui/pagination"
 
 import { ApiClientError } from "@/lib/apiClient"
+import type { ApiPagination } from "@/types/common"
 
 import {
   adminSubscriptionPlanFeatureService,
@@ -36,19 +38,33 @@ export default function SubscriptionPlanFeaturesPage() {
   const [newFeatureId, setNewFeatureId] = useState<string>("")
   const [newLimit, setNewLimit] = useState<string>("")
   const [newEnabled, setNewEnabled] = useState(true)
+  const [page, setPage] = useState(1)
+  const pageRef = useRef(1)
+  const [pagination, setPagination] = useState<ApiPagination>({
+    total: 0,
+    per_page: 15,
+    current_page: 1,
+    last_page: 1,
+    from: null,
+    to: null,
+  })
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (nextPage?: number) => {
+    const targetPage = nextPage ?? pageRef.current
     setLoading(true)
     try {
       const [planList, featureList, linkList] = await Promise.all([
         adminSubscriptionPlanService.list({ perPage: 100 }),
         adminSubscriptionFeatureService.list({ perPage: 100 }),
-        adminSubscriptionPlanFeatureService.list({ perPage: 100 }),
+        adminSubscriptionPlanFeatureService.list({ page: targetPage, perPage: 15 }),
       ])
       await Promise.resolve().then(() => {
         setPlans(planList.data)
         setFeatures(featureList.data)
         setLinks(linkList.data)
+        setPagination(linkList.pagination)
+        pageRef.current = targetPage
+        setPage(targetPage)
       })
     } catch (err) {
       const message =
@@ -60,8 +76,6 @@ export default function SubscriptionPlanFeaturesPage() {
       })
     }
     // `t` from useSubscriptionsTranslations is a new function every render.
-    // Including it here retriggered this callback → useEffect → setState → infinite
-    // list requests and stacked API error toasts.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -90,7 +104,7 @@ export default function SubscriptionPlanFeaturesPage() {
       setNewFeatureId("")
       setNewLimit("")
       setNewEnabled(true)
-      await refresh()
+      await refresh(1)
     } catch (err) {
       const message =
         err instanceof ApiClientError ? err.message : t("errors.saveFailed")
@@ -280,6 +294,14 @@ export default function SubscriptionPlanFeaturesPage() {
               </table>
             </div>
           )}
+          <Pagination
+            currentPage={pagination.current_page || page}
+            totalPages={pagination.last_page}
+            total={pagination.total}
+            perPage={pagination.per_page || 15}
+            disabled={loading}
+            onPageChange={(next) => void refresh(next)}
+          />
         </CardContent>
       </Card>
     </div>

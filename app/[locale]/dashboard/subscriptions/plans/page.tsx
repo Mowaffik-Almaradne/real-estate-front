@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 
 import { Button } from "components/ui/button"
 import { Card, CardContent } from "components/ui/card"
+import { Pagination } from "components/ui/pagination"
 
 import { ApiClientError } from "@/lib/apiClient"
 
@@ -70,7 +71,7 @@ export default function SubscriptionPlansPage() {
         <CardContent className="space-y-4 p-6">
           <SubscriptionPlansFiltersBar
             filters={plansHook.filters}
-            onChange={plansHook.setFilters}
+            onChange={(next) => plansHook.setFilters({ ...next, page: 1 })}
             loading={plansHook.loading}
           />
           <SubscriptionPlansGrid
@@ -83,6 +84,16 @@ export default function SubscriptionPlansPage() {
               setFormOpen(true)
             }}
             onDelete={(plan) => setDeleteTarget(plan)}
+          />
+          <Pagination
+            currentPage={plansHook.pagination.current_page}
+            totalPages={plansHook.pagination.last_page}
+            total={plansHook.pagination.total}
+            perPage={plansHook.pagination.per_page || 15}
+            disabled={plansHook.loading}
+            onPageChange={(page) =>
+              plansHook.setFilters({ ...plansHook.filters, page })
+            }
           />
         </CardContent>
       </Card>
